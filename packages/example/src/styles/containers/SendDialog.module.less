@@ -1,0 +1,75 @@
+@import '../variable.less';
+.sendDialog {
+  padding: 36px 0 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  h1 {
+    font-weight: 500;
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+}
+
+.sendForm {
+  width: 500px;
+
+  .fee {
+    margin-top: 40px;
+    border-top: 1px solid @line-color;
+    padding-top: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .formAmount {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    a {
+      margin-left: 10px;
+    }
+  }
+}
+
+.confirmDialog {
+  padding: 36px 0 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  h1 {
+    font-weight: 500;
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+}
+
+.amount {
+  strong {
+    font-size: 34px;
+  }
+  span {
+    margin-left: 5px;
+    font-size: 16px;
+  }
+}
+
+.confirmForm {
+  width: 500px;
+}
+
+.info {
+  margin-top: 40px;
+  border-top: 1px solid @border-color;
+  .infoItem {
+    padding-top: 10px;
+    display: flex;
+    justify-content: space-between;
+
+    small {
+      color: @light-color;
+      font-size: 14px;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
+    "moduleResolution": "node"
+  },
+  "references": [
+    { "path": "packages/snap" },
+    { "path": "packages/example" },
+    { "path": "packages/types" }
+  ]
+}

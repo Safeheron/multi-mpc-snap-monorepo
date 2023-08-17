@@ -1,0 +1,37 @@
+{
+  "name": "@safeheron/mpcsnap-types",
+  "version": "1.0.0",
+  "description": "Types for MPCSnap",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "author": "Yann<yanjie002@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Safeheron/mpcsnap"
+  },
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "index.ts"
+  ],
+  "keywords": [
+    "MPCSnap",
+    "MPC",
+    "MetaMask",
+    "safeheron"
+  ],
+  "scripts": {
+    "build": "yarn build:types",
+    "build:types": "tsc --project tsconfig.build.json"
+  },
+  "dependencies": {
+    "superstruct": "^1.0.3"
+  },
+  "devDependencies": {
+    "ts-loader": "^9.4.4",
+    "typescript": "^4.7.3",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
+  }
+}

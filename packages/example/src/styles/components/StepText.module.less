@@ -1,0 +1,99 @@
+@import '../variable.less';
+
+.stepContent {
+  ul {
+    list-style: none;
+    li {
+      position: relative;
+      padding-left: 35px;
+      margin-bottom: 18px;
+      height: 80px;
+      h1 {
+        font-size: 14px;
+        color: fade(@font-color, 50);
+        font-weight: 500;
+        margin-bottom: 2px;
+      }
+
+      p {
+        font-size: 12px;
+        color: fade(@light-color, 50);
+      }
+
+      .success,
+      .loading {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        color: @brand-color;
+        font-weight: 500;
+        line-height: 14px;
+        margin-top: 5px;
+
+        img {
+          margin-right: 5px;
+        }
+      }
+
+      .loading {
+        align-items: flex-start;
+        font-weight: normal;
+
+        .loadingImg {
+          animation: rotate 1.5s linear infinite;
+        }
+      }
+
+      &.active {
+        h1 {
+          color: @font-color;
+        }
+        p {
+          color: @light-color;
+        }
+      }
+
+      &:last-child {
+        margin: 0;
+        .line {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+.icon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  left: 0;
+  z-index: 1;
+
+  img {
+    width: 20px;
+  }
+}
+
+.line {
+  position: absolute;
+  left: 9.5px;
+  display: block;
+  width: 1px;
+  height: 100px;
+  background-color: @line-color;
+  z-index: 0;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,24 @@
+.popoverBtn {
+  display: flex;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background-color: fade(#cbd5e1, 23);
+  }
+
+  span,
+  &::before,
+  &::after {
+    content: '';
+    background-color: #cbd5e1;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    margin: 1.5px 0;
+  }
+}

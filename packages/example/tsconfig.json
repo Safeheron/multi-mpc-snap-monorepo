@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "esnext",
+    "target": "es6",
+    "lib": ["es6", "dom"],
+    "sourceMap": true,
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "useDefineForClassFields": true,
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "rootDir": ".",
+    "composite": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@/assets/*": ["src/assets/*"]
+    },
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "importsNotUsedAsValues": "preserve",
+    "incremental": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src", "*/**/**.json"],
+  "exclude": ["**/node_modules"]
+}

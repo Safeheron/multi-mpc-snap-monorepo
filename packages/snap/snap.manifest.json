@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "description": "The Safeheron MPC Snap.",
+  "proposedName": "Safeheron Snap",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Safeheron/mpcsnap"
+  },
+  "source": {
+    "shasum": "P1DWBUxZ0bu2zzyjjCDn/M8HBXkkV5XoyWY/Cw9vA18=",
+    "location": {
+      "npm": {
+        "filePath": "dist/bundle.js",
+        "iconPath": "dist/images/logo.svg",
+        "packageName": "@safeheron/mpcsnap",
+        "registry": "https://registry.npmjs.org/"
+      }
+    }
+  },
+  "initialPermissions": {
+    "snap_dialog": {},
+    "snap_manageState": {},
+    "endowment:long-running": {},
+    "endowment:rpc": {
+      "dapps": true,
+      "snaps": false
+    },
+    "endowment:webassembly": {},
+    "snap_manageAccounts": {}
+  },
+  "manifestVersion": "0.1"
+}

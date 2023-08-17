@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.packages.build.json",
+  "compilerOptions": {
+    "emitDeclarationOnly": false,
+    "sourceMap": true,
+    "inlineSources": true,
+    "baseUrl": "./",
+    "outDir": "./dist",
+    "rootDir": "./"
+  },
+  "include": ["."]
+}
