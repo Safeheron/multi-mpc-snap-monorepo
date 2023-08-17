@@ -1,0 +1,160 @@
+.ant-btn {
+  border-radius: 40px;
+  height: 40px;
+  font-weight: 500;
+  padding: 4px 20px;
+
+  &.ant-btn-default {
+    color: @font-color;
+    border-color: @border-color;
+    background-color: transparent;
+
+    &:hover {
+      color: @font-color;
+      border-color: @brand-color;
+    }
+
+    &:disabled {
+      background-color: rgba(54, 73, 119, 0.13);
+      border-color: @disable-color;
+    }
+  }
+
+  &.ant-btn-primary {
+    &:hover {
+      background-color: #385ad7;
+    }
+    &:disabled {
+      background-color: @disable-color;
+      border-color: @disable-color;
+    }
+  }
+}
+
+.ant-modal-wrap {
+  .ant-modal {
+    border-radius: 10px;
+    .ant-modal-content {
+      padding: 0;
+    }
+  }
+}
+
+.ant-modal-confirm-body-wrapper {
+  .ant-modal-confirm-body {
+    padding: 40px 30px;
+  }
+  .ant-modal-confirm-btns {
+    display: flex;
+    border-top: 1px solid @border-color;
+    margin: 0;
+    .ant-btn {
+      flex: 1;
+      border: none;
+      background: none;
+      color: @font-color;
+      border-radius: 0;
+      height: 56px;
+      & + .ant-btn {
+        border-left: 1px solid @border-color;
+        margin: 0;
+      }
+
+      &-primary{
+        &:active, &:hover, &:focus-visible{
+          background: none;
+          color: #0958d9;
+          outline: none;
+        }
+      }
+    }
+  }
+}
+
+.ant-input {
+  height: 46px;
+  border-radius: 5px;
+  border-color: @border-color;
+  font-weight: 500;
+
+  &::placeholder {
+    color: #b4bfcd;
+  }
+}
+
+.ant-form {
+  .ant-form-item {
+    .btn-control {
+      display: flex;
+      justify-content: center;
+
+      .ant-btn {
+        width: 158px;
+        &:first-child {
+          margin-right: 50px;
+        }
+      }
+    }
+  }
+}
+
+.ant-table {
+  .ant-table-thead {
+    & > tr > th {
+      background: none;
+      border: none;
+      color: @light-color;
+      font-size: 12px;
+      font-weight: normal;
+
+      &::before {
+        display: none;
+      }
+    }
+  }
+  .ant-table-tbody {
+    & > tr > td {
+      font-size: 12px;
+      border: none;
+      padding: 10px 16px;
+    }
+
+    .ant-empty {
+      height: 200px;
+      padding-top: 50px;
+    }
+  }
+}
+
+.ant-popover {
+  &.action-popover {
+    min-width: 150px;
+    .ant-popover-arrow {
+      display: none;
+    }
+    .ant-popover-content {
+      .ant-popover-inner {
+        padding: 0;
+        .ant-popover-inner-content {
+          display: flex;
+          flex-direction: column;
+          padding: 7px 0;
+
+          a {
+            padding: 0 20px;
+            color: @font-color;
+            font-weight: 500;
+            display: flex;
+            line-height: 16px;
+            height: 40px;
+            align-items: center;
+
+            &:hover {
+              background-color: fade(#cbd5e1, 23);
+            }
+          }
+        }
+      }
+    }
+  }
+}

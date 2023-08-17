@@ -1,0 +1,56 @@
+@import './variable.less';
+@import 'antd.less';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-size: 14px;
+  margin: 0;
+  background-color: @bg-color;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.container {
+  width: 1260px;
+  margin: 0 auto;
+}
+
+a {
+  cursor: pointer;
+  text-decoration: none;
+  color: @brand-color;
+}
+
+.Pending,
+.warning {
+  color: #e97207;
+}
+
+.Success {
+  color: #29820c;
+}
+
+.Failed,
+.error {
+  color: @error-color;
+}
+
+ul {
+  list-style: none;
+}

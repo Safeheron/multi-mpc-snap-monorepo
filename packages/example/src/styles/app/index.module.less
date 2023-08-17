@@ -1,0 +1,141 @@
+@import '../variable.less';
+
+.indexWrap{
+  background-size: 1535px 1165px;
+  background-image: url(../../assets/bg.png);
+  background-position: top center;
+  background-repeat: no-repeat;
+  width: 100%;
+  margin: 0 auto;
+  padding-top: 73px;
+}
+
+.indexPage {
+  margin: 0 auto;
+  width: 1070px;
+  padding-top: 130px;
+
+  .slogan {
+    text-align: center;
+    margin-bottom: 212px;
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    p {
+      font-size: 16px;
+      color: @light-color;
+      line-height: 22px;
+      font-weight: 300;
+    }
+
+    & > button {
+      margin-top: 50px;
+      border: 2px solid @brand-color!important;
+      height: 54px;
+      width: 220px;
+      background-color: @bg-color;
+
+      &:hover {
+        background-color: @brand-color;
+        color: white !important;
+      }
+    }
+  }
+
+  .feat-list {
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    width: 1110px;
+    font-size: 14px;
+    display: flex;
+
+    .narrower-feat-wrap {
+      margin-bottom: 20px;
+      width: 245px;
+      height: 340px;
+      border-radius: 16px;
+      padding-top: 184px;
+      padding-left: 16px;
+      padding-right: 16px;
+      color: white;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      //box-shadow: 0 6px 20px rgba(2, 125, 239, 30);
+
+      h1 {
+        font-size: 18px;
+        font-weight: 500;
+        text-align: center;
+      }
+      p {
+        font-size: 14px;
+        letter-spacing: 0.01px;
+        margin-top: 5px;
+        line-height: 19px;
+      }
+    }
+
+    .wider-feat-wrap{
+      width: 520px;
+      height: 206px;
+      display: flex;
+      justify-content: space-around;
+      background-color: #fff;
+      border-radius: 16px;
+
+      .left{
+        width: 180px;
+        height: 206px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .right{
+        flex: 1;
+        padding-top: 38px;
+        padding-right: 16px;
+        h1 {
+          font-size: 18px;
+          font-weight: 500;
+        }
+        p {
+          color: #6B6D7C;
+          font-size: 14px;
+          letter-spacing: 1px;
+          margin-top: 5px;
+          line-height: 22px;
+          font-weight: 300;
+        }
+      }
+    }
+  }
+}
+
+
+.partner {
+  text-align: center;
+  margin-top: 70px;
+
+  h1 {
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 20px;
+  }
+}
+
+.home-partner{
+  text-align: center;
+  margin-top: 35px;
+  color: #6B6D7C;
+  h1 {
+    font-size: 12px;
+    font-weight: 400;
+    margin-bottom: 10px;
+  }
+}

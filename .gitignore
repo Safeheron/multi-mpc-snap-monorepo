@@ -1,0 +1,7 @@
+.idea
+.vscode
+node_modules
+.yalc
+
+artifacts
+.release.config.dev.js

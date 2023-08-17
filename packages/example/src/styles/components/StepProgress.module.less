@@ -1,0 +1,39 @@
+@import '../variable.less';
+.stepProgress {
+  display: flex;
+  list-style: none;
+  justify-content: center;
+  li {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    color: @light-color;
+
+    b {
+      background-color: #e7e8ec;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      text-align: center;
+      color: @light-color;
+      margin-right: 5px;
+      font-weight: normal;
+    }
+
+    & > div {
+      background-color: @border-color;
+      height: 2px;
+      width: 74px;
+      margin-left: 10px;
+      margin-right: 5px;
+    }
+    &.active {
+      color: @font-color;
+
+      b {
+        background-color: @brand-color;
+        color: white;
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "useUnknownInCatchVariables": false,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2020",
+    "lib": ["dom", "ES2017"],
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": false,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+//    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "exclude": ["node_modules"],
+  "include": ["src", "webpack.config.ts", "customSnapPlugin.ts","package.json"]
+}

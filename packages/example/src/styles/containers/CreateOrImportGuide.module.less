@@ -1,0 +1,71 @@
+@import '../variable.less';
+.guide {
+  padding-top: 180px;
+
+  section {
+    display: flex;
+    justify-content: center;
+
+    .box {
+      width: 270px;
+      height: 86px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 18px 25px;
+      padding-right: 22px;
+      background-color: white;
+      border: 2px solid @brand-color;
+      border-radius: 9px;
+      line-height: 18px;
+      color: @font-color;
+      font-weight: 500;
+      font-size: 16px;
+      transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+
+      small {
+        font-size: 16px;
+        font-weight: normal;
+        color: @light-color;
+      }
+
+      .tip {
+        font-size: 12px;
+      }
+
+      &:hover {
+        background-color: @brand-color;
+        color: white;
+      }
+
+      &.disabled {
+        background-color: @block-color;
+        border-color: @block-color;
+        cursor: not-allowed;
+        color: @font-color;
+      }
+
+      &:last-child {
+        margin-left: 70px;
+      }
+    }
+  }
+
+  p {
+    margin-top: 44px;
+    text-align: center;
+    color: @light-color;
+
+    a {
+      text-decoration: underline;
+    }
+  }
+}
+.line {
+  height: 1px;
+  background-color: @line-color;
+  margin-top: 200px;
+  margin-bottom: 44px;
+}
