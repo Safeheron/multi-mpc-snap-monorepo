@@ -2,9 +2,11 @@
 // Please do not change this file!
 declare namespace CreateOrImportGuideModuleLessNamespace {
   export interface ICreateOrImportGuideModuleLess {
+    box: string
     disabled: string
     guide: string
     line: string
+    tip: string
   }
 }
 

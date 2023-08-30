@@ -1,26 +1,28 @@
-import { Button, List, message } from 'antd'
+import { Button } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect } from 'react'
 
 import Loading from '@/components/Loading'
+import { snap_origin } from '@/configs/snap'
 import AddressCard from '@/containers/AddressCard'
 import BackupDialog from '@/containers/BackupDialog'
 import CheckShardDialog from '@/containers/CheckShardDialog'
 import CreateDialog from '@/containers/CreateDialog'
 import CreateOrImportGuide from '@/containers/CreateOrImportGuide'
 import Header from '@/containers/Header'
+import PendingRequestList from '@/containers/PendingRequestList'
 import RecoverDialog from '@/containers/RecoverDialog'
 import RecoverPrepareDialog from '@/containers/RecoverPrepareDialog'
-import SignTransactionDialog from '@/containers/SignTransactionDialog'
-import TransactionList from '@/containers/TransactionList'
+import SignTransactionDialog from '@/containers/SignDialog'
 import WalletNameDialog from '@/containers/WalletNameDialog'
 import Welcome from '@/containers/Welcome'
-import { connect, getSnaps, heartBeat, SNAP_ID } from '@/service/metamask'
+import { MetamaskActions, MetaMaskContext } from '@/hooks/MetamaskContext'
+import { SnapKeepAliveContext } from '@/hooks/SnapKeepAliveContext'
 import { useStore } from '@/store'
-import { isMetaMaskSnapsSupported } from '@/utils'
+import { connectSnap, getSnap, isLocalSnap } from '@/utils/snap'
 
 const Home = () => {
-  const { accountModule, interactive, snapRequestModule } = useStore()
+  const { accountModule, interactive } = useStore()
   const {
     loading,
     walletNameDialogVisible,
@@ -31,129 +33,55 @@ const Home = () => {
     recoverDialogVisible,
     recoverPrepareDialogVisible,
   } = interactive
-  const { address, network } = accountModule
-  const { requests } = snapRequestModule
+  const { address } = accountModule
 
-  const [isSupportMetamaskFlask, setIsSupportMetamaskFlask] = useState(false)
-  const [isInstallMPCSnap, setIsInstallMPCSnap] = useState(false)
-  const [connected, setConnected] = useState(false)
+  const [state, dispatch] = useContext(MetaMaskContext)
+  const isMetaMaskReady = isLocalSnap(snap_origin)
+    ? state.isFlask
+    : state.snapsDetected
 
-  const heartTimer = useRef<any>()
-
-  const detectEnvironment = async () => {
-    await accountModule.getNetwork()
-
-    await detectFlaskInstalled()
-    await detectMPCSnapInstalled()
-  }
-
-  const detectFlaskInstalled = async () => {
-    const isSupportedFlask = await isMetaMaskSnapsSupported()
-    setIsSupportMetamaskFlask(isSupportedFlask)
-    return isSupportedFlask
-  }
-
-  const detectMPCSnapInstalled = async () => {
-    return false
-    let mpcSnapInstalled = false
+  const connectMetamask = async () => {
     try {
-      const snaps = await getSnaps()
-      mpcSnapInstalled = Boolean(snaps?.[SNAP_ID]?.enabled)
+      interactive.setLoading(true)
+      await connectSnap()
+      const installedSnap = await getSnap()
+
+      dispatch({
+        type: MetamaskActions.SetInstalled,
+        payload: installedSnap,
+      })
     } catch (e) {
-      console.error('Detect snap installed occur an error ', e)
+      console.error('Connect Snap Error: ', e)
+      dispatch({ type: MetamaskActions.SetError, payload: e })
+    } finally {
+      interactive.setLoading(false)
     }
-    setIsInstallMPCSnap(mpcSnapInstalled)
-    return mpcSnapInstalled
-  }
-
-  const startHeartBeat = () => {
-    console.log('start heart beat....')
-    stopHeartBeat()
-    heartTimer.current = setInterval(() => {
-      heartBeat()
-    }, 30 * 1000)
-  }
-
-  const stopHeartBeat = () => {
-    clearInterval(heartTimer.current)
-  }
-
-  const requestMPCAccount = async () => {
-    await accountModule.requestAccount()
-  }
-
-  const connectFlask = async () => {
-    if (!isSupportMetamaskFlask) {
-      message.error('Flask not enable, please reload')
-      return
-    }
-
-    interactive.setLoading(true)
-    if (!isInstallMPCSnap) {
-      const connectRes = await connect()
-
-      if (connectRes.success) {
-        setIsInstallMPCSnap(true)
-        setConnected(true)
-        await requestMPCAccount()
-      } else {
-        message.error(connectRes.message)
-      }
-    } else {
-      await requestMPCAccount()
-      setConnected(true)
-    }
-    interactive.setLoading(false)
-    startHeartBeat()
-    snapRequestModule.startLoopRequest()
-  }
-
-  const resolveRequest = (requestId: string) => {
-    const request = requests.find(r => r.request.id === requestId)
   }
 
   useEffect(() => {
-    detectEnvironment()
-
-    return () => {
-      clearInterval(heartTimer.current)
+    if (state.installedSnap) {
+      accountModule.requestAccount()
     }
-  }, [])
+  }, [state.installedSnap])
 
   return (
     <>
       <Header>
-        <Button disabled={connected} color={'primary'} onClick={connectFlask}>
-          {connected ? 'Connected' : 'Connect Metamask Flask'}
+        <Button
+          disabled={!isMetaMaskReady}
+          color={'primary'}
+          onClick={connectMetamask}>
+          {state.installedSnap ? 'Reconnect' : 'Connect Metamask'}
         </Button>
       </Header>
 
-      {connected ? (
+      {state.installedSnap ? (
         !address ? (
           <CreateOrImportGuide />
         ) : (
           <>
             <AddressCard />
-            <List
-              itemLayout="horizontal"
-              dataSource={requests}
-              renderItem={(item, index) => (
-                <List.Item
-                  actions={[
-                    <a
-                      key={item.request.id}
-                      onClick={() => resolveRequest(item.request.id)}>
-                      Handle This Request
-                    </a>,
-                  ]}>
-                  <List.Item.Meta
-                    title={'Request Type::' + item.request.method}
-                    description={JSON.stringify(item)}
-                  />
-                </List.Item>
-              )}
-            />
-            {network.chainId && <TransactionList />}
+            <PendingRequestList />
           </>
         )
       ) : (

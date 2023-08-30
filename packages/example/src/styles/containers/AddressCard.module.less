@@ -68,7 +68,7 @@
       background-color: fade(@brand-color, 6) !important;
     }
 
-    &:first-child {
+    &:not(:last-child) {
       margin-right: 30px;
     }
     img {
@@ -119,3 +119,21 @@
   right: 0px;
   top: 120px;
 }
+
+.dashboard-Content{
+  width: 260px;
+  .dashboard-wrapper{
+    margin-top: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-content: center;
+    .dashboard-logo{
+      width: 24px;
+      margin-right: 12px;
+    }
+  }
+}
+
+
+
+

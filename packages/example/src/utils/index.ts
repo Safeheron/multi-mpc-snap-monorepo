@@ -109,4 +109,4 @@ export function copyText(text: string, name: string) {
   message.success(`${name} has been copied!`)
 }
 
-export const IS_PROD = process.env.RUN_ENV === 'PROD'
+export const IS_PROD = process.env.IS_PROD === 'PROD'

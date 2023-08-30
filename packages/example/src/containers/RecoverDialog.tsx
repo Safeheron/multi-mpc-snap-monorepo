@@ -8,6 +8,7 @@ import StepText from '@/components/StepText'
 import WebRTCConnection from '@/components/WebRTCConnection'
 import MnemonicForm from '@/containers/MnemonicForm'
 import useConfirm, { CANCEL_CONFIRM_TEXT } from '@/hooks/useConfirm'
+import useSnapKeepAlive from '@/hooks/useSnapKeepAlive'
 import { WebRTCChannel } from '@/service/channel/WebRTCChannel'
 import { MPCMessageType } from '@/service/types'
 import { useStore } from '@/store'
@@ -16,28 +17,30 @@ import styles from '@/styles/containers/RecoverDialog.module.less'
 const steps = [
   {
     title: 'Step1: Connect to Safeheron Snap App of your first phone',
-    desc: `Participate in recover an MPC wallet via Safeheron Snap App and then follow the steps on the right side.`,
+    desc: `Participate in recovering an MPC wallet via Safeheron Snap App and then place the QR code generated in front of the desktop's camera.`,
     successText: 'Connected',
   },
   {
     title: 'Step2: Connect to Safeheron Snap App of your second phone',
-    desc: `Participate in recover an MPC wallet via Safeheron Snap App and then follow the steps on the right side.`,
+    desc: `Participate in recovering an MPC wallet via Safeheron Snap App and then place the QR code generated in front of the desktop's camera.`,
     successText: 'Connected',
   },
   {
     title:
-      'Step3: According to the prompt, enter the private key shard mnemonic phrases separately and submit for confirmation.',
+      'Step3: Enter the mnemonic phrase for each private key shard separately as prompted and submit them for confirmation',
     successText: 'Filled',
   },
   {
-    title: 'Step4: Please wait for the process to complete successfully.',
+    title: 'Step4: Wait for recovery to complete successfully',
     successText: 'The MPC wallet is recovered successfully',
     loadingText:
       'Waiting for the three parties to compute and recover the MPC Wallet.',
   },
 ]
 const RecoverDialog = () => {
-  const { interactive, messageModule, accountModule } = useStore()
+  useSnapKeepAlive()
+
+  const { interactive, messageModule } = useStore()
 
   const [webrtcChannel1, setWebrtcChannel1] = useState<WebRTCChannel>()
   const [webrtcChannel2, setWebrtcChannel2] = useState<WebRTCChannel>()
@@ -104,7 +107,8 @@ const RecoverDialog = () => {
   const { showConfirm } = useConfirm()
   const handleCancel = () => {
     showConfirm({
-      content: CANCEL_CONFIRM_TEXT,
+      content:
+        'Do you confirm the cancellation? Canceling will terminate this operational process.',
       onOk: () => {
         interactive.setRecoverDialogVisible(false)
         messageModule.rpcChannel?.next({

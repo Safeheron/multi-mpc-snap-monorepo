@@ -1,6 +1,6 @@
 import { SnapRpcResponse } from '@safeheron/mpcsnap-types'
 
-export function succeed(data: any): SnapRpcResponse {
+export function succeed(data?: any): SnapRpcResponse {
   return { success: true, data }
 }
 

@@ -2,6 +2,7 @@ import { URDecoder } from '@ngraveio/bc-ur'
 import { BrowserQRCodeReader } from '@zxing/browser'
 import { IScannerControls } from '@zxing/browser/esm/common/IScannerControls'
 import { message } from 'antd'
+import pako from 'pako'
 import { FC, useEffect, useRef, useState } from 'react'
 
 import { useMediaDeviceDetect } from '@/hooks/useMediaDeviceDetect'
@@ -60,7 +61,12 @@ const ScanDynamicQrCode: FC<Props> = ({ onComplete }) => {
         if (decoder.isSuccess()) {
           const ur = decoder.resultUR()
           const decoded = ur.decodeCBOR()
-          onComplete(decoded.toString())
+
+          const inflateStr = pako.inflate(decoded, {
+            to: 'string',
+          })
+          onComplete(inflateStr)
+
           resetCamera()
         } else {
           const decodedErrors = decoder.resultError()

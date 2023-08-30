@@ -1,37 +1,57 @@
 @import '../variable.less';
 
-.record {
-  border: 1px solid @border-color;
-  border-radius: 6px;
-  padding: 20px 20px 0;
-  background-color: white;
-  min-height: 460px;
-}
+.container{
+  margin-top: 50px;
 
-.more {
-  margin-top: 20px;
-  border-top: 1px solid @line-color;
-  display: flex;
-  justify-content: center;
+  .title{
+    font-size: 16px;
+    font-weight: bold;
+    color: #262833;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .sub-title{
+    font-size: 14px;
+    color: #6B6D7C;
+    text-align: center;
+  }
 
-  ul {
+  .record {
+    border: 1px solid @border-color;
+    border-radius: 6px;
+    padding: 20px 20px 0;
+    background-color: white;
+    min-height: 460px;
+    margin-top: 30px;
+  }
+
+  .more {
+    margin-top: 20px;
+    border-top: 1px solid @line-color;
     display: flex;
-    list-style: none;
-    padding: 20px;
-    cursor: pointer;
+    justify-content: center;
 
-    li {
-      width: 3px;
-      height: 3px;
-      background-color: #cbd5e1;
-      border-radius: 50%;
-      margin-left: 5px;
-    }
+    ul {
+      display: flex;
+      list-style: none;
+      padding: 20px;
+      cursor: pointer;
 
-    &:hover {
       li {
-        background-color: fade(@brand-color, 50);
+        width: 3px;
+        height: 3px;
+        background-color: #cbd5e1;
+        border-radius: 50%;
+        margin-left: 5px;
+      }
+
+      &:hover {
+        li {
+          background-color: fade(@brand-color, 50);
+        }
       }
     }
   }
 }
+
+

@@ -1,12 +1,10 @@
 import { message } from 'antd'
 
-import { TransactionStatusEnum } from '@/configs/Enums'
 import { PartyId } from '@/service/types'
 import { store } from '@/store'
 import { ethers, provider } from '@/utils'
 
 import { signContext, signRound } from '../metamask'
-import { TxRecordItem } from '../models'
 import { MPCMessage, MPCMessageType } from '../types'
 
 const SignAction = {
@@ -34,14 +32,17 @@ const SignAction = {
       console.log('handleSignRound result', res.data)
       if (res.data.isComplete) {
         const signedTransaction = res.data.signedTransaction
-        console.log('signedTransaction:', signedTransaction)
+        if (signedTransaction) {
+          console.log('signedTransaction:', signedTransaction)
 
-        console.log(
-          'parseTransaction',
-          ethers.utils.parseTransaction(signedTransaction)
-        )
+          console.log(
+            'parseTransaction',
+            ethers.utils.parseTransaction(signedTransaction)
+          )
 
-        this.sendTransaction(signedTransaction)
+          await this.sendTransaction(signedTransaction)
+        }
+        store.interactive.setSignStep(4)
       } else {
         // continue round
         store.messageModule.rpcChannel?.next({
@@ -51,6 +52,8 @@ const SignAction = {
       }
     }
   },
+
+  // TODO 没有 provider 的时候要提示一下
   async sendTransaction(signedTransaction: string) {
     if (!provider) return
     try {
@@ -61,23 +64,9 @@ const SignAction = {
         return
       }
       console.log('txhash', response.hash)
-      store.interactive.setTxHash(response.hash)
-      const item: TxRecordItem = {
-        txHash: response.hash,
-        method: 'Transfer',
-        from: store.accountModule.address,
-        to: store.transactionModule.transactionObject.to,
-        value: store.transactionModule.transactionObject.value,
-        status: TransactionStatusEnum.pending,
-        date: Date.now(),
-      }
-      store.transactionModule.addTransaction(item)
+
       store.interactive.setSignStep(4)
       store.interactive.setProgress(0)
-
-      // const receipt = await response.wait()
-
-      // console.log('sendTransaction receipt result', receipt)
     } catch (error) {
       console.error('sendTransaction', error)
 

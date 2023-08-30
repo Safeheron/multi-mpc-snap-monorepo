@@ -1,7 +1,8 @@
 import { configure } from 'mobx'
 import { createContext, useContext } from 'react'
 
-import SnapRequestModule from '@/store/module/SnapRequestModule'
+import NetworkModule from '@/store/module/NetworkModule'
+import SignModule from '@/store/module/SignModule'
 
 import AccountModule from './module/AccountModule'
 import Interactive from './module/Interactive'
@@ -17,7 +18,8 @@ const store = {
   messageModule: new MessageModule(),
   interactive: new Interactive(),
   transactionModule: new TransactionModule(),
-  snapRequestModule: new SnapRequestModule(),
+  signModule: new SignModule(),
+  networkModule: new NetworkModule(),
 }
 const StoreContext = createContext<typeof store>(store)
 

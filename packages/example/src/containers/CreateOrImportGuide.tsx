@@ -22,25 +22,20 @@ const CreateOrImportGuide = () => {
   return (
     <div className={styles.guide}>
       <section>
-        <a onClick={handleCreate}>
-          <span>Create a new MPC Wallet</span>
-        </a>
+        <div className={styles.box} onClick={handleCreate}>
+          <div>Create a new MPC Wallet</div>
+          {/*<div className={styles.tip}>*/}
+          {/*  The wallet you created will be automatically added to your MetaMask*/}
+          {/*  Account. You can directly use the MPC wallet in MetaMask.*/}
+          {/*</div>*/}
+        </div>
 
-        {/* <a onClick={handleTest}>
-          <span>test</span>
-        </a> */}
-
-        <a onClick={handleRecover}>
+        <div className={styles.box} onClick={handleRecover}>
           <span>
-            I have an MPC wallet already. <br /> Recover the wallet.
+            I already have an MPC wallet. <br /> Recover the wallet.
           </span>
-        </a>
+        </div>
       </section>
-      {/* <p>
-        Forgot your Snap Key Shard?{' '}
-        <a href=""> Recover with Safeheron Snap App and Keystone</a>(Coming
-        Soon)
-      </p> */}
       <div className={styles.line}></div>
       <InstallReminder />
     </div>

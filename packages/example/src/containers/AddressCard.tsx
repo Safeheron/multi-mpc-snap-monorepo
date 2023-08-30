@@ -1,14 +1,22 @@
-import { Button } from 'antd'
+import { Button, Popover } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import copy from '@/assets/copy.png'
+import dashboardImg from '@/assets/dashboard.png'
+import logoDebank from '@/assets/logo-debank.png'
+import logoMetaMask from '@/assets/logo-metamask.png'
+import logoZapper from '@/assets/logo-zapper.png'
+import logoZerion from '@/assets/logo-zerion.png'
 import receive from '@/assets/receive.png'
 import send from '@/assets/send.png'
 import ActionPopover from '@/components/ActionPopover'
 import SendDialog from '@/containers/SendDialog'
-import useConfirm from '@/hooks/useConfirm'
-import { backupApproval, checkMnemonic, deleteWallet } from '@/service/metamask'
+import {
+  backupApproval,
+  checkMnemonic,
+  syncAccountToMetamask,
+} from '@/service/metamask'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/AddressCard.module.less'
 import { copyText, wei2eth } from '@/utils'
@@ -16,27 +24,47 @@ import { copyText, wei2eth } from '@/utils'
 import AddressQrcode from './AddressQrcode'
 import NotBackupDialog from './NotBackupDialog'
 
+const DASHBOARD_LIST = [
+  {
+    skipJoinAddr: true,
+    name: 'MetaMask Portfolio',
+    logo: logoMetaMask,
+    url: 'https://portfolio.metamask.io/',
+  },
+  {
+    name: 'Zerion',
+    logo: logoZerion,
+    url: 'https://app.zerion.io/',
+  },
+  {
+    name: 'DeBank',
+    logo: logoDebank,
+    url: `https://debank.com/profile/`,
+  },
+  {
+    name: 'Zapper',
+    logo: logoZapper,
+    url: 'https://zapper.fi/account/',
+  },
+]
+
 const AddressCard = () => {
-  const { accountModule, interactive, transactionModule } = useStore()
-  const { address, walletName, balance, network, backuped } = accountModule
+  const { accountModule, interactive, transactionModule, networkModule } =
+    useStore()
+  const { address, walletName, balance, backuped } = accountModule
   const [qrcodeVisible, setQrcodeVisible] = useState(false)
   const popoverRef = useRef<any>()
-  const { showConfirm, showInfo } = useConfirm()
 
-  useEffect(() => {
-    accountModule.getNetwork()
-  }, [])
+  const { hexChainId, chainName, fetchChainListFailed } = networkModule
 
-  const handleDelete = async () => {
-    interactive.setLoading(true)
-    const res = await deleteWallet()
-    interactive.setLoading(false)
-    console.log('handleDelete', res)
-
-    if (res.success) {
-      window.location.reload()
-    }
-  }
+  const filledDashboardList = useMemo(() => {
+    return DASHBOARD_LIST.map(d => {
+      return {
+        ...d,
+        url: d.skipJoinAddr ? d.url : d.url + address,
+      }
+    })
+  }, [address])
 
   const handleSend = () => {
     if (!backuped) {
@@ -83,17 +111,24 @@ const AddressCard = () => {
     interactive.setRecoverPrepareDialogVisible(true)
   }
 
+  const handleSyncAccountToMetaMask = async () => {
+    interactive.setLoading(true)
+    await syncAccountToMetamask()
+    interactive.setLoading(false)
+  }
+
   return (
     <div className={styles.addressCard}>
       <div className={styles.network}>
-        <span>{network.name}</span>
+        {fetchChainListFailed && <span>ChainId: {parseInt(hexChainId)}</span>}
+        {chainName && <span>{chainName}</span>}
       </div>
 
       <div className={styles.account}>
         <h1>{walletName || 'test'} </h1>
         {backuped ? (
           <p>
-            <span>{address}</span>{' '}
+            <span>{address}</span>
             <img src={copy} onClick={() => copyText(address, 'Address')} />
           </p>
         ) : (
@@ -101,7 +136,7 @@ const AddressCard = () => {
             Your wallet has not been backed up yet. <br />
             Please
             <a onClick={handleBackupApproval}> complete the backup </a>
-            in a timely manner to ensure asset security.
+            timely to ensure asset security.
           </p>
         )}
         <h2>{wei2eth(balance)} ETH</h2>
@@ -116,6 +151,29 @@ const AddressCard = () => {
           <img src={receive} alt="" />
           <span>Receive</span>
         </Button>
+        <Popover
+          content={
+            <div className={styles.dashboardContent}>
+              <div>
+                You can track your assets through these third-party dashboards
+              </div>
+              {filledDashboardList.map(d => (
+                <div key={d.name} className={styles.dashboardWrapper}>
+                  <img className={styles.dashboardLogo} src={d.logo} alt="" />
+                  <a href={d.url} target={'_blank'}>
+                    {d.name}
+                  </a>
+                </div>
+              ))}
+            </div>
+          }
+          placement={'bottom'}
+          trigger="click">
+          <Button>
+            <img src={dashboardImg} alt="" />
+            <span>Dashboard</span>
+          </Button>
+        </Popover>
       </div>
       <div className={styles.more}>
         <ActionPopover
@@ -123,16 +181,16 @@ const AddressCard = () => {
           content={
             <>
               {!backuped && (
-                <a onClick={handleBackupApproval}>Backup the wallet</a>
+                <a onClick={handleBackupApproval}>Backup My Wallet</a>
               )}
 
               {backuped && (
-                <a onClick={handleCheckShard}>Check the Key Shard A</a>
+                <>
+                  <a onClick={handleCheckShard}>View Key Shard A</a>
+                  <a onClick={handleRecover}>Recover for Other Device</a>
+                  <a onClick={handleSyncAccountToMetaMask}>Add to MetaMask</a>
+                </>
               )}
-              {backuped && (
-                <a onClick={handleRecover}>Recovery for other device</a>
-              )}
-              {/*<a onClick={handleDelete}>Delete</a>*/}
             </>
           }
         />

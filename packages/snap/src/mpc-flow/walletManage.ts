@@ -4,6 +4,7 @@ import { AccountItem, SnapRpcResponse } from '@safeheron/mpcsnap-types'
 
 import StateManager from '@/StateManager'
 import ErrorMessage from '@/utils/Errors'
+import { convertAccount, syncAccountToMetaMask } from '@/utils/snapAccountApi'
 import { requestConfirm } from '@/utils/snapDialog'
 import { errored, succeed } from '@/utils/snapRpcUtil'
 
@@ -29,6 +30,15 @@ export async function requestAccount(
       backuped: false,
     })
   }
+}
+
+export async function syncAccount(stateManager: StateManager) {
+  const snapAccount = stateManager.account
+  if (snapAccount) {
+    const metamaskAccount = convertAccount(snapAccount)
+    await syncAccountToMetaMask(metamaskAccount)
+  }
+  return succeed()
 }
 
 /**

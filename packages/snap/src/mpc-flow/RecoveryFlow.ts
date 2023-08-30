@@ -18,27 +18,27 @@ import { ethers } from 'ethers'
 import { v4 as uuidV4 } from 'uuid'
 
 import StateManager, { SnapAccount } from '@/StateManager'
+import { SUPPORTED_METHODS } from '@/utils/configs'
+import { convertAccount, syncAccountToMetaMask } from '@/utils/snapAccountApi'
 import { requestConfirm } from '@/utils/snapDialog'
 import { errored, succeed } from '@/utils/snapRpcUtil'
 
 import { BaseFlow } from './BaseFlow'
 
 class RecoveryFlow extends BaseFlow {
-  private keyRecovery: KeyRecovery
-  private keyRefresh: KeyRefresh
+  private keyRecovery?: KeyRecovery
+  private keyRefresh?: KeyRefresh
   private mpcHelper: MPCHelper
-  private signKey?: string
-  private walletName?: string
-  private mnemonic?: string
-  private pubKey?: string
+  private signKey = ''
+  private walletName = ''
+  private mnemonic = ''
+  private pubKey = ''
   private privKey?: string
   private remotePub?: string
   private newSignKey?: string
 
   constructor(stateManager: StateManager, mpcInstance: MPC) {
     super(stateManager, mpcInstance)
-    this.keyRecovery = mpcInstance.KeyRecovery.getCoSigner()
-    this.keyRefresh = mpcInstance.KeyRefresh.getCoSigner()
     this.mpcHelper = mpcInstance.mpcHelper
   }
 
@@ -47,18 +47,27 @@ class RecoveryFlow extends BaseFlow {
   > {
     await requestConfirm(panel([heading('Confirm to recovery an MPC wallet?')]))
 
+    this.walletName = ''
+    this.pubKey = ''
+    this.privKey = ''
+    this.remotePub = ''
+    this.newSignKey = ''
+
     this.sessionId = uuidV4()
-    const wallet = this.getWalletWithError()
-    this.signKey = wallet.signKey
-    const res = await this.mpcHelper.extractMnemonicFromSignKey(this.signKey)
-    if (res.err) {
-      throw new Error(res.err.err_msg)
+    const wallet = this.getWallet()
+    this.signKey = wallet?.signKey ?? ''
+    if (this.signKey) {
+      const res = await this.mpcHelper.extractMnemonicFromSignKey(this.signKey)
+      if (res.err) {
+        throw new Error(res.err.err_msg)
+      }
+      this.mnemonic = res.mnemo ?? ''
     }
 
-    this.mnemonic = res.mnemo
+    this.keyRecovery = this.mpcInstance.KeyRecovery.getCoSigner()
 
     // TODO The mnemonic should not be returned here
-    return succeed({ sessionId: this.sessionId, mnemonic: res.mnemo })
+    return succeed({ sessionId: this.sessionId, mnemonic: this.mnemonic })
   }
 
   async recoverPrepare(
@@ -75,12 +84,12 @@ class RecoveryFlow extends BaseFlow {
 
   async recoverKeyPair(sessionId: string): Promise<SnapRpcResponse<string>> {
     this.verifySession(sessionId)
-    const res = await this.mpcHelper.createKeyPair()
-    this.privKey = res.priv
-    if (res.err) {
-      throw errored(res.err.err_msg)
+    const keypair = await this.mpcHelper.createKeyPair()
+    this.privKey = keypair.priv
+    if (keypair.err) {
+      throw errored(keypair.err.err_msg)
     }
-    return succeed(res.pub)
+    return succeed(keypair.pub)
   }
 
   async recoverContext(
@@ -95,7 +104,7 @@ class RecoveryFlow extends BaseFlow {
     this.verifySession(sessionId)
 
     this.remotePub = remotePub
-    const res = await this.keyRecovery.createContext(
+    const res = await this.keyRecovery!.createContext(
       this.mnemonic!,
       partyInfo.localPartyIndex,
       partyInfo.remotePartyIndex,
@@ -106,23 +115,23 @@ class RecoveryFlow extends BaseFlow {
 
   async recoverRound(sessionId: string, remoteMessageList: ComputeMessage[]) {
     this.verifySession(sessionId)
-    const round = this.keyRecovery.lastIndex
+    const round = this.keyRecovery!.lastIndex
 
     console.log('start recovery round', round)
-    const res = await this.keyRecovery.runRound(remoteMessageList)
+    const res = await this.keyRecovery!.runRound(remoteMessageList)
     console.log('end recovery round', round, res)
 
-    if (this.keyRecovery?.isComplete) {
+    if (this.keyRecovery!.isComplete) {
       if (!this.remotePub) {
         throw new Error('no remotePub')
       }
       const encryptedPartySecretKey = await this.encrypt(
-        this.keyRecovery.partySecretKey
+        this.keyRecovery!.partySecretKey
       )
       return succeed({
-        isComplete: this.keyRecovery.isComplete,
+        isComplete: this.keyRecovery!.isComplete,
         partySecretKey: encryptedPartySecretKey,
-        pubKeyOfThreeParty: this.keyRecovery.pubKeyOfThreeParty,
+        pubKeyOfThreeParty: this.keyRecovery!.pubKeyOfThreeParty,
       })
     }
     return succeed({
@@ -163,6 +172,7 @@ class RecoveryFlow extends BaseFlow {
   async refreshPrepare(
     sessionId: string
   ): Promise<SnapRpcResponse<GeneratePubAndZkpResult>> {
+    this.keyRefresh = this.mpcInstance.KeyRefresh.getCoSigner()
     this.verifySession(sessionId)
     const res = await this.keyRefresh.generatePubAndZkp(this.mnemonic!)
     if (res.err) {
@@ -177,74 +187,71 @@ class RecoveryFlow extends BaseFlow {
     remoteParties: PartyWithZkp[]
   ): Promise<SnapRpcResponse<ComputeMessage[]>> {
     this.verifySession(sessionId)
-    // TODO don't delete below line, this will be create a minimal key for key refresh
-    await this.keyRefresh.generateMinimalKey(localParty, remoteParties)
-    const res = await this.keyRefresh.createContext()
+
+    // Don't delete below line, this will create a minimal key for key refresh
+    await this.keyRefresh!.generateMinimalKey(localParty, remoteParties)
+
+    const res = await this.keyRefresh!.createContext()
     return succeed(res)
   }
 
   async refreshRound(sessionId: string, remoteMessageList: ComputeMessage[]) {
     this.verifySession(sessionId)
-    const round = this.keyRefresh.lastIndex
+    const round = this.keyRefresh!.lastIndex
     console.log('start runRound', round)
-    const res = await this.keyRefresh.runRound(remoteMessageList)
+    const res = await this.keyRefresh!.runRound(remoteMessageList)
     console.log('runRound res', round, res)
-    if (this.keyRefresh.isComplete) {
-      this.newSignKey = this.keyRefresh.getSignKey()
-      this.pubKey = this.keyRefresh.getPub()
+    if (this.keyRefresh!.isComplete) {
+      this.newSignKey = this.keyRefresh!.getSignKey()
+      this.pubKey = this.keyRefresh!.getPub()
       return succeed({
-        isComplete: this.keyRefresh.isComplete,
+        isComplete: this.keyRefresh!.isComplete,
         pubKey: this.pubKey,
       })
     }
     return succeed({
-      isComplete: this.keyRefresh.isComplete,
+      isComplete: this.keyRefresh!.isComplete,
       message: res,
     })
   }
 
   async refreshSuccess(sessionId: string) {
+    this.verifySession(sessionId)
+
     const { walletName } = this
     const address = ethers.utils.computeAddress(`0x${this.pubKey}`)
-    this.verifySession(sessionId)
 
     const backuped = Boolean(this.signKey) || Boolean(this.mnemonic)
 
     const oldState = this.stateManager.account
+
     let newState: SnapAccount
     if (oldState) {
       newState = {
         ...oldState,
-        signKey: this.signKey!,
+        signKey: this.newSignKey!,
         backuped,
       }
-      await this.stateManager.saveOrUpdateAccount(newState)
     } else {
       newState = {
         id: uuidV4(),
         name: this.walletName!,
         address,
         options: {},
-        supportedMethods: [
-          'eth_sendTransaction',
-          'eth_sign',
-          'eth_signTransaction',
-          'eth_signTypedData_v1',
-          'eth_signTypedData_v2',
-          'eth_signTypedData_v3',
-          'eth_signTypedData_v4',
-          'eth_signTypedData',
-          'personal_sign',
-        ],
+        supportedMethods: SUPPORTED_METHODS,
         type: 'eip155:eoa',
         backuped: false,
         pubkey: this.pubKey!,
-        signKey: this.signKey!,
+        signKey: this.newSignKey!,
       }
-      await this.stateManager.saveOrUpdateAccount(newState)
     }
 
-    // TODO Create or update an account via the metamask account snap api
+    await this.stateManager.saveOrUpdateAccount(newState)
+
+    if (backuped) {
+      const metamaskAccount = convertAccount(newState)
+      await syncAccountToMetaMask(metamaskAccount)
+    }
 
     return succeed({
       walletName,

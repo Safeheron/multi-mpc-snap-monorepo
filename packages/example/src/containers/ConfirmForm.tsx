@@ -1,5 +1,6 @@
+import { TransactionObject } from '@safeheron/mpcsnap-types'
 import { Button, Form, Input } from 'antd'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
 
@@ -10,9 +11,16 @@ import styles from '@/styles/containers/SendDialog.module.less'
 import { ethers, provider, wei2eth } from '@/utils'
 
 const ConfirmForm = () => {
-  const { interactive, accountModule, messageModule, transactionModule } =
-    useStore()
+  const {
+    interactive,
+    accountModule,
+    messageModule,
+    transactionModule,
+    signModule,
+    networkModule,
+  } = useStore()
   const { feeData, fee, baseTx } = transactionModule
+  const { intChainId, chainName } = networkModule
 
   useEffect(() => {}, [])
 
@@ -26,21 +34,27 @@ const ConfirmForm = () => {
       )
 
       const chainId = (await provider.getNetwork()).chainId
-      const txObj = {
-        nonce: defaultNonce || 0,
+      const txObj: TransactionObject = {
+        nonce: String(defaultNonce || 0),
         to: baseTx.to,
-        value: baseTx.value,
+        chainId: String(chainId),
         data: baseTx.data,
-        chainId,
-        maxFeePerGas: formatUnits(feeData.maxFeePerGas, 'gwei').toString(),
-        maxPriorityFeePerGas: formatUnits(
-          feeData.maxPriorityFeePerGas,
-          'gwei'
-        ).toString(),
+        value: parseEther(baseTx.value).toString(),
+        maxFeePerGas: feeData.maxFeePerGas,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
         gasLimit: feeData.gasLimit,
+        type: 2,
       }
+
       transactionModule.setTransactionObject(txObj)
-      const res = await signApproval(txObj)
+      signModule.setPendingRequest({
+        originalMethod: 'eth_signTransaction',
+        method: 'eth_signTransaction',
+        params: txObj,
+      })
+
+      // @ts-ignore
+      const res = await signApproval('eth_signTransaction', txObj)
       interactive.setLoading(false)
       console.log(res)
 
@@ -103,7 +117,7 @@ const ConfirmForm = () => {
         <div className={styles.info}>
           <div className={styles.infoItem}>
             <span>Network</span>
-            <span>{accountModule.network.name}</span>
+            <span>{chainName || intChainId}</span>
           </div>
           <div className={styles.infoItem}>
             <span>Network Fee</span>

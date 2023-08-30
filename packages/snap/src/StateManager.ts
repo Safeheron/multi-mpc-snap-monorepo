@@ -17,9 +17,14 @@ class StateManager {
       params: { operation: 'get' },
     })) as MPCSnapState
 
+    console.debug('Snap init state: ', state)
+
     state = state ?? {}
     // shim empty requests
     state.requests = state.requests ?? {}
+
+    // TODO delete in release version
+    console.debug('State Manager init: ', state.account, state.requests)
 
     this.#state = state
   }
@@ -51,9 +56,20 @@ class StateManager {
     await this.#saveState()
   }
 
+  findRequest(requestId: string): KeyringRequest | undefined {
+    return this.#state?.requests?.[requestId]
+  }
+
+  isValidRequest(requestId: string) {
+    const request = this.findRequest(requestId)
+    return request !== undefined
+  }
+
   async deleteRequest(requestId: string) {
+    console.log('request state manager to delete request: ', requestId)
     const oldRequests = this.#state?.requests ?? {}
-    if (!Object.prototype.hasOwnProperty.call(oldRequests, requestId)) {
+    if (!oldRequests[requestId]) {
+      console.log('invalid request id: %s, not need operation', requestId)
       return
     }
     delete oldRequests[requestId]
@@ -76,6 +92,8 @@ export type MPCSnapState = {
   account?: SnapAccount
   requests: Record<string, KeyringRequest>
 }
+
+export type WrappedKeyringRequest = { createTime: number } & KeyringRequest
 
 export type SnapAccount = KeyringAccount & {
   signKey: string

@@ -3,28 +3,6 @@ export enum RouterEnum {
   index = '/',
 }
 
-export enum ChainIdEnum {
-  Main = '0x1',
-  Ropsten = '0x3',
-  Rinkeby = '0x4',
-  Goerli = '0x5',
-  Kovan = '0x2a',
-}
-
-export enum TransactionStatusEnum {
-  pending = 'Pending',
-  success = 'Success',
-  failed = 'Failed',
-}
-
-export const ChainIdMap = {
-  [ChainIdEnum.Main]: 'Ethereum Main Network',
-  [ChainIdEnum.Ropsten]: 'Ropsten Test Network',
-  [ChainIdEnum.Rinkeby]: 'Rinkeby Test Network',
-  [ChainIdEnum.Goerli]: 'Goerli Test Network',
-  [ChainIdEnum.Kovan]: 'Kovan Test Network',
-}
-
 export enum SnapInvokeMethods {
   heartBeat = 'mpc_snapKeepAlive',
 
@@ -39,6 +17,7 @@ export enum SnapInvokeMethods {
   signRound = 'mpc_signRound',
 
   requestAccount = 'mpc_requestAccount',
+  syncAccount = 'mpc_syncAccount',
   deleteWallet = 'mpc_deleteWallet',
   checkMnemonic = 'mpc_checkMnemonic',
 
@@ -56,8 +35,6 @@ export enum SnapInvokeMethods {
   refreshContext = 'mpc_refreshContext',
   refreshRound = 'mpc_refreshRound',
   refreshSuccess = 'mpc_refreshSuccess',
-
-  keyringListRequests = 'keyring_listRequests',
 
   test = 'mpc_test',
 }

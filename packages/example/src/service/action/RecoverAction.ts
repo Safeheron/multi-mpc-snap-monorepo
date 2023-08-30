@@ -204,11 +204,7 @@ class RecoverAction {
   }
 
   async handleRecoverSuccess() {
-    const res = await refreshPrepare(
-      store.interactive.sessionId,
-      store.interactive.mnemonic,
-      store.interactive.walletName
-    )
+    const res = await refreshPrepare(store.interactive.sessionId)
     if (res.success) {
       store.messageModule.rpcChannel?.next({
         messageType: MPCMessageType.refreshReady,

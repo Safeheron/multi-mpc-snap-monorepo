@@ -1,4 +1,4 @@
-if (IS_DEV_SERVER) {
+if (process.env.IS_DEV_SERVER) {
   if (module.hot) {
     module.hot.accept()
     module.hot.addStatusHandler(status => {

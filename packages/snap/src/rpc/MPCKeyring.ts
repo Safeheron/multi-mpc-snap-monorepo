@@ -5,10 +5,9 @@ import {
   SubmitRequestResponse,
 } from '@metamask/keyring-api'
 import { Json } from '@metamask/snaps-types'
-import { v4 as uuid } from 'uuid'
 
 import StateManager from '@/StateManager'
-import { convertAccount } from '@/utils/snapAccountApi'
+import { convertAccount, submitSignResponse } from '@/utils/snapAccountApi'
 
 export class MPCKeyring implements Keyring {
   private stateManager: StateManager
@@ -44,7 +43,9 @@ export class MPCKeyring implements Keyring {
 
   async getAccount(id: string): Promise<KeyringAccount | undefined> {
     const localAccount = this.stateManager.account
-    const keyringAccount = localAccount && convertAccount(localAccount)
+    const keyringAccount = localAccount
+      ? convertAccount(localAccount)
+      : undefined
     return keyringAccount
   }
 
@@ -76,7 +77,8 @@ export class MPCKeyring implements Keyring {
   }
 
   async rejectRequest(id: string): Promise<void> {
-    throw new Error('The "rejectRequest" method is not available on this snap.')
+    await submitSignResponse(id, null)
+    await this.stateManager.deleteRequest(id)
   }
 }
 

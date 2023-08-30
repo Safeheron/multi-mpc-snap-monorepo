@@ -9,12 +9,12 @@ const StorageUtil = {
     return res
   },
 
-  set(key: string, value: any, stringfy = false) {
+  set(key: string, value: any, stringify = false) {
     let newValue = ''
-    if (stringfy) {
+    if (stringify) {
       newValue = JSON.stringify(value)
     }
-    localStorage.setItem(key, value)
+    localStorage.setItem(key, newValue)
   },
 }
 

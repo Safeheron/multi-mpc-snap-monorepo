@@ -4,7 +4,6 @@ import { PartyId } from '@/service/types'
 import { MPCMessage } from '@/service/types'
 
 export abstract class MessageChannel extends EventEmitter {
-  messageList: MPCMessage[]
   name: string
   protected partyId: PartyId
 
@@ -35,7 +34,11 @@ export abstract class MessageChannel extends EventEmitter {
     } catch (error) {}
   }
 
-  async receiveExternal(msg: string) {
+  /**
+   * receive message from website
+   * @param msg
+   */
+  receiveExternal(msg: string) {
     try {
       const message = JSON.parse(msg) as MPCMessage
       this.emit('receive', message)

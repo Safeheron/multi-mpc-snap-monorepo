@@ -26,6 +26,7 @@ enum InternalSnapCommonMethods {
 enum InternalMPCAccountMethods {
   ListAccounts = 'mpc_requestAccount',
   DeleteAccount = 'mpc_deleteWallet',
+  SyncAccount = 'mpc_syncAccount',
   ApprovalCreateAccount = 'mpc_createApproval',
   CreateAccountContext = 'mpc_createContext',
   CreateAccountRound = 'mpc_createRound',

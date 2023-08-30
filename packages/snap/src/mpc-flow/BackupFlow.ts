@@ -5,7 +5,7 @@ import { AccountItem, SnapRpcResponse } from '@safeheron/mpcsnap-types'
 import { v4 as getUuid } from 'uuid'
 
 import StateManager from '@/StateManager'
-import { addAccount, convertAccount } from '@/utils/snapAccountApi'
+import { convertAccount, syncAccountToMetaMask } from '@/utils/snapAccountApi'
 import { requestConfirm } from '@/utils/snapDialog'
 import { errored, succeed } from '@/utils/snapRpcUtil'
 
@@ -42,23 +42,18 @@ class BackupFlow extends BaseFlow {
     return succeed({ sessionId, mnemonic: res.mnemo })
   }
 
-  async updateBackup(sessionId: string): Promise<SnapRpcResponse<AccountItem>> {
+  async finishBackup(sessionId: string): Promise<SnapRpcResponse<AccountItem>> {
     this.verifySession(sessionId)
 
     const wallet = this.getWalletWithError()
     wallet.backuped = true
 
-    // TODO save or update
-    // first add account to metamask
+    // First add account to metamask
     const metamaskAccount: KeyringAccount = convertAccount(wallet)
-    const syncAccountResult = await addAccount(metamaskAccount)
-    console.log(
-      'sync account to metamask result: ',
-      metamaskAccount,
-      syncAccountResult
-    )
+    await syncAccountToMetaMask(metamaskAccount)
+    console.log('sync account to metamask result: ', metamaskAccount)
 
-    // update snap local state
+    // Update snap local state
     await this.stateManager.saveOrUpdateAccount(wallet)
 
     return succeed({

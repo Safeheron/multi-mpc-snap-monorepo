@@ -8,12 +8,14 @@ import StepContainer from '@/components/StepContainer'
 import StepText from '@/components/StepText'
 import WebRTCConnection from '@/components/WebRTCConnection'
 import useConfirm, { CANCEL_CONFIRM_TEXT } from '@/hooks/useConfirm'
+import useSnapKeepAlive from '@/hooks/useSnapKeepAlive'
 import { RPCChannel } from '@/service/channel/RPCChannel'
 import { WebRTCChannel } from '@/service/channel/WebRTCChannel'
 import { PartyId } from '@/service/types'
 import { MPCMessageType } from '@/service/types'
-import { store, useStore } from '@/store'
+import { useStore } from '@/store'
 import styles from '@/styles/containers/CreateDialog.module.less'
+import { tryToExtractChainId } from '@/utils/snapRequestUtil'
 
 const steps = [
   {
@@ -33,23 +35,23 @@ const steps = [
       'Waiting for the three parties to compute and then sign the transaction.',
   },
 ]
-const SignTransactionDialog = () => {
-  const { interactive, messageModule, accountModule, transactionModule } =
-    useStore()
+
+const SignDialog = () => {
+  useSnapKeepAlive()
+
+  const {
+    interactive,
+    messageModule,
+    signModule,
+    networkModule,
+    accountModule,
+  } = useStore()
+
+  const { explorer, currentChain } = networkModule
+  const { balanceEth } = accountModule
+
   const step = interactive.signStep
   const [webrtcChannel, setWebrtcChannel] = useState<WebRTCChannel>()
-
-  useEffect(() => {
-    const rpcChannel = new RPCChannel()
-    messageModule.setRPCChannel(rpcChannel)
-    messageModule.messageRelayer?.join(rpcChannel)
-
-    setupRtcChannel()
-
-    return () => {
-      interactive.setCreateStep(1)
-    }
-  }, [])
 
   const isSuccess = step > 3
 
@@ -58,12 +60,25 @@ const SignTransactionDialog = () => {
     setWebrtcChannel(rtcChannel)
     rtcChannel.on('channelOpen', async () => {
       setTimeout(async () => {
+        const { method, originalMethod, params } = signModule.pendingRequest
+        const thisChainId = tryToExtractChainId(originalMethod, params)
+        const thisChainName = networkModule.getChainName(thisChainId)
+
         await rtcChannel.sendMessage(
           JSON.stringify({
             messageType: MPCMessageType.signPrepare,
             messageContent: {
-              ...transactionModule.transactionObject,
-              chainName: store.accountModule.network.name,
+              method: method,
+              params: params,
+              commonParams: {
+                chainName: thisChainName,
+                chainId: thisChainId,
+                balance: balanceEth,
+                nativeCurrency: currentChain?.nativeCurrency,
+                // TODO set timestamp and formatTime
+                timestamp: 0,
+                formatTime: '--',
+              },
             },
           })
         )
@@ -81,7 +96,10 @@ const SignTransactionDialog = () => {
   }
 
   const handleTxnHash = async () => {
-    window.open(`${accountModule.network.explorer}/tx/${interactive.txHash}`)
+    // TODO to ensure that some special explorer
+    if (explorer) {
+      window.open(`${explorer}/tx/${interactive.txHash}`)
+    }
   }
 
   const { showConfirm } = useConfirm()
@@ -102,6 +120,18 @@ const SignTransactionDialog = () => {
   const handleClose = () => {
     interactive.setSignTransactionDialogVisible(false)
   }
+
+  useEffect(() => {
+    const rpcChannel = new RPCChannel()
+    messageModule.setRPCChannel(rpcChannel)
+    messageModule.messageRelayer?.join(rpcChannel)
+
+    setupRtcChannel()
+
+    return () => {
+      interactive.setCreateStep(1)
+    }
+  }, [])
 
   return (
     <Modal centered closable={false} open={true} footer={null} width={960}>
@@ -150,4 +180,4 @@ const SignTransactionDialog = () => {
   )
 }
 
-export default observer(SignTransactionDialog)
+export default observer(SignDialog)

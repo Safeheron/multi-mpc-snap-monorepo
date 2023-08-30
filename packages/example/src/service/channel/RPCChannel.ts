@@ -26,7 +26,7 @@ export class RPCChannel extends MessageChannel {
   // call rpc
   protected async sendExternal(messageArray: MPCMessage[]) {
     const type = messageArray[0].messageType
-    console.warn('rpc sendExternal', type)
+    console.debug('[RPC channel] send message ↑', type, messageArray)
     const { interactive } = store
 
     switch (type) {

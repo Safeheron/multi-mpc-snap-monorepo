@@ -10,13 +10,14 @@ import { ethers } from 'ethers'
 import { v4 as uuidV4 } from 'uuid'
 
 import StateManager, { SnapAccount } from '@/StateManager'
+import { SUPPORTED_METHODS } from '@/utils/configs'
 import { requestConfirm } from '@/utils/snapDialog'
 import { succeed } from '@/utils/snapRpcUtil'
 
 import { BaseFlow } from './BaseFlow'
 
 class KeyGenFlow extends BaseFlow {
-  private keyGen: KeyGen
+  private keyGen?: KeyGen
 
   private walletName?: string
   private signKey = ''
@@ -24,8 +25,6 @@ class KeyGenFlow extends BaseFlow {
 
   constructor(stateManager: StateManager, mpcInstance: MPC) {
     super(stateManager, mpcInstance)
-
-    this.keyGen = mpcInstance.KeyGen.getCoSigner()
   }
 
   // TODO validate wallet name
@@ -41,9 +40,12 @@ class KeyGenFlow extends BaseFlow {
       ])
     )
 
+    this.keyGen = this.mpcInstance.KeyGen.getCoSigner()
+
     this.walletName = walletName
     this.sessionId = uuidV4()
-    this.keyGen.setLocalParty(party.party_id, party.index)
+    this.keyGen!.setLocalParty(party.party_id, party.index)
+
     return succeed(this.sessionId)
   }
 
@@ -52,27 +54,27 @@ class KeyGenFlow extends BaseFlow {
     remoteParties: Party[]
   ): Promise<SnapRpcResponse<ComputeMessage[]>> {
     this.verifySession(sessionId)
-    const res = await this.keyGen.createContext(remoteParties)
+    const res = await this.keyGen!.createContext(remoteParties)
     return succeed(res)
   }
 
   async runRound(sessionId: string, remoteMessageList: ComputeMessage[]) {
     this.verifySession(sessionId)
 
-    const round = this.keyGen.lastIndex
-    console.log('start keygen round', round)
-    const res = await this.keyGen.runRound(remoteMessageList)
+    const round = this.keyGen!.lastIndex
+    console.log('start keygen round', round, remoteMessageList)
+    const res = await this.keyGen!.runRound(remoteMessageList)
     console.log('end keygen round: ', round, res)
-    if (this.keyGen.isComplete) {
-      this.signKey = this.keyGen.getSignKey()
-      this.pubKey = this.keyGen.getPubKey()
+    if (this.keyGen!.isComplete) {
+      this.signKey = this.keyGen!.getSignKey()
+      this.pubKey = this.keyGen!.getPubKey()
       return succeed({
-        isComplete: this.keyGen.isComplete,
+        isComplete: this.keyGen!.isComplete,
         pubKey: this.pubKey,
       })
     }
     return succeed({
-      isComplete: this.keyGen.isComplete,
+      isComplete: this.keyGen!.isComplete,
       message: res,
     })
   }
@@ -91,17 +93,7 @@ class KeyGenFlow extends BaseFlow {
       name: this.walletName!,
       address,
       options: {},
-      supportedMethods: [
-        'eth_sendTransaction',
-        'eth_sign',
-        'eth_signTransaction',
-        'eth_signTypedData_v1',
-        'eth_signTypedData_v2',
-        'eth_signTypedData_v3',
-        'eth_signTypedData_v4',
-        'eth_signTypedData',
-        'personal_sign',
-      ],
+      supportedMethods: SUPPORTED_METHODS,
       type: 'eip155:eoa',
       backuped: false,
       pubkey: this.pubKey!,

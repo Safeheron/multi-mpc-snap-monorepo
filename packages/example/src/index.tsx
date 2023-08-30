@@ -4,6 +4,8 @@ import { ConfigProvider } from 'antd'
 import ReactDOM from 'react-dom/client'
 
 import App from '@/App'
+import { MetaMaskProvider } from '@/hooks/MetamaskContext'
+import { SnapKeepAliveProvider } from '@/hooks/SnapKeepAliveContext'
 import { store, StoreContext } from '@/store'
 const root = document.getElementById('root') as HTMLElement
 
@@ -15,7 +17,11 @@ ReactDOM.createRoot(root).render(
           colorPrimary: '#496CE9',
         },
       }}>
-      <App />
+      <MetaMaskProvider>
+        <SnapKeepAliveProvider>
+          <App />
+        </SnapKeepAliveProvider>
+      </MetaMaskProvider>
     </ConfigProvider>
   </StoreContext.Provider>
 )

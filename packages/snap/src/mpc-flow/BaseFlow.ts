@@ -22,6 +22,11 @@ export class BaseFlow {
     return wallet
   }
 
+  getWallet(): SnapAccount | undefined {
+    const wallet = this.stateManager.account
+    return wallet
+  }
+
   protected verifySession(sessionId: string) {
     if (!sessionId || sessionId !== this.sessionId) {
       throw new Error(ErrorMessage.SESSION_INVALID)

@@ -10,8 +10,8 @@ import styles from '@/styles/containers/SendDialog.module.less'
 import { ethers, wei2eth } from '@/utils'
 
 const SendForm = () => {
-  const { interactive, accountModule, transactionModule } = useStore()
-  const { baseTx, feeData, fee, availableBalance } = transactionModule
+  const { interactive, transactionModule } = useStore()
+  const { baseTx, fee, availableBalance } = transactionModule
 
   const [form] = Form.useForm()
   const [, forceUpdate] = useState({})
@@ -45,19 +45,13 @@ const SendForm = () => {
   const dataChangeAction = async data => {
     const to = form.getFieldValue('to')
     const value = form.getFieldValue('value')
-    if (
-      !to ||
-      !value ||
+    const fieldHasError =
       form.getFieldsError().filter(({ errors }) => errors.length).length > 0
-    ) {
+    if (!to || !value || fieldHasError) {
       return
     }
 
-    transactionModule.setBaseTx({
-      to,
-      value,
-      data,
-    })
+    transactionModule.setBaseTx({ to, value, data })
     await transactionModule.getFeeData()
     form.validateFields(['value'])
   }

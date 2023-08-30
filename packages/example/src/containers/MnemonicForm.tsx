@@ -18,7 +18,7 @@ const MnemonicForm = () => {
     if (interactive.isSkip) {
       showInfo({
         content:
-          'At least 2 private key shards are required to recover the wallet. If other devices have skipped entering the mnemonic phrase, this device cannot skip. Please enter the mnemonic phrase for this device.',
+          'A minimum of 2 private key shards is necessary for wallet recovery. If other devices have already bypassed entering the mnemonic phrase, this device can no longer skip this step. Please input the mnemonic phrase for this device.',
       })
     } else {
       try {
@@ -27,7 +27,7 @@ const MnemonicForm = () => {
         }
         showConfirm({
           content:
-            'The wallet address will remain the same, but you will need to back up the recovered private key shard before you can use the wallet.',
+            'The wallet address will remain the same, but remember to back up the recovered private key shard before using the wallet.',
           onOk() {
             const walletName = form.getFieldValue('walletName')
 
@@ -111,7 +111,7 @@ const MnemonicForm = () => {
             <Input.TextArea rows={6} />
           </Form.Item>
           <div className={styles.skip}>
-            Mnemonic phrase lost, <a onClick={handleSkip}>skipping input</a>
+            The mnemonic phrase is lost. <a onClick={handleSkip}>Skip it</a>
           </div>
           <Form.Item>
             <Button type="primary" htmlType="submit">
@@ -122,9 +122,8 @@ const MnemonicForm = () => {
       ) : interactive.mnemonicFormType === 'done' ? (
         <div className={styles.done}>
           <p>
-            Please follow the prompts in the Safeheron Snap App on both phones
-            separately, and click 'Continue' in the mobile app after completing
-            the operation.
+            Please follow the prompts in the Safeheron Snap App on each phone,
+            and tap 'Continue' in the mobile app after completing the operation.
           </p>
           <img src={waiting} width={168} />
         </div>

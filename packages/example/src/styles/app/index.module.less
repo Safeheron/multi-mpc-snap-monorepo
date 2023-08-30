@@ -3,28 +3,39 @@
   padding-top: 200px;
   background: url(../../assets/bg.png) top center no-repeat;
 
-  ul {
+  .feat-list {
     list-style: none;
     display: flex;
+    flex-wrap: wrap;
     margin-top: 190px;
-    justify-content: center;
+    justify-content: start;
+    width: 1180px;
+    margin-left: 50px;
 
-    li {
-      width: 330px;
-      height: 250px;
+    .feat-wrap {
+      margin-bottom: 20px;
+      width: 570px;
+      height: 160px;
       border-radius: 16px;
-      background-color: fade(white, 90);
-      text-align: center;
-      padding-top: 22px;
-      margin-left: 20px;
+      background-color: #fff;
+      padding: 25px;
+      margin-right: 20px;
+      display: flex;
 
-      h1 {
-        font-size: 18px;
+      img{
+        margin-right: 20px;
       }
-      p {
-        padding: 0 30px;
-        margin-top: 15px;
-        color: @light-color;
+
+      .feat-right{
+        h1 {
+          font-size: 18px;
+          margin-bottom: 5px;
+        }
+        p {
+          font-size: 14px;
+          margin-top: 15px;
+          color: @light-color;
+        }
       }
     }
   }

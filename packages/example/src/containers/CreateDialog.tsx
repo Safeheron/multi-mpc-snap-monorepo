@@ -7,6 +7,7 @@ import StepContainer from '@/components/StepContainer'
 import StepText from '@/components/StepText'
 import WebRTCConnection from '@/components/WebRTCConnection'
 import useConfirm, { CANCEL_CONFIRM_TEXT } from '@/hooks/useConfirm'
+import useSnapKeepAlive from '@/hooks/useSnapKeepAlive'
 import { WebRTCChannel } from '@/service/channel/WebRTCChannel'
 import { PartyId } from '@/service/types'
 import { MPCMessageType } from '@/service/types'
@@ -32,6 +33,8 @@ const steps = [
   },
 ]
 const CreateDialog = () => {
+  useSnapKeepAlive()
+
   const { interactive, messageModule, accountModule } = useStore()
   const step = interactive.createStep
 
@@ -110,6 +113,8 @@ const CreateDialog = () => {
       },
     })
   }
+
+  // TODO 按钮改为 Backup My Wallet Now，并且跳转
 
   return (
     <Modal centered closable={false} open={true} footer={null} width={960}>

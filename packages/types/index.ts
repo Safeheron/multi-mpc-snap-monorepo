@@ -5,7 +5,7 @@ import {
   Infer,
   literal,
   object,
-  pattern,
+  optional,
   record,
   string,
   unknown,
@@ -178,10 +178,33 @@ export const CreateSuccessStruct = object({
 
 export type CreateSuccess = Infer<typeof CreateSuccessStruct>
 
+enum EthMethod {
+  PersonalSign = 'personal_sign',
+  Sign = 'eth_sign',
+  SendTransaction = 'eth_sendTransaction',
+  SignTransaction = 'eth_signTransaction',
+  SignTypedData = 'eth_signTypedData',
+  SignTypedDataV1 = 'eth_signTypedData_v1',
+  SignTypedDataV3 = 'eth_signTypedData_v3',
+  SignTypedDataV4 = 'eth_signTypedData_v4',
+}
+
 export const SignApprovalStruct = object({
+  ...CommonHeader,
   method: literal('mpc_signApproval'),
   params: object({
-    transactionObject: record(string(), unknown()),
+    method: enums([
+      `${EthMethod.PersonalSign}`,
+      `${EthMethod.Sign}`,
+      `${EthMethod.SignTransaction}`,
+      `${EthMethod.SendTransaction}`,
+      `${EthMethod.SignTypedData}`,
+      `${EthMethod.SignTypedDataV1}`,
+      `${EthMethod.SignTypedDataV3}`,
+      `${EthMethod.SignTypedDataV4}`,
+    ]),
+    params: record(string(), unknown()),
+    requestId: optional(string()),
   }),
 })
 
@@ -240,7 +263,6 @@ export const RecoverContextStruct = object({
   method: literal('mpc_recoverContext'),
   params: object({
     sessionId: string(),
-    localMnemonic: string(),
     partyInfo: object({
       localPartyIndex: string(),
       remotePartyIndex: string(),
@@ -355,13 +377,38 @@ export interface AccountItem {
   backuped?: boolean
 }
 
-export interface TransactionObject {
+export interface TransactionBaseParams {
   to: string
+  nonce: string
   value: string
-  chainId: number
-  nonce: number
+  chainId: string
+  /**
+   * @deprecated
+   */
+  chainName?: string
   data: string
+
   gasLimit: string
+}
+
+export interface LegacyParams {
+  type: 0 | 1
+  gasPrice: string
+}
+
+export type AccessList = Array<{ address: string; storageKeys: Array<string> }>
+
+export type AccessListish =
+  | AccessList
+  | Array<[string, Array<string>]>
+  | Record<string, Array<string>>
+
+export interface Eip1559Params {
+  type: 2
   maxFeePerGas: string
   maxPriorityFeePerGas: string
+  accessList?: AccessListish
 }
+
+export type TransactionObject = TransactionBaseParams &
+  (LegacyParams | Eip1559Params)

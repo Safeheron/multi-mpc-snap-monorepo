@@ -16,9 +16,9 @@ import { errored } from '@/utils/snapRpcUtil'
 
 // don't change the sort of handlers
 const handler: OnRpcRequestHandler = buildHandlersChain(
+  setupHandler,
   loggerHandler,
   permissionsHandler,
-  setupHandler,
   internalMPCHandler,
   keygenHandler,
   backupHandler,
@@ -29,10 +29,15 @@ const handler: OnRpcRequestHandler = buildHandlersChain(
 
 const onRpcRequest: OnRpcRequestHandler = async snapRpcRequest => {
   try {
-    return handler(snapRpcRequest)
+    const response = await handler(snapRpcRequest)
+    console.log(
+      `response by request method [${snapRpcRequest.request.method}] >>`,
+      response
+    )
+    return response
   } catch (e) {
     console.log('handle rpc request error: ', e)
-    return errored('Unknown error.')
+    return errored(e?.message ?? 'Unknown error.')
   }
 }
 

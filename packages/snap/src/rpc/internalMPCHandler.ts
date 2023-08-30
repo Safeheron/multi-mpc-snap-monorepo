@@ -35,6 +35,7 @@ import {
   checkMnemonic,
   deleteWallet,
   requestAccount,
+  syncAccount,
 } from '@/mpc-flow/walletManage'
 import { MPCKeyring } from '@/rpc/MPCKeyring'
 import StateManager from '@/StateManager'
@@ -54,9 +55,10 @@ export const setupHandler: OnRpcRequestHandler = async ({ request }) => {
   }
 
   if (!stateManager) {
-    console.log('init mpc stateManager...')
-    stateManager = new StateManager()
-    await stateManager.loadState()
+    console.log('init stateManager...')
+    const tmpStateManager = new StateManager()
+    await tmpStateManager.loadState()
+    stateManager = tmpStateManager
   }
 
   throw new MethodNotSupportedError(request.method)
@@ -79,7 +81,7 @@ export const backupHandler: OnRpcRequestHandler = async ({ request }) => {
 
     case 'mpc_backupUpdate':
       assert(request, BackupUpdateStruct)
-      return backupFlow.updateBackup(request.params.sessionId)
+      return backupFlow.finishBackup(request.params.sessionId)
     default:
       throw new MethodNotSupportedError(request.method)
   }
@@ -131,8 +133,11 @@ export const signHandler: OnRpcRequestHandler = async ({ request }) => {
 
   switch (request.method) {
     case 'mpc_signApproval':
-      assert(request, SignApprovalStruct)
-      return signFlow.signApproval(request.params.transactionObject)
+      // TODO 这里要写一个完善的类型校验
+      // assert(request, SignApprovalStruct)
+      // @ts-ignore
+      const { method, params, requestId } = request.params
+      return signFlow.signApproval(method, params, requestId)
 
     case 'mpc_signContext':
       assert(request, SignContextStruct)
@@ -179,12 +184,14 @@ export const recoverHandler: OnRpcRequestHandler = async ({ request }) => {
         request.params.partyInfo,
         request.params.remotePub
       )
+
     case 'mpc_recoverRound':
       assert(request, RecoverRoundStruct)
       return recoveryFlow.recoverRound(
         request.params.sessionId,
         request.params.messages
       )
+
     case 'mpc_recoverMnemonic':
       assert(request, RecoverMnemonicStruct)
       return recoveryFlow.generateMnemonic(
@@ -196,6 +203,7 @@ export const recoverHandler: OnRpcRequestHandler = async ({ request }) => {
     case 'mpc_refreshPrepare':
       assert(request, RefreshPrepareStruct)
       return recoveryFlow.refreshPrepare(request.params.sessionId)
+
     case 'mpc_refreshContext':
       assert(request, RefreshContextStruct)
       return recoveryFlow.refreshContext(
@@ -203,6 +211,7 @@ export const recoverHandler: OnRpcRequestHandler = async ({ request }) => {
         request.params.localParty,
         request.params.remoteParties
       )
+
     case 'mpc_refreshRound':
       assert(request, RefreshRoundStruct)
       return recoveryFlow.refreshRound(
@@ -222,7 +231,7 @@ export const recoverHandler: OnRpcRequestHandler = async ({ request }) => {
 export const internalMPCHandler: OnRpcRequestHandler = async ({ request }) => {
   switch (request.method) {
     case 'mpc_snapKeepAlive':
-      return 'alived'
+      return 'lived'
 
     case 'mpc_requestAccount':
       return requestAccount(stateManager)
@@ -233,6 +242,9 @@ export const internalMPCHandler: OnRpcRequestHandler = async ({ request }) => {
     case 'mpc_checkMnemonic':
       assert(request, CheckMnemonicStruct)
       return checkMnemonic(request.params.walletName, stateManager, mpcInstance)
+
+    case 'mpc_syncAccount':
+      return syncAccount(stateManager)
 
     default:
       throw new MethodNotSupportedError(request.method)

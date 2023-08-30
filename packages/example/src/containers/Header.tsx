@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { FC, PropsWithChildren, useEffect, useState } from 'react'
 
-// @ts-expect-error
 import logo from '@/assets/logo.png'
 import styles from '@/styles/containers/Header.module.less'
 
@@ -28,7 +27,7 @@ const Header: FC<PropsWithChildren> = ({ children }) => {
       <div className={styles.container}>
         <div className={styles.logoBox}>
           <div>
-            <img src={logo} width={42} />
+            <img src={logo} width={42} alt={'Safeheron Logo'} />
           </div>
           <div className={styles.text}>
             <div className={styles.title}>Safeheron Snap</div>

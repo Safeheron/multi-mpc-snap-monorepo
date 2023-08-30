@@ -6,12 +6,14 @@
     display: flex;
     justify-content: center;
 
-    a {
+    .box {
       width: 270px;
       height: 86px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
       padding: 18px 25px;
       padding-right: 22px;
       background-color: white;
@@ -27,6 +29,10 @@
         font-size: 16px;
         font-weight: normal;
         color: @light-color;
+      }
+
+      .tip {
+        font-size: 12px;
       }
 
       &:hover {

@@ -23,6 +23,9 @@ const config: Configuration = {
       buffer: require.resolve('buffer/'),
       stream: require.resolve('stream-browserify'),
       crypto: require.resolve('crypto-browserify'),
+      http: false,
+      https: false,
+      zlib: false,
     },
   },
   experiments: {

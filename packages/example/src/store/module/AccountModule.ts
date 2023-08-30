@@ -1,22 +1,24 @@
+import type { AccountItem } from '@safeheron/mpcsnap-types'
+import { ethers } from 'ethers'
 import { makeAutoObservable } from 'mobx'
 
 import { requestAccount } from '@/service/metamask'
-import { NetworkItem } from '@/service/models'
-import { ethers, provider } from '@/utils'
+import { provider } from '@/utils'
 
-const { ethereum } = window
-import type { AccountItem } from '@safeheron/mpcsnap-types'
-
-import { store } from '@/store'
+const LOOP_GAP = 20_000
 
 class AccountModule {
   walletName = ''
   address = ''
   balance = ''
-  network: NetworkItem = {} as NetworkItem
   backuped?: boolean
 
   timer: any
+
+  get balanceEth() {
+    if (!this.balance) return ''
+    return ethers.utils.formatUnits(ethers.BigNumber.from(this.balance), 18)
+  }
 
   constructor() {
     makeAutoObservable(this)
@@ -30,10 +32,7 @@ class AccountModule {
   }
 
   async requestAccount() {
-    store.interactive.setLoading(true)
     const res = await requestAccount()
-
-    store.interactive.setLoading(false)
     if (res.success) {
       this.setAccount(res.data)
     }
@@ -43,12 +42,17 @@ class AccountModule {
     this.backuped = backuped
   }
 
-  loopBalance(address: string) {
-    this.getBalance(address)
-    clearInterval(this.timer)
-    this.timer = setInterval(() => {
-      this.getBalance(address)
-    }, 30 * 1000)
+  async loopBalance(address: string) {
+    clearTimeout(this.timer)
+    await this.loop(address)
+  }
+
+  private async loop(address: string) {
+    await this.getBalance(address)
+    this.timer = setTimeout(async () => {
+      await this.getBalance(address)
+      await this.loop(address)
+    }, LOOP_GAP)
   }
 
   async getBalance(address: string) {
@@ -60,36 +64,6 @@ class AccountModule {
       this.balance = res.toString()
     } catch (error) {
       console.error(error)
-    }
-  }
-
-  async getNetwork() {
-    if (!ethereum) return
-    ethereum.on('chainChanged', _chainId => {
-      window.location.reload()
-    })
-    store.interactive.setLoading(true)
-    // @ts-ignore
-    const chainId: string = await ethereum.request({ method: 'eth_chainId' })
-
-    try {
-      const chainList = await ethers.utils.fetchJson(
-        'https://chainid.network/chains.json'
-      )
-      store.interactive.setLoading(false)
-
-      const chainInfo = chainList.find(v => v.chainId === parseInt(chainId))
-
-      this.network = {
-        name: chainInfo.title || chainInfo.name,
-        chainId,
-        explorer: !chainInfo.explorers.length
-          ? null
-          : chainInfo.explorers[0]?.url,
-      }
-    } catch (error) {
-      store.interactive.setLoading(false)
-      console.log(error)
     }
   }
 }

@@ -1,13 +1,13 @@
 import { UR, UREncoder } from '@ngraveio/bc-ur'
+import pako from 'pako'
 import { QRCodeSVG } from 'qrcode.react'
 import { FC, useEffect, useRef, useState } from 'react'
 
 interface Props {
   message?: string
-  encodings?: BufferEncoding
 }
 
-const DynamicQrCode: FC<Props> = ({ message, encodings = 'utf-8' }) => {
+const DynamicQrCode: FC<Props> = ({ message }) => {
   const [code, setCode] = useState('')
   const timer = useRef<any>()
 
@@ -19,10 +19,12 @@ const DynamicQrCode: FC<Props> = ({ message, encodings = 'utf-8' }) => {
   const init = () => {
     if (!message) return
 
-    const messageBuffer = Buffer.from(message, encodings)
+    const compressedMessage = pako.deflate(message) as Buffer
+    // @ts-ignore
+    const messageBuffer = Buffer.from(compressedMessage)
 
     const ur = UR.fromBuffer(messageBuffer)
-    const encoder = new UREncoder(ur, 400, 0, 10)
+    const encoder = new UREncoder(ur, 300, 0, 10)
 
     clearInterval(timer.current)
     timer.current = setInterval(() => {

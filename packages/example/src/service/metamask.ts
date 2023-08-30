@@ -10,78 +10,35 @@ import type {
   PubKey,
   RecoverResult,
   RunRoundResponse,
+  SignApproval,
   SignResult,
   SnapRpcResponse,
 } from '@safeheron/mpcsnap-types'
 
 import { SnapInvokeMethods } from '@/configs/Enums'
+import { snap_origin } from '@/configs/snap'
 import { InvokeReqModel } from '@/service/models'
-import { handleSnapResponse, IS_PROD } from '@/utils'
-
-export const SNAP_ID = IS_PROD
-  ? 'npm:@safeheron/mpc-snap'
-  : 'local:http://localhost:4100'
+import { handleSnapResponse } from '@/utils'
 
 const { ethereum } = window
 
-const keyringClient = new KeyringSnapRpcClient(SNAP_ID, ethereum)
-
-export async function connect() {
-  try {
-    const result: any = await ethereum?.request({
-      method: 'wallet_requestSnaps',
-      params: {
-        [SNAP_ID]: {},
-      },
-    })
-
-    if (result) {
-      const info = result[SNAP_ID]
-      console.log('snap info', info)
-
-      if (info.error) {
-        return {
-          success: false,
-          message: info.error.message,
-        }
-      } else {
-        return {
-          success: true,
-        }
-      }
-    } else {
-      return { success: false }
-    }
-  } catch (error) {
-    console.error('connect error', error)
-
-    return {
-      success: false,
-      message: error.message,
-    }
-  }
-}
-
-export async function getSnaps() {
-  return ethereum?.request<{ [key: string]: { enabled: boolean } }>({
-    method: 'wallet_getSnaps',
-  })
-}
+const keyringClient = new KeyringSnapRpcClient(snap_origin, ethereum)
 
 // walletInvokeSnap
 export async function walletInvokeSnap(req: InvokeReqModel<any>): Promise<any> {
   const params = {
-    snapId: SNAP_ID,
+    snapId: snap_origin,
     request: req,
   }
   if (req.method !== 'mpc_snapKeepAlive') {
-    console.log('walletInvokeSnap:::', req)
+    console.debug('walletInvokeSnap request:::', req)
   }
   try {
     const res: any = await ethereum?.request({
       method: 'wallet_invokeSnap',
       params,
     })
+    console.debug('walletInvokeSnap response:::', res)
     if (res.success) {
       return res
     }
@@ -106,11 +63,8 @@ export async function listKeyringRequests() {
   return keyringClient.listRequests()
 }
 
-// ping
-export async function heartBeat(): Promise<SnapRpcResponse<any>> {
-  return await walletInvokeSnap({
-    method: SnapInvokeMethods.heartBeat,
-  })
+export async function keyringRejectRequestId(requestId: string) {
+  return keyringClient.rejectRequest(requestId)
 }
 
 export async function requestAccount(): Promise<SnapRpcResponse<AccountItem>> {
@@ -198,11 +152,13 @@ export async function createSuccess(
 }
 
 export async function signApproval(
-  transactionObject: Record<string, unknown>
+  method: SignApproval['params']['method'],
+  params: Record<string, unknown>,
+  requestId?: string
 ): Promise<SnapRpcResponse<any>> {
   return walletInvokeSnap({
     method: SnapInvokeMethods.signApproval,
-    params: { transactionObject },
+    params: { method, params, requestId },
   })
 }
 
@@ -313,16 +269,12 @@ export async function recoverMnemonic(
 }
 
 export async function refreshPrepare(
-  sessionId: string,
-  mnemonic: string,
-  walletName: string
+  sessionId: string
 ): Promise<SnapRpcResponse<PubAndZkp>> {
   return walletInvokeSnap({
     method: SnapInvokeMethods.refreshPrepare,
     params: {
       sessionId,
-      mnemonic,
-      walletName,
     },
   })
 }
@@ -363,6 +315,12 @@ export async function refreshSuccess(
     params: {
       sessionId,
     },
+  })
+}
+
+export async function syncAccountToMetamask() {
+  return walletInvokeSnap({
+    method: SnapInvokeMethods.syncAccount,
   })
 }
 

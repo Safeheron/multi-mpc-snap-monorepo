@@ -2,8 +2,11 @@
 // Please do not change this file!
 declare namespace TransactionListModuleLessNamespace {
   export interface ITransactionListModuleLess {
+    container: string
     more: string
     record: string
+    subTitle: string
+    title: string
   }
 }
 

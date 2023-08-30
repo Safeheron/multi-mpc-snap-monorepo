@@ -8,6 +8,9 @@ declare namespace AddressCardModuleLessNamespace {
     addressCard: string
     addressDialog: string
     backup: string
+    dashboardContent: string
+    dashboardLogo: string
+    dashboardWrapper: string
     more: string
     network: string
     qrcode: string

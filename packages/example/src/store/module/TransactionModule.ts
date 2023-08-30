@@ -2,14 +2,11 @@ import type { TransactionObject } from '@safeheron/mpcsnap-types'
 import { BigNumber } from 'ethers'
 import { makeAutoObservable } from 'mobx'
 
-import { TransactionStatusEnum } from '@/configs/Enums'
-import { BaseTxObj, FeeData, TxRecordItem } from '@/service/models'
+import { BaseTxObj, FeeData } from '@/service/models'
 import { store } from '@/store'
 import { ethers, provider, stringToHex } from '@/utils'
-import StorageUtil from '@/utils/StorageUtil'
 
 class TransactionModule {
-  transactionList: TxRecordItem[] = []
   maxLength: 30
   timer: any
 
@@ -67,77 +64,6 @@ class TransactionModule {
     }
   }
 
-  getTransactionList() {
-    const TXRECODE_KEY = getTxRecordKey([
-      store.accountModule.address,
-      store.accountModule.network.chainId,
-    ])
-    const list = StorageUtil.get(TXRECODE_KEY, true) ?? []
-    this.transactionList = list
-    this.loopTransactionStatus()
-  }
-  async getTransactionStatus() {
-    if (!provider) return
-
-    for (const v of this.transactionList) {
-      if (v.status === TransactionStatusEnum.pending) {
-        const res = await provider.getTransactionReceipt(v.txHash)
-        if (!res) return
-        const status =
-          res.status === 1
-            ? TransactionStatusEnum.success
-            : TransactionStatusEnum.failed
-
-        this.updateTransaction({
-          ...v,
-          status,
-        })
-      }
-    }
-  }
-
-  updateTransaction(item: TxRecordItem) {
-    const index = this.transactionList.findIndex(v => v.txHash === item.txHash)
-    const newList = [
-      ...this.transactionList.slice(0, index),
-      item,
-      ...this.transactionList.slice(index + 1),
-    ]
-    this.saveTransaction(newList)
-  }
-
-  loopTransactionStatus() {
-    this.getTransactionStatus()
-    clearInterval(this.timer)
-    this.timer = setInterval(() => {
-      this.getTransactionStatus()
-    }, 30 * 1000)
-  }
-
-  addTransaction(item: TxRecordItem) {
-    console.log('addTransaction', item)
-
-    const TXRECODE_KEY = getTxRecordKey([
-      store.accountModule.address,
-      store.accountModule.network.chainId,
-    ])
-    const list = StorageUtil.get(TXRECODE_KEY, true) ?? []
-    const newList = [item, ...list]
-    if (newList.length > this.maxLength) {
-      newList.length === this.maxLength
-    }
-    this.saveTransaction(newList)
-  }
-
-  saveTransaction(list: TxRecordItem[]) {
-    const TXRECODE_KEY = getTxRecordKey([
-      store.accountModule.address,
-      store.accountModule.network.chainId,
-    ])
-    StorageUtil.set(TXRECODE_KEY, JSON.stringify(list), true)
-    this.transactionList = list
-  }
-
   get fee(): string {
     if (!this.feeData.gasLimit || !this.feeData.maxFeePerGas) {
       return '0'
@@ -157,5 +83,4 @@ class TransactionModule {
   }
 }
 
-export const getTxRecordKey = ([addr, cId]) => `x-tx-${cId}-${addr}`
 export default TransactionModule

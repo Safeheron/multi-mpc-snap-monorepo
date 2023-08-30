@@ -43,8 +43,8 @@ const NotBackupDialog = ({ onSubmit }) => {
             </>
           }>
           Your wallet has not been backed up yet. Please{' '}
-          <a onClick={handleBackupApproval}>complete the backup</a> in a timely
-          manner to ensure asset security
+          <a onClick={handleBackupApproval}>complete the backup</a> timely to
+          ensure asset security.
         </ButtonContainer>
       </div>
     </Modal>

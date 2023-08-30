@@ -31,7 +31,7 @@ const CheckShardDialog = () => {
       case 1:
         return (
           <ButtonContainer
-            title="About to start viewing private key shard A"
+            title="Private Key Shard A"
             buttonContent={
               <Button type="primary" onClick={onClose}>
                 Done
@@ -77,15 +77,13 @@ const CheckShardDialog = () => {
               <img src={backup} alt="" />
               <p>
                 The MPC wallet created in Safeheron Snap has three private key
-                shards, A, B, and C, distributed across MetaMask Snap, Safeheron
-                Snap App 1, and Safeheron Snap App 2.
+                shards, A, B, and C which are distributed across MetaMask Snap,
+                Safeheron Snap App 1, and Safeheron Snap App 2. Please complete
+                the backup of the three private key shards before using the
+                wallet.
               </p>
               <ul className={styles.warnList}>
-                <li>Please be careful to avoid the camera.</li>
-                <li>
-                  We recommend that you disconnect from the internet and perform
-                  an offline backup.
-                </li>
+                <li>Stay clear of cameras devices.</li>
               </ul>
             </div>
           </ButtonContainer>

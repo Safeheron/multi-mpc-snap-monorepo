@@ -1,7 +1,6 @@
 import { Button } from 'antd'
 import { useNavigate } from 'react-router-dom'
 
-import metamask from '@/assets/metamask.png'
 import safeheron from '@/assets/safeheron.png'
 import { RouterEnum } from '@/configs/Enums'
 import Header from '@/containers/Header'
@@ -32,22 +31,20 @@ const Index = () => {
           </p>
           <Button onClick={goHome}>Launch Wallet</Button>
         </div>
-        <ul>
+        <div className={styles.featList}>
           {feats.map((v, i) => (
-            <li key={i}>
-              <img src={v.img} width="290" />
-              <h1>{v.title}</h1>
-              <p>{v.desc}</p>
-            </li>
+            <div className={styles.featWrap} key={i}>
+              <img src={v.img} width="180" />
+              <div className={styles.featRight}>
+                <h1>{v.title}</h1>
+                <p>{v.desc}</p>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
         <div className={styles.partner}>
           <h1>MPC Wallet Solution Powered by</h1>
           <img src={safeheron} width="232" />
-        </div>
-        <div className={styles.partner}>
-          <h1>Partner</h1>
-          <img src={metamask} width="212" />
         </div>
       </div>
     </>

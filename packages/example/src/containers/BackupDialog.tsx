@@ -8,14 +8,19 @@ import ButtonContainer from '@/components/ButtonContainer'
 import MnemonicList from '@/components/MnemonicList'
 import StepProgress from '@/components/StepProgress'
 import { mnemonicInfoList } from '@/configs/text'
+import useConfirm from '@/hooks/useConfirm'
+import useSnapKeepAlive from '@/hooks/useSnapKeepAlive'
 import { backupUpdate } from '@/service/metamask'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/BackupDialog.module.less'
 import { IS_PROD, randomFromArray } from '@/utils'
 
-const steps = ['Backup', 'Verify', 'Finish']
+const steps = ['Backup', 'Verify', 'Complete']
+
 const RANDOM_NUMBER = IS_PROD ? 6 : 1
 const BackupDialog = () => {
+  useSnapKeepAlive()
+
   const { interactive, accountModule } = useStore()
   const { mnemonic } = interactive
 
@@ -29,17 +34,27 @@ const BackupDialog = () => {
     setStep(step - 1)
   }
 
+  const { showConfirm } = useConfirm()
+
   const next = async () => {
-    if (step === 1) {
+    if (step === 0) {
+      showConfirm({
+        content:
+          'Please note that the current backup is for Private Key Shard A. When backing up shards, please label the backed-up phrase with its corresponding shard.',
+        onOk: () => {},
+      })
+      setStep(1)
+    } else if (step === 1) {
       const random = randomFromArray(mnemonic.split(/\s+/), RANDOM_NUMBER)
       setLackMnemonic(random)
       setFinallyMnemonic(random)
+      setStep(2)
     } else if (step === 2) {
       const res = await backupUpdate(interactive.sessionId)
       if (!res.success) return
       accountModule.setAccount(res.data)
+      setStep(3)
     }
-    setStep(step + 1)
   }
 
   const onClose = () => {
@@ -76,7 +91,7 @@ const BackupDialog = () => {
       case 1:
         return (
           <ButtonContainer
-            title="Backup private key shard A"
+            title="Backup Private Key Shard A"
             buttonContent={
               <>
                 <Button onClick={prev}>Back</Button>
@@ -91,7 +106,7 @@ const BackupDialog = () => {
               <div className={styles.info}>
                 <span className="warning">
                   Please write down these words in the correct order and save
-                  them in a secure place.
+                  theme in a secure place.
                 </span>
               </div>
 
@@ -131,8 +146,8 @@ const BackupDialog = () => {
             <div className={styles.action}>
               <div className={styles.info}>
                 <span className="warning">
-                  Please write down these words in the correct order and keep
-                  them in a safe place
+                  Fill in the blanks in the correct order to verify the accuracy
+                  of the mnemonic phrase backup.
                 </span>
               </div>
               <MnemonicList
@@ -143,7 +158,7 @@ const BackupDialog = () => {
 
               {!!errorList.length && (
                 <div className="error">
-                  Fill in the error, please proofread and try again
+                  Wrong word. Please check it and try again.
                 </div>
               )}
             </div>
@@ -164,8 +179,8 @@ const BackupDialog = () => {
               <img src={success} width={100} />
               <span>Success</span>
               <p className="warning">
-                Please ensure that private key shards A, B, and C have all been
-                backed up before starting to use the wallet.
+                Please ensure all private key shards (A, B, and C) have been
+                backed up before using the wallet.
               </p>
             </div>
           </ButtonContainer>
@@ -174,11 +189,10 @@ const BackupDialog = () => {
       default:
         return (
           <ButtonContainer
-            title="About to start backing up private key shard A"
+            title="Back Up Private Key Shard A"
             buttonContent={
               <>
                 <Button onClick={onClose}>Cancel</Button>
-
                 <Button type="primary" onClick={next}>
                   Start Backup
                 </Button>
@@ -188,16 +202,25 @@ const BackupDialog = () => {
               <img src={backup} alt="" />
               <p>
                 The MPC wallet created in Safeheron Snap has three private key
-                shards, A, B, and C, distributed across MetaMask Snap, Safeheron
-                Snap App 1, and Safeheron Snap App 2 You must complete the
-                backup of all three private key shards before you can start
-                using the wallet.
+                shards, A, B, and C which are distributed across MetaMask Snap,
+                Safeheron Snap App 1, and Safeheron Snap App 2. Please complete
+                the backup of the three private key shards before using the
+                wallet.
               </p>
               <ul className={styles.warnList}>
-                <li>Please be careful to avoid the camera.</li>
+                <li>Stay clear of cameras devices.</li>
                 <li>
-                  We recommend that you disconnect from the internet and perform
-                  an offline backup.
+                  We suggest that you disconnect your device from the Internet
+                  for offline backup.
+                </li>
+                <li>
+                  Each mnemonic phrase matches a key shard (A, B, or C). When
+                  backing up shards, please label the backed-up phrase with its
+                  corresponding shard.
+                </li>
+                <li>
+                  After you back up your wallet, it will automatically add the
+                  wallet to your MetaMask Account.
                 </li>
               </ul>
             </div>

@@ -1,53 +1,84 @@
-import { heading, panel, text } from '@metamask/snaps-ui'
+import { KeyringAccount } from '@metamask/keyring-api'
 import { MPC, Signer } from '@safeheron/mpc-wasm-sdk'
-import { ComputeMessage, SnapRpcResponse } from '@safeheron/mpcsnap-types'
-import { BigNumber, ethers, UnsignedTransaction } from 'ethers'
+import {
+  ComputeMessage,
+  SnapRpcResponse,
+  TransactionObject,
+} from '@safeheron/mpcsnap-types'
+import { ethers, UnsignedTransaction } from 'ethers'
 import { v4 as uuidV4 } from 'uuid'
 
 import StateManager from '@/StateManager'
-import { requestConfirm } from '@/utils/snapDialog'
+import { serialize } from '@/utils/serializeUtil'
+import { submitSignResponse } from '@/utils/snapAccountApi'
 import { succeed } from '@/utils/snapRpcUtil'
+import { normalizeTx, trimNullableProperty } from '@/utils/transactionUtil'
 
 import { BaseFlow } from './BaseFlow'
 
+function isTransaction(method: KeyringAccount['supportedMethods'][number]) {
+  return method === 'eth_sendTransaction' || method === 'eth_signTransaction'
+}
+
 class KeyGenFlow extends BaseFlow {
-  private signer: Signer
-  private transactionObject?: Record<string, any>
-  private unsignedTransaction?: UnsignedTransaction
+  private signer?: Signer
+
+  private requestOrigin: 'metamask' | 'website' = 'website'
+  private metamaskRequestId?: string
+  private signMethod?: KeyringAccount['supportedMethods'][number]
+  private signParams?: Record<string, any>
+
+  private normalizedTx?: UnsignedTransaction
   private signKey?: string
 
   constructor(stateManager: StateManager, mpcInstance: MPC) {
     super(stateManager, mpcInstance)
-    this.signer = mpcInstance.Signer.getCoSigner()
   }
 
   /**
-   * TODO support message sign
-   * TODO need wallet id param and request id param
-   * @param transactionObject
+   * @param method
+   * @param params
+   * @param requestId
    */
   async signApproval(
-    transactionObject: Record<string, any>
+    method: KeyringAccount['supportedMethods'][number],
+    params: Record<string, any>,
+    requestId?: string
   ): Promise<SnapRpcResponse<string>> {
     const wallet = this.getWalletWithError()
 
-    const jsonList = Object.keys(transactionObject).map(key =>
-      text(`${key}: ${transactionObject[key]}`)
-    )
-
-    // TODO validate request id
-
-    await requestConfirm(
-      panel([
-        heading('Confirm to sign this transaction?'),
-        text(' '),
-        ...jsonList,
-      ])
-    )
+    // TODO delete approval
+    // if (method === 'eth_sendTransaction' || method === 'eth_signTransaction') {
+    //   const jsonList = Object.keys(params).map(key =>
+    //     text(`${key}: ${params[key]}`)
+    //   )
+    //
+    //   await requestConfirm(
+    //     panel([
+    //       heading('Confirm to sign this transaction?'),
+    //       text(' '),
+    //       ...jsonList,
+    //     ])
+    //   )
+    // }
+    if (requestId) {
+      const requestIdIsValid = this.stateManager.isValidRequest(requestId)
+      if (!requestIdIsValid) {
+        throw new Error('Invalid request id: ' + requestId)
+      }
+      this.metamaskRequestId = requestId
+    }
 
     this.sessionId = uuidV4()
-    this.transactionObject = transactionObject
+    this.requestOrigin = Boolean(requestId) ? 'metamask' : 'website'
+    this.signMethod = method
+    this.signParams = params
+    if (isTransaction(this.signMethod)) {
+      this.normalizedTx = normalizeTx(params as TransactionObject)
+    }
     this.signKey = wallet.signKey
+
+    this.signer = this.mpcInstance.Signer.getCoSigner()
 
     return succeed(this.sessionId)
   }
@@ -58,8 +89,9 @@ class KeyGenFlow extends BaseFlow {
   ): Promise<SnapRpcResponse<ComputeMessage[]>> {
     this.verifySession(sessionId)
 
-    const hash = this.serializeUnsignedTransaction(this.transactionObject!)
-    const res = await this.signer.createContext(
+    const hash = this.serialized()
+    console.log('serialize hash >>', hash)
+    const res = await this.signer!.createContext(
       hash,
       this.signKey!,
       participantsPartyIds
@@ -70,74 +102,74 @@ class KeyGenFlow extends BaseFlow {
   async runRound(sessionId: string, remoteMessageList: ComputeMessage[]) {
     this.verifySession(sessionId)
 
-    const round = this.signer.lastIndex
+    const round = this.signer!.lastIndex
 
     console.log('start sign round: ', round)
-    const res = await this.signer.runRound(remoteMessageList)
+    const res = await this.signer!.runRound(remoteMessageList)
     console.log('end sign round: ', round, res)
 
-    // TODO resolve transaction
-    if (this.signer.isComplete) {
-      const signedTransaction = this.serializeTransaction(
-        this.signer.getSignature()
-      )
-      return succeed({
-        isComplete: this.signer.isComplete,
-        signedTransaction: signedTransaction,
-      })
+    if (this.signer!.isComplete) {
+      const signature = this.signer!.getSignature()
+      if (this.requestOrigin === 'metamask') {
+        const { r, s, v } = signature
+        let resultSig: any
+        if (isTransaction(this.signMethod!)) {
+          const isEip1559 = Boolean(this.signParams!.maxFeePerGas)
+          const chainId = this.signParams!.chainId
+
+          // Fixed Metamask validate
+          const recoveryId =
+            chainId !== undefined
+              ? BigInt(v + 35) + BigInt(chainId) * BigInt(2)
+              : v + 27
+
+          resultSig = trimNullableProperty({
+            ...this.signParams,
+            r: this.padHexPrefix(r),
+            s: this.padHexPrefix(s),
+            v: isEip1559 ? v : this.padHexPrefix(recoveryId.toString(16)),
+            chainId: ethers.BigNumber.from(chainId).toHexString(),
+          })
+
+          console.log('signed transaction for metamask request>> ', resultSig)
+        } else {
+          resultSig = `0x${r}${s}${v.toString(16).padStart(2, '0')}`
+        }
+
+        await submitSignResponse(this.metamaskRequestId!, resultSig)
+        await this.stateManager.deleteRequest(this.metamaskRequestId!)
+
+        return succeed({
+          isComplete: this.signer!.isComplete,
+        })
+      } else {
+        const signedTransaction =
+          this.serializeTransactionWithSignature(signature)
+        return succeed({
+          isComplete: this.signer!.isComplete,
+          signedTransaction: signedTransaction,
+        })
+      }
     }
     return succeed({
-      isComplete: this.signer.isComplete,
+      isComplete: this.signer!.isComplete,
       message: res,
     })
   }
 
-  private serializeUnsignedTransaction(
-    transactionObject: Record<string, any>
-  ): string {
-    // TODO just use needed field
-    const unsignedTransaction: UnsignedTransaction = {
-      ...transactionObject,
-      value: ethers.utils
-        .parseUnits(`${transactionObject.value}`, 18)
-        .toHexString(),
-      data: transactionObject.data
-        ? ethers.utils.isHexString(transactionObject.data)
-          ? transactionObject.data
-          : ethers.utils.hexlify(
-              ethers.utils.toUtf8Bytes(`${transactionObject.data}`)
-            )
-        : '',
-      gasLimit: BigNumber.from(transactionObject.gasLimit).toHexString(),
-      maxFeePerGas: ethers.utils
-        .parseUnits(`${transactionObject.maxFeePerGas}`, 'gwei')
-        .toHexString(),
-      maxPriorityFeePerGas: ethers.utils
-        .parseUnits(`${transactionObject.maxPriorityFeePerGas}`, 'gwei')
-        .toHexString(),
-      type: transactionObject.type || 2,
-    }
-
-    console.log('transactionObject', this.transactionObject)
-    this.unsignedTransaction = unsignedTransaction
-    console.log('unsignedTransaction', unsignedTransaction)
-
-    const serializedTransaction =
-      ethers.utils.serializeTransaction(unsignedTransaction)
-    let unsignedTxHash = ethers.utils.keccak256(serializedTransaction)
-    if (unsignedTxHash.startsWith('0x')) {
-      unsignedTxHash = unsignedTxHash.substring(2)
-    }
-    return unsignedTxHash
+  private serialized() {
+    return serialize(this.signMethod!, this.signParams!)
   }
 
   private padHexPrefix(value: string) {
     return ethers.utils.isHexString(value) ? value : '0x' + value
   }
 
-  private serializeTransaction(sig): string {
-    console.log('r s v', sig)
-
+  private serializeTransactionWithSignature(sig: {
+    r: string
+    s: string
+    v: number
+  }): string {
     const { r, s, v } = sig
     const signature = {
       r: this.padHexPrefix(r),
@@ -145,17 +177,10 @@ class KeyGenFlow extends BaseFlow {
       recoveryParam: v,
     }
 
-    // TODO removed or replace a standard logger
-    console.log('serializeTransaction signature', signature)
-    console.log(
-      'serializeTransaction unsignedTransaction',
-      this.unsignedTransaction
-    )
+    console.log('normalized tx >>', this.normalizedTx)
+    console.log('signature >>', signature)
 
-    return ethers.utils.serializeTransaction(
-      this.unsignedTransaction!,
-      signature
-    )
+    return ethers.utils.serializeTransaction(this.normalizedTx!, signature)
   }
 }
 

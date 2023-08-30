@@ -1,0 +1,1 @@
+export const CACHE_ID_CHAIN = 'CACHE_ID_CHAIN'
