@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 type PromisedFn = (...args: any) => Promise<any>
 
@@ -26,13 +26,11 @@ export default function useAsyncInterval(fn: PromisedFn, delay) {
   }
 
   const scheduleTimeout = () => {
-    timeoutIdRef.current = setTimeout(() => {
-      savedCallback.current &&
-        savedCallback.current().finally(() => {
-          if (!isPausedRef.current) {
-            scheduleTimeout()
-          }
-        })
+    timeoutIdRef.current = setTimeout(async () => {
+      if (!isPausedRef.current) {
+        savedCallback.current && (await savedCallback.current())
+        scheduleTimeout() // Schedule the next call after fn has completed
+      }
     }, delay)
   }
 

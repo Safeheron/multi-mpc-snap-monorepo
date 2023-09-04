@@ -57,21 +57,14 @@ const PendingRequestList: React.FC = () => {
   } = useStore()
   const { address, backuped } = accountModule
 
-  const [loopInterval, setLoopInterval] = useState<undefined | number>(
-    undefined
-  )
   const [requests, setRequests] = useState<KeyringRequest[]>([])
 
   const getSnapRequests = async () => {
     console.debug('Start to loop request...')
-    return new Promise(resolve => {
-      setTimeout(resolve, 700)
-    })
-    //
-    // const r = await listKeyringRequests()
-    // setRequests(r)
+    const r = await listKeyringRequests()
+    setRequests(r)
   }
-  useAsyncInterval(getSnapRequests, loopInterval)
+  const { pause, resume } = useAsyncInterval(getSnapRequests, LOOP_GAP)
 
   const resolveRequest = async (rpcRequest: KeyringRequest['request']) => {
     let requestMethod = rpcRequest.method
@@ -179,7 +172,9 @@ const PendingRequestList: React.FC = () => {
 
   useEffect(() => {
     if (address && backuped) {
-      setLoopInterval(LOOP_GAP)
+      resume()
+    } else {
+      pause()
     }
   }, [address, backuped])
 

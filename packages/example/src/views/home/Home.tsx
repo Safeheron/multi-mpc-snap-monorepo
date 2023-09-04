@@ -17,7 +17,6 @@ import SignTransactionDialog from '@/containers/SignDialog'
 import WalletNameDialog from '@/containers/WalletNameDialog'
 import Welcome from '@/containers/Welcome'
 import { MetamaskActions, MetaMaskContext } from '@/hooks/MetamaskContext'
-import { SnapKeepAliveContext } from '@/hooks/SnapKeepAliveContext'
 import { useStore } from '@/store'
 import { connectSnap, getSnap, isLocalSnap } from '@/utils/snap'
 
