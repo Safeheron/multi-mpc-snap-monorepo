@@ -133,7 +133,6 @@ export const signHandler: OnRpcRequestHandler = async ({ request }) => {
 
   switch (request.method) {
     case 'mpc_signApproval':
-      // TODO 这里要写一个完善的类型校验
       // assert(request, SignApprovalStruct)
       // @ts-ignore
       const { method, params, requestId } = request.params

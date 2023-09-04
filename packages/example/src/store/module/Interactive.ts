@@ -91,7 +91,7 @@ class Interactive {
     this.progress += value
   }
 
-  // TODO 数据放在这里是有问题的
+  // TODO fix here, move mnemonic to another place
   setMnemonic(value) {
     this.mnemonic = value
   }

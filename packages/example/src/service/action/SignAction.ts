@@ -53,9 +53,11 @@ const SignAction = {
     }
   },
 
-  // TODO 没有 provider 的时候要提示一下
   async sendTransaction(signedTransaction: string) {
-    if (!provider) return
+    if (!provider) {
+      console.warn('No provider, can not broadcast transaction.')
+      return
+    }
     try {
       const response = await provider.sendTransaction(signedTransaction)
       if ('error' in response) {

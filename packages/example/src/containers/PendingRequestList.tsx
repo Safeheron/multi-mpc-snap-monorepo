@@ -1,11 +1,11 @@
 import { KeyringRequest } from '@metamask/keyring-api'
-import { useRafInterval } from 'ahooks'
 import { Space, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { toJS } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import React, { useEffect, useState } from 'react'
 
+import useAsyncInterval from '@/hooks/useAsyncInterval'
 import useConfirm from '@/hooks/useConfirm'
 import {
   keyringRejectRequestId,
@@ -64,11 +64,14 @@ const PendingRequestList: React.FC = () => {
 
   const getSnapRequests = async () => {
     console.debug('Start to loop request...')
-    const r = await listKeyringRequests()
-    setRequests(r)
+    return new Promise(resolve => {
+      setTimeout(resolve, 700)
+    })
+    //
+    // const r = await listKeyringRequests()
+    // setRequests(r)
   }
-
-  const clearInterval = useRafInterval(getSnapRequests, loopInterval)
+  useAsyncInterval(getSnapRequests, loopInterval)
 
   const resolveRequest = async (rpcRequest: KeyringRequest['request']) => {
     let requestMethod = rpcRequest.method
@@ -179,7 +182,6 @@ const PendingRequestList: React.FC = () => {
       setLoopInterval(LOOP_GAP)
     }
   }, [address, backuped])
-  useEffect(() => clearInterval(), [])
 
   return (
     <div className={styles.container}>

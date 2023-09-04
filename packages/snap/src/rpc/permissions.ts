@@ -79,6 +79,7 @@ PERMISSIONS.set('metamask', [
 const local_websites = [
   'http://localhost:8080',
   'http://127.0.0.1:8080',
+  'https://test-mpcsnap.safeheron.com',
   'https://mpcsnap.safeheron.com',
 ]
 const website_permissions = [

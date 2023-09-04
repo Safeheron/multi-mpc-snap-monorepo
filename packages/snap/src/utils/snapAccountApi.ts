@@ -13,9 +13,6 @@ export async function syncAccountToMetaMask(
     },
   })) as KeyringAccount[]
 
-  // TODO 如果 snap 被删除了，此时同步到 metamask 的钱包还存在，就会出现 snap state 里无钱包，
-  // 但是 metamask 中有钱包的状态
-
   let needUpdate = false
   if (listedAccounts && listedAccounts.length > 0) {
     needUpdate = listedAccounts.findIndex(l => l.id === account.id) > -1
