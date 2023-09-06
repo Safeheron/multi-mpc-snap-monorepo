@@ -3,6 +3,7 @@ import feat2 from '@/assets/feat2.png'
 import feat3 from '@/assets/feat3.png'
 import feat4 from '@/assets/feat4.png'
 import feat5 from '@/assets/feat5.png'
+import feat6 from '@/assets/feat6.png'
 
 export const feats = [
   {
@@ -31,7 +32,7 @@ export const feats = [
     desc: 'Safeheron Snap wallet can easily connect to any Web3 application, offering hardware wallet-level security and the convenience of MPC signing.',
   },
   {
-    img: feat5,
+    img: feat6,
     title: 'Fully Decentralized',
     desc: "Users have all 3 MPC key shards, with no reliance on cloud servers. MPC signing and communication perform exclusively on the user's device.",
   },

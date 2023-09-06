@@ -5,6 +5,7 @@ import { toJS } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import React, { useEffect, useState } from 'react'
 
+import emptyPng from '@/assets/empty.png'
 import useAsyncInterval from '@/hooks/useAsyncInterval'
 import useConfirm from '@/hooks/useConfirm'
 import {
@@ -185,12 +186,36 @@ const PendingRequestList: React.FC = () => {
         Submit your signature requests on MetaMask to proceed with signing.
       </div>
       <div className={styles.record}>
-        <Table
-          rowKey={row => row['request'].id}
-          dataSource={requests}
-          columns={columns}
-          pagination={false}
-        />
+        {requests.length > 0 ? (
+          <Table
+            rowKey={row => row['request'].id}
+            dataSource={requests}
+            columns={columns}
+            pagination={false}
+          />
+        ) : (
+          <div className={styles.emptyContainer}>
+            <img src={emptyPng} width={80} alt={''} />
+
+            <div>Steps to use Safeheron Snap in MetaMask</div>
+
+            <div className={styles.emptyTipList}>
+              <div>
+                1. Select the Safeheron Snap account in the MetaMask Extension.
+              </div>
+              <div>
+                2. Submit the signature request in the MetaMask Extension.
+              </div>
+              <div>
+                3. Process the signature request on the Safeheron Snap website.
+              </div>
+              <div>
+                4. Follow the instructions to complete the MPC signature in the
+                Safeheron Snap app.
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

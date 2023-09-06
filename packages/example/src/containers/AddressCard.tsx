@@ -52,7 +52,8 @@ const DASHBOARD_LIST = [
 const AddressCard = () => {
   const { accountModule, interactive, transactionModule, networkModule } =
     useStore()
-  const { address, walletName, balance, backuped } = accountModule
+  const { address, walletName, balance, backuped, requestAccountLoading } =
+    accountModule
 
   const [qrcodeVisible, setQrcodeVisible] = useState(false)
   const popoverRef = useRef<any>()

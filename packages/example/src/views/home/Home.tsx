@@ -32,7 +32,7 @@ const Home = () => {
     recoverDialogVisible,
     recoverPrepareDialogVisible,
   } = interactive
-  const { address } = accountModule
+  const { address, requestAccountLoading } = accountModule
 
   const [state, dispatch] = useContext(MetaMaskContext)
   const isMetaMaskReady = isLocalSnap(snap_origin)
@@ -57,6 +57,24 @@ const Home = () => {
     }
   }
 
+  const renderContent = () => {
+    if (!state.installedSnap) return <Welcome />
+
+    if (!address && requestAccountLoading) {
+      return <div>Loading Account</div>
+    }
+
+    if (address) {
+      return (
+        <>
+          <AddressCard />
+          <PendingRequestList />
+        </>
+      )
+    }
+    return <CreateOrImportGuide />
+  }
+
   useEffect(() => {
     if (state.installedSnap) {
       accountModule.requestAccount()
@@ -74,18 +92,7 @@ const Home = () => {
         </Button>
       </Header>
 
-      {state.installedSnap ? (
-        !address ? (
-          <CreateOrImportGuide />
-        ) : (
-          <>
-            <AddressCard />
-            <PendingRequestList />
-          </>
-        )
-      ) : (
-        <Welcome />
-      )}
+      {renderContent()}
 
       <Loading loading={loading} />
 

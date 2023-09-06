@@ -7,13 +7,19 @@ import { provider } from '@/utils'
 
 const LOOP_GAP = 20_000
 
+const lastLoopTime = 0
+
 class AccountModule {
   walletName = ''
   address = ''
   balance = ''
   backuped?: boolean
 
+  private loopFlag = false
+
   timer: any
+
+  requestAccountLoading = false
 
   get balanceEth() {
     if (!this.balance) return ''
@@ -32,7 +38,9 @@ class AccountModule {
   }
 
   async requestAccount() {
+    this.requestAccountLoading = true
     const res = await requestAccount()
+    this.requestAccountLoading = false
     if (res.success) {
       this.setAccount(res.data)
     }
@@ -43,15 +51,18 @@ class AccountModule {
   }
 
   async loopBalance(address: string) {
-    clearTimeout(this.timer)
-    await this.loop(address)
+    if (!this.loopFlag) {
+      clearTimeout(this.timer)
+      await this.loop(address)
+    }
   }
 
   private async loop(address: string) {
+    this.loopFlag = true
     await this.getBalance(address)
-    this.timer = setTimeout(async () => {
-      await this.getBalance(address)
-      await this.loop(address)
+
+    this.timer = setTimeout(() => {
+      this.loop(address)
     }, LOOP_GAP)
   }
 
@@ -59,8 +70,9 @@ class AccountModule {
     if (!provider) return
     if (!address) return
     try {
+      console.debug('Start to loop balance...')
       const res = await provider.getBalance(address)
-      console.log('getBalance', res.toString())
+      console.debug('Loop balance result: ', res.toString())
       this.balance = res.toString()
     } catch (error) {
       console.error(error)

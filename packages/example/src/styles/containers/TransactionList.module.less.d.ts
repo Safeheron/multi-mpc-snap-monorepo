@@ -3,7 +3,8 @@
 declare namespace TransactionListModuleLessNamespace {
   export interface ITransactionListModuleLess {
     container: string
-    more: string
+    emptyContainer: string
+    emptyTipList: string
     record: string
     subTitle: string
     title: string

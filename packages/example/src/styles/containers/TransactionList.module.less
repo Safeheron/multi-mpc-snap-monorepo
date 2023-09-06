@@ -1,7 +1,6 @@
 @import '../variable.less';
 
 .container{
-  margin-top: 50px;
 
   .title{
     font-size: 16px;
@@ -25,31 +24,24 @@
     margin-top: 30px;
   }
 
-  .more {
-    margin-top: 20px;
-    border-top: 1px solid @line-color;
+  .empty-container{
+    height: 460px;
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
+    color: #6B6D7C;
+    font-size: 12px;
+    line-height: 17px;
 
-    ul {
+    img {
+      margin-bottom: 20px;
+    }
+
+    .empty-tip-list{
       display: flex;
-      list-style: none;
-      padding: 20px;
-      cursor: pointer;
-
-      li {
-        width: 3px;
-        height: 3px;
-        background-color: #cbd5e1;
-        border-radius: 50%;
-        margin-left: 5px;
-      }
-
-      &:hover {
-        li {
-          background-color: fade(@brand-color, 50);
-        }
-      }
+      flex-direction: column;
+      margin-top: 20px;
     }
   }
 }
