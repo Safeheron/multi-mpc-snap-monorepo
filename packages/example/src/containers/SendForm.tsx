@@ -2,7 +2,7 @@ import { Button, Form, Input, Space } from 'antd'
 import { isAddress } from 'ethers/lib/utils'
 import { debounce } from 'lodash'
 import { observer } from 'mobx-react-lite'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 
 import NumberInput from '@/components/NumberInput'
 import { useStore } from '@/store'
@@ -17,18 +17,22 @@ const SendForm = () => {
 
   const [form] = Form.useForm()
   const [, forceUpdate] = useState({})
+  const [submittable, setSubmittable] = useState(false)
+  const values = Form.useWatch([], form)
 
   useEffect(() => {
-    transactionModule.getFeeData()
-    console.log({ ...baseTx })
+    form
+      // @ts-ignore
+      .validateFields({ validateOnly: true })
+      .then(() => setSubmittable(true))
+      .catch(() => setSubmittable(false))
+  }, [values])
 
-    forceUpdate({})
-  }, [])
-
-  const onFinish = async values => {
-    transactionModule.setBaseTx(values)
+  const onFinish = async (v: any) => {
+    transactionModule.setBaseTx(v)
     interactive.setSendFormCompleted(true)
   }
+
   const handleCancel = async () => {
     form.resetFields()
     transactionModule.setBaseTx({})
@@ -57,6 +61,13 @@ const SendForm = () => {
     await transactionModule.getFeeData()
     await form.validateFields(['value'])
   }
+
+  useEffect(() => {
+    transactionModule.getFeeData()
+    console.log({ ...baseTx })
+
+    forceUpdate({})
+  }, [])
 
   return (
     <div className={styles.sendDialog}>
@@ -140,12 +151,7 @@ const SendForm = () => {
           {() => (
             <div className="btn-control">
               <Button onClick={handleCancel}>Cancel</Button>
-              <Button
-                type="primary"
-                htmlType="submit"
-                disabled={
-                  !form.getFieldValue('to') || !form.getFieldValue('value')
-                }>
+              <Button type="primary" htmlType="submit" disabled={!submittable}>
                 Continue
               </Button>
             </div>

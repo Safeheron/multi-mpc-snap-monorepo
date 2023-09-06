@@ -7,12 +7,11 @@ import { provider } from '@/utils'
 
 const LOOP_GAP = 20_000
 
-const lastLoopTime = 0
-
 class AccountModule {
   walletName = ''
   address = ''
-  balance = ''
+
+  balance = '' // wei
   backuped?: boolean
 
   private loopFlag = false
