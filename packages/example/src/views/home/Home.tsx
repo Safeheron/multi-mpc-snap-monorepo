@@ -61,7 +61,11 @@ const Home = () => {
     if (!state.installedSnap) return <Welcome />
 
     if (!address && requestAccountLoading) {
-      return <div>Loading Account</div>
+      return (
+        <div style={{ textAlign: 'center', marginTop: '200px' }}>
+          Request MPC Account...
+        </div>
+      )
     }
 
     if (address) {
