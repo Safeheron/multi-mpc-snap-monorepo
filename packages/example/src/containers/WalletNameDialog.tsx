@@ -96,8 +96,9 @@ const WalletNameDialog = () => {
             <Checkbox>
               I agree to the{' '}
               <a href="" target={'_blank'}>
-                User and Privacy Agreement.
+                User and Privacy Agreement
               </a>
+              .
             </Checkbox>
           </Form.Item>
 

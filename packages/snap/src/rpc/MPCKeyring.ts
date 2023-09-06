@@ -5,9 +5,11 @@ import {
   SubmitRequestResponse,
 } from '@metamask/keyring-api'
 import { Json } from '@metamask/snaps-types'
+import { panel, text } from '@metamask/snaps-ui'
 
 import StateManager from '@/StateManager'
 import { convertAccount, submitSignResponse } from '@/utils/snapAccountApi'
+import { requestAlert } from '@/utils/snapDialog'
 
 export class MPCKeyring implements Keyring {
   private stateManager: StateManager
@@ -67,6 +69,13 @@ export class MPCKeyring implements Keyring {
   async submitRequest(request: KeyringRequest): Promise<SubmitRequestResponse> {
     const requestId = request.request.id
     await this.stateManager.addRequest(requestId, request)
+    await requestAlert(
+      panel([
+        text(
+          'Please go to the Safeheron Snap Website to continue with the transaction. URL: https://mpcsnap.safeheron.com'
+        ),
+      ])
+    )
     return { pending: true }
   }
 

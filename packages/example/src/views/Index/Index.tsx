@@ -25,9 +25,9 @@ const Index = () => {
         <div className={styles.slogan}>
           <h1>A Multi-Factor Auth Wallet for Everyone</h1>
           <p>
-            An innovative wallet using 3 key shards that are distributedly
-            stored on MetaMask Snap, Safeheron Snap App 1 and Safeheron Snap App
-            2. Two devices are used to sign a transaction.
+            A fully decentralized MPC wallet with 3 key shards distributedly
+            stored on MetaMask Snap, Safeheron Snap App 1, and Safeheron Snap
+            App 2. Two devices are used to sign a transaction.
           </p>
           <Button onClick={goHome}>Launch Wallet</Button>
         </div>

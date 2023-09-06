@@ -180,10 +180,9 @@ const PendingRequestList: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.title}>Waiting for signature</div>
+      <div className={styles.title}>Pending Signature</div>
       <div className={styles.subTitle}>
-        You need to process the signature request for this wallet by submitting
-        it on MetaMask
+        Submit your signature requests on MetaMask to proceed with signing.
       </div>
       <div className={styles.record}>
         <Table

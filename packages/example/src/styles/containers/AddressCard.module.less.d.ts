@@ -14,6 +14,7 @@ declare namespace AddressCardModuleLessNamespace {
     more: string
     network: string
     qrcode: string
+    tip: string
   }
 }
 

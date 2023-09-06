@@ -9,6 +9,7 @@ import WebRTCConnection from '@/components/WebRTCConnection'
 import useConfirm, { CANCEL_CONFIRM_TEXT } from '@/hooks/useConfirm'
 import useSnapKeepAlive from '@/hooks/useSnapKeepAlive'
 import { WebRTCChannel } from '@/service/channel/WebRTCChannel'
+import { backupApproval } from '@/service/metamask'
 import { PartyId } from '@/service/types'
 import { MPCMessageType } from '@/service/types'
 import { useStore } from '@/store'
@@ -16,17 +17,18 @@ import styles from '@/styles/containers/CreateDialog.module.less'
 
 const steps = [
   {
-    title: 'Step1: Connect to Safeheron Snap App of your first phone',
-    desc: `Participate in creating an MPC wallet via Safeheron Snap App and then follow the steps on the right side.`,
+    title: 'Step 1: Connect to Safeheron Snap App on your first phone',
+    desc: `Participate in creating an MPC wallet through Safeheron Snap App, and then follow the steps on the right side.`,
     successText: 'Connected',
   },
   {
-    title: 'Step2: Connect to Safeheron Snap App of your second phone',
-    desc: `Participate in creating an MPC wallet via Safeheron Snap App and then follow the steps on the right side.`,
+    title: 'Step 2: Connect to Safeheron Snap App on your second phone',
+    desc: `Participate in creating an MPC wallet through Safeheron Snap App, and then follow the steps on the right side.`,
     successText: 'Connected',
   },
   {
-    title: 'Step3: Keep this window open for creating your wallet successfully',
+    title:
+      'Step 3: Keep this window open for creating your wallet successfully',
     successText: 'The MPC wallet is created successfully',
     loadingText:
       'Waiting for the three parties to compute and create the MPC Wallet.',
@@ -94,7 +96,7 @@ const CreateDialog = () => {
     }
   }
 
-  const handleStartWallet = async () => {
+  const handleBackupLater = async () => {
     await accountModule.requestAccount()
     interactive.setCreateDialogVisible(false)
   }
@@ -114,7 +116,16 @@ const CreateDialog = () => {
     })
   }
 
-  // TODO 按钮改为 Backup My Wallet Now，并且跳转
+  const handleBackup = async () => {
+    await accountModule.requestAccount()
+    const res = await backupApproval(accountModule.walletName)
+    if (res.success) {
+      interactive.setCreateDialogVisible(false)
+      interactive.setSessionId(res.data.sessionId)
+      interactive.setMnemonic(res.data.mnemonic)
+      interactive.setBackupDialogVisible(true)
+    }
+  }
 
   return (
     <Modal centered closable={false} open={true} footer={null} width={960}>
@@ -122,9 +133,12 @@ const CreateDialog = () => {
         <StepContainer
           buttonContent={
             isSuccess ? (
-              <Button type="primary" onClick={handleStartWallet}>
-                Use the MPC Wallet
-              </Button>
+              <>
+                <Button type="primary" onClick={handleBackup}>
+                  Backup Wallet Now
+                </Button>
+                <Button onClick={handleBackupLater}>Backup Later</Button>
+              </>
             ) : (
               <Button onClick={handleCancel}>Cancel</Button>
             )

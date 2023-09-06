@@ -8,12 +8,12 @@ export const feats = [
   {
     img: feat1,
     title: 'Secure and User-Friendly',
-    desc: 'Distribute 3 key shards on 3 devices and utilize 2 devices to complete signature for a transaction',
+    desc: 'Distribute 3 key shards on 3 devices and utilize 2 devices to sign transactions.',
   },
   {
     img: feat2,
     title: '100% Asset Control',
-    desc: 'Users have access to all 3 key shards and securely back them up via recovery phrases.',
+    desc: 'Users have access to all 3 MPC key shards and securely back them up via recovery phrases.',
   },
   {
     img: feat3,
@@ -22,12 +22,17 @@ export const feats = [
   },
   {
     img: feat4,
-    title: 'Use MPC wallet in MetaMask',
-    desc: 'Support MetaMask Account Snap feature. After you back up your wallet, it will automatically add the wallet to your MetaMask Account. You can directly use the MPC wallet in MetaMask.',
+    title: 'MPC Wallet in MetaMask',
+    desc: 'After backing up created wallets, the MPC wallets will be automatically added to users’ MetaMask accounts. Users can directly utilize MPC wallets in MetaMask.',
   },
   {
     img: feat5,
-    title: 'Secure and convenient Web3 access',
-    desc: 'Benefiting from the support of the MetaMask Account Snap feature, the Safeheron Snap wallet can easily connect to any Web3 application, offering hardware wallet-level security and the convenience of MPC signatures.',
+    title: 'Secure and Convenient Web3 access',
+    desc: 'Safeheron Snap wallet can easily connect to any Web3 application, offering hardware wallet-level security and the convenience of MPC signing.',
+  },
+  {
+    img: feat5,
+    title: 'Fully Decentralized',
+    desc: "Users have all 3 MPC key shards, with no reliance on cloud servers. MPC signing and communication perform exclusively on the user's device.",
   },
 ]

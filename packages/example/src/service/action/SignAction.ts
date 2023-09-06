@@ -67,6 +67,7 @@ const SignAction = {
       }
       console.log('txhash', response.hash)
 
+      store.interactive.setTxHash(response.hash)
       store.interactive.setSignStep(4)
       store.interactive.setProgress(0)
     } catch (error) {

@@ -20,18 +20,24 @@ const Header: FC<PropsWithChildren> = ({ children }) => {
     setPercent(document.documentElement.scrollTop)
   }
 
+  const toIndex = () => {
+    window.open(location.origin)
+  }
+
   return (
     <div
       className={styles.header}
       style={{ backgroundColor: `rgba(255,255,255,${percent / 10})` }}>
       <div className={styles.container}>
-        <div className={styles.logoBox}>
+        <div className={styles.logoBox} onClick={toIndex}>
           <div>
             <img src={logo} width={42} alt={'Safeheron Logo'} />
           </div>
           <div className={styles.text}>
             <div className={styles.title}>Safeheron Snap</div>
-            <div className={styles.desc}>An MPC wallet for MetaMask users</div>
+            <div className={styles.desc}>
+              Enables MPC Wallet inside MetaMask
+            </div>
           </div>
         </div>
         {children}

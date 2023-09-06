@@ -11,6 +11,7 @@ import logoZerion from '@/assets/logo-zerion.png'
 import receive from '@/assets/receive.png'
 import send from '@/assets/send.png'
 import ActionPopover from '@/components/ActionPopover'
+import { CACHE_ID_SYNC_ACCOUNT_TIP } from '@/configs/Configs'
 import SendDialog from '@/containers/SendDialog'
 import {
   backupApproval,
@@ -52,10 +53,12 @@ const AddressCard = () => {
   const { accountModule, interactive, transactionModule, networkModule } =
     useStore()
   const { address, walletName, balance, backuped } = accountModule
+
   const [qrcodeVisible, setQrcodeVisible] = useState(false)
   const popoverRef = useRef<any>()
 
-  const { hexChainId, chainName, fetchChainListFailed } = networkModule
+  const { hexChainId, chainName, fetchChainListFailed, currentChain } =
+    networkModule
 
   const filledDashboardList = useMemo(() => {
     return DASHBOARD_LIST.map(d => {
@@ -90,7 +93,6 @@ const AddressCard = () => {
     interactive.setLoading(true)
     const res = await backupApproval(walletName)
     interactive.setLoading(false)
-    console.log(res)
 
     if (res.success) {
       interactive.setSessionId(res.data.sessionId)
@@ -117,12 +119,34 @@ const AddressCard = () => {
     interactive.setLoading(false)
   }
 
+  const [mentioned, setMentioned] = useState(false)
+  const setup = () => {
+    const tipCache = localStorage.getItem(CACHE_ID_SYNC_ACCOUNT_TIP)
+    setMentioned(Boolean(tipCache))
+  }
+
+  const hideTip = () => {
+    setMentioned(true)
+    localStorage.setItem(CACHE_ID_SYNC_ACCOUNT_TIP, '1')
+  }
+
+  useEffect(() => {
+    setup()
+  }, [])
+
   return (
     <div className={styles.addressCard}>
       <div className={styles.network}>
         {fetchChainListFailed && <span>ChainId: {parseInt(hexChainId)}</span>}
         {chainName && <span>{chainName}</span>}
       </div>
+
+      {!mentioned && backuped && (
+        <p className={styles.tip}>
+          The wallet has been added to your MetaMask account. You can now
+          directly use the wallet in MetaMask. <a onClick={hideTip}>Hide</a>
+        </p>
+      )}
 
       <div className={styles.account}>
         <h1>{walletName || 'test'} </h1>
@@ -139,7 +163,9 @@ const AddressCard = () => {
             timely to ensure asset security.
           </p>
         )}
-        <h2>{wei2eth(balance)} ETH</h2>
+        <h2>
+          {wei2eth(balance)} {currentChain?.nativeCurrency.symbol}
+        </h2>
       </div>
 
       <div className={styles.action}>
@@ -151,29 +177,29 @@ const AddressCard = () => {
           <img src={receive} alt="" />
           <span>Receive</span>
         </Button>
-        <Popover
-          content={
-            <div className={styles.dashboardContent}>
-              <div>
-                You can track your assets through these third-party dashboards
+        {address && backuped && (
+          <Popover
+            content={
+              <div className={styles.dashboardContent}>
+                <div>You can track your assets through these dashboards:</div>
+                {filledDashboardList.map(d => (
+                  <div key={d.name} className={styles.dashboardWrapper}>
+                    <img className={styles.dashboardLogo} src={d.logo} alt="" />
+                    <a href={d.url} target={'_blank'}>
+                      {d.name}
+                    </a>
+                  </div>
+                ))}
               </div>
-              {filledDashboardList.map(d => (
-                <div key={d.name} className={styles.dashboardWrapper}>
-                  <img className={styles.dashboardLogo} src={d.logo} alt="" />
-                  <a href={d.url} target={'_blank'}>
-                    {d.name}
-                  </a>
-                </div>
-              ))}
-            </div>
-          }
-          placement={'bottom'}
-          trigger="click">
-          <Button>
-            <img src={dashboardImg} alt="" />
-            <span>Dashboard</span>
-          </Button>
-        </Popover>
+            }
+            placement={'bottom'}
+            trigger="click">
+            <Button>
+              <img src={dashboardImg} alt="" />
+              <span>Dashboard</span>
+            </Button>
+          </Popover>
+        )}
       </div>
       <div className={styles.more}>
         <ActionPopover

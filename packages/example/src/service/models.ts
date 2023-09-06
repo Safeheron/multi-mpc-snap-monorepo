@@ -25,4 +25,5 @@ export interface FeeData {
   maxFeePerGas: string
   maxPriorityFeePerGas: string
   gasLimit: string
+  gasPrice?: string
 }

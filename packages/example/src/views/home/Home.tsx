@@ -70,7 +70,7 @@ const Home = () => {
           disabled={!isMetaMaskReady}
           color={'primary'}
           onClick={connectMetamask}>
-          {state.installedSnap ? 'Reconnect' : 'Connect Metamask'}
+          {state.installedSnap ? 'Reconnect' : 'Connect MetaMask'}
         </Button>
       </Header>
 

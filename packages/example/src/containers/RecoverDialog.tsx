@@ -7,9 +7,10 @@ import StepContainer from '@/components/StepContainer'
 import StepText from '@/components/StepText'
 import WebRTCConnection from '@/components/WebRTCConnection'
 import MnemonicForm from '@/containers/MnemonicForm'
-import useConfirm, { CANCEL_CONFIRM_TEXT } from '@/hooks/useConfirm'
+import useConfirm from '@/hooks/useConfirm'
 import useSnapKeepAlive from '@/hooks/useSnapKeepAlive'
 import { WebRTCChannel } from '@/service/channel/WebRTCChannel'
+import { backupApproval } from '@/service/metamask'
 import { MPCMessageType } from '@/service/types'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/RecoverDialog.module.less'
@@ -27,7 +28,7 @@ const steps = [
   },
   {
     title:
-      'Step3: Enter the mnemonic phrase for each private key shard separately as prompted and submit them for confirmation',
+      'Step3: Enter the recovery phrase for each private key shard separately as prompted and submit them for confirmation',
     successText: 'Filled',
   },
   {
@@ -40,7 +41,7 @@ const steps = [
 const RecoverDialog = () => {
   useSnapKeepAlive()
 
-  const { interactive, messageModule } = useStore()
+  const { interactive, messageModule, accountModule } = useStore()
 
   const [webrtcChannel1, setWebrtcChannel1] = useState<WebRTCChannel>()
   const [webrtcChannel2, setWebrtcChannel2] = useState<WebRTCChannel>()
@@ -100,10 +101,6 @@ const RecoverDialog = () => {
     }
   }
 
-  const handleStartWallet = async () => {
-    interactive.setRecoverDialogVisible(false)
-  }
-
   const { showConfirm } = useConfirm()
   const handleCancel = () => {
     showConfirm({
@@ -124,15 +121,33 @@ const RecoverDialog = () => {
     interactive.setRecoverDialogVisible(false)
   }
 
+  const handleBackupLater = () => {
+    interactive.setRecoverDialogVisible(false)
+  }
+
+  const handleBackupWallet = async () => {
+    await accountModule.requestAccount()
+    const res = await backupApproval(accountModule.walletName)
+    if (res.success) {
+      interactive.setRecoverDialogVisible(false)
+      interactive.setSessionId(res.data.sessionId)
+      interactive.setMnemonic(res.data.mnemonic)
+      interactive.setBackupDialogVisible(true)
+    }
+  }
+
   return (
     <Modal centered closable={false} open={true} footer={null} width={960}>
       <div className={styles.recoverDialog}>
         <StepContainer
           buttonContent={
             isSuccess ? (
-              <Button type="primary" onClick={handleStartWallet}>
-                Use the MPC Wallet
-              </Button>
+              <>
+                <Button type="primary" onClick={handleBackupWallet}>
+                  Backup Wallet Now
+                </Button>
+                <Button onClick={handleBackupLater}>Backup Later</Button>
+              </>
             ) : step === 3 && interactive.mnemonicFormType === 'noNeed' ? (
               <Button type="primary" onClick={handleBack}>
                 Back to the MPC Wallet

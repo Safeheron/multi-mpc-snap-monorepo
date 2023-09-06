@@ -10,8 +10,10 @@ import styles from '@/styles/containers/SendDialog.module.less'
 import { ethers, wei2eth } from '@/utils'
 
 const SendForm = () => {
-  const { interactive, transactionModule } = useStore()
-  const { baseTx, fee, availableBalance } = transactionModule
+  const { interactive, transactionModule, networkModule } = useStore()
+  const { baseTx, fee, feeData, availableBalance } = transactionModule
+  const { currentChain } = networkModule
+  const currentSymbol = currentChain?.nativeCurrency.symbol
 
   const [form] = Form.useForm()
   const [, forceUpdate] = useState({})
@@ -53,7 +55,7 @@ const SendForm = () => {
 
     transactionModule.setBaseTx({ to, value, data })
     await transactionModule.getFeeData()
-    form.validateFields(['value'])
+    await form.validateFields(['value'])
   }
 
   return (
@@ -64,10 +66,6 @@ const SendForm = () => {
         className={styles.sendForm}
         onFinish={onFinish}
         layout="vertical"
-        // initialValues={{
-        //   to: '0x324a1c5f646F5aA117afCa9e8cC9fe74547f822e',
-        //   value: '0',
-        // }}
         requiredMark={false}>
         <Form.Item
           label="To"
@@ -80,9 +78,7 @@ const SendForm = () => {
                   return Promise.reject('Please enter the receiving address')
                 }
                 if (!isAddress(value)) {
-                  return Promise.reject(
-                    'The address should be formatted correctly'
-                  )
+                  return Promise.reject('Invalid Address')
                 }
                 return Promise.resolve()
               },
@@ -112,7 +108,7 @@ const SendForm = () => {
             <NumberInput placeholder="Enter the amount" />
           </Form.Item>
           <div className={styles.formAmount}>
-            Available Balance: {wei2eth(availableBalance)} ETH
+            Available Balance: {wei2eth(availableBalance)} {currentSymbol}
             <a onClick={handleMax}>Max</a>
           </div>
         </Space>
@@ -127,8 +123,15 @@ const SendForm = () => {
           <div className={styles.infoItem}>
             <span>Network Fee</span>
             <span>
-              {wei2eth(fee)} ETH{' '}
-              <small>({ethers.utils.formatUnits(fee, 'gwei')}Gwei)</small>
+              {wei2eth(fee)} {currentSymbol}
+              <small>
+                (
+                {ethers.utils.formatUnits(
+                  feeData.maxFeePerGas || feeData.gasPrice || '0',
+                  'gwei'
+                )}
+                Gwei)
+              </small>
             </span>
           </div>
         </div>

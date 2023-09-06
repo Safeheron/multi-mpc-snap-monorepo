@@ -34,13 +34,16 @@ class TransactionModule {
     try {
       const feeData = await provider.getFeeData()
       store.interactive.setLoading(false)
-      // const maxFeePerGas = ethers.utils.formatUnits(feeData.maxFeePerGas!, 'gwei')
-      const maxFeePerGas = feeData.maxFeePerGas!.toString()
-      const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas!.toString()
+      const maxFeePerGas = feeData.maxFeePerGas?.toString() ?? ''
+      const maxPriorityFeePerGas =
+        feeData.maxPriorityFeePerGas?.toString() ?? ''
+      const gasPrice = feeData.gasPrice?.toString() ?? ''
+
       if (!this.baseTx.data) {
         this.feeData = {
           maxFeePerGas,
           maxPriorityFeePerGas,
+          gasPrice,
           gasLimit: '21000',
         }
       } else {
@@ -53,6 +56,7 @@ class TransactionModule {
         console.log('gasLimit', gasLimit)
 
         this.feeData = {
+          gasPrice,
           maxFeePerGas,
           maxPriorityFeePerGas,
           gasLimit,
@@ -65,13 +69,23 @@ class TransactionModule {
   }
 
   get fee(): string {
-    if (!this.feeData.gasLimit || !this.feeData.maxFeePerGas) {
+    if (!this.feeData.gasLimit) {
       return '0'
     }
 
-    return BigNumber.from(this.feeData.maxFeePerGas)
-      .mul(this.feeData.gasLimit)
-      .toString()
+    if (this.feeData.maxFeePerGas) {
+      return BigNumber.from(this.feeData.maxFeePerGas)
+        .mul(this.feeData.gasLimit)
+        .toString()
+    }
+
+    if (this.feeData.gasPrice) {
+      return BigNumber.from(this.feeData.gasPrice)
+        .mul(this.feeData.gasLimit)
+        .toString()
+    }
+
+    return '0'
   }
 
   get availableBalance(): string {

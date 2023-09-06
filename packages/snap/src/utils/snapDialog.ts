@@ -18,3 +18,13 @@ export async function requestConfirm(content: any) {
     throw new UserRejectError()
   }
 }
+
+export async function requestAlert(content: any) {
+  await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: DialogType.Alert,
+      content,
+    },
+  })
+}

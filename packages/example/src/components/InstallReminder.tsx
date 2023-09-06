@@ -10,8 +10,8 @@ const InstallReminder = () => {
   return (
     <div className={styles.reminder}>
       <p>
-        Please ensure you have MetaMask installed on your Browser and the
-        Safeheron Snap App on your two different mobile phones.
+        Please ensure you've installed MetaMask on your Google Chrome and
+        Safeheron Snap App on your two mobile phones.
       </p>
       <div className={styles.btns}>
         <a className={styles.link} target="'_blank'" href={flaskLinkUrl}>

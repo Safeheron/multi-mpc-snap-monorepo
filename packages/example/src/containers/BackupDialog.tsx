@@ -208,19 +208,19 @@ const BackupDialog = () => {
                 wallet.
               </p>
               <ul className={styles.warnList}>
-                <li>Stay clear of cameras devices.</li>
+                <li>Stay clear of cameras.</li>
                 <li>
                   We suggest that you disconnect your device from the Internet
                   for offline backup.
                 </li>
                 <li>
-                  Each mnemonic phrase matches a key shard (A, B, or C). When
+                  Each recovery phrase matches a key shard (A, B, or C). When
                   backing up shards, please label the backed-up phrase with its
                   corresponding shard.
                 </li>
                 <li>
-                  After you back up your wallet, it will automatically add the
-                  wallet to your MetaMask Account.
+                  Once the wallet is backed up, it will automatically be added
+                  to your MetaMask account.
                 </li>
               </ul>
             </div>

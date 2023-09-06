@@ -37,6 +37,8 @@ class RecoveryFlow extends BaseFlow {
   private remotePub?: string
   private newSignKey?: string
 
+  private backuped = false
+
   constructor(stateManager: StateManager, mpcInstance: MPC) {
     super(stateManager, mpcInstance)
     this.mpcHelper = mpcInstance.mpcHelper
@@ -45,13 +47,15 @@ class RecoveryFlow extends BaseFlow {
   async recoverApproval(): Promise<
     SnapRpcResponse<{ sessionId: string; mnemonic: string }>
   > {
-    await requestConfirm(panel([heading('Confirm to recovery an MPC wallet?')]))
+    await requestConfirm(panel([heading('Confirm to recover an MPC wallet?')]))
 
     this.walletName = ''
     this.pubKey = ''
     this.privKey = ''
     this.remotePub = ''
     this.newSignKey = ''
+    this.mnemonic = ''
+    this.backuped = false
 
     this.sessionId = uuidV4()
     const wallet = this.getWallet()
@@ -62,6 +66,7 @@ class RecoveryFlow extends BaseFlow {
         throw new Error(res.err.err_msg)
       }
       this.mnemonic = res.mnemo ?? ''
+      this.backuped = true
     }
 
     this.keyRecovery = this.mpcInstance.KeyRecovery.getCoSigner()
@@ -79,6 +84,7 @@ class RecoveryFlow extends BaseFlow {
 
     this.walletName = walletName
     this.mnemonic = mnemonic
+    this.backuped = true
     return succeed(true)
   }
 
@@ -221,8 +227,6 @@ class RecoveryFlow extends BaseFlow {
     const { walletName } = this
     const address = ethers.utils.computeAddress(`0x${this.pubKey}`)
 
-    const backuped = Boolean(this.signKey) || Boolean(this.mnemonic)
-
     const oldState = this.stateManager.account
 
     let newState: SnapAccount
@@ -230,7 +234,7 @@ class RecoveryFlow extends BaseFlow {
       newState = {
         ...oldState,
         signKey: this.newSignKey!,
-        backuped,
+        backuped: this.backuped,
       }
     } else {
       newState = {
@@ -240,7 +244,7 @@ class RecoveryFlow extends BaseFlow {
         options: {},
         supportedMethods: SUPPORTED_METHODS,
         type: 'eip155:eoa',
-        backuped: false,
+        backuped: this.backuped,
         pubkey: this.pubKey!,
         signKey: this.newSignKey!,
       }
@@ -248,7 +252,7 @@ class RecoveryFlow extends BaseFlow {
 
     await this.stateManager.saveOrUpdateAccount(newState)
 
-    if (backuped) {
+    if (this.backuped) {
       const metamaskAccount = convertAccount(newState)
       await syncAccountToMetaMask(metamaskAccount)
     }
@@ -256,7 +260,7 @@ class RecoveryFlow extends BaseFlow {
     return succeed({
       walletName,
       address,
-      backuped,
+      backuped: this.backuped,
     })
   }
 

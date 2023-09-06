@@ -19,20 +19,21 @@ import { tryToExtractChainId } from '@/utils/snapRequestUtil'
 
 const steps = [
   {
-    title: 'Step1: Connect to one of phones with Safeheron Snap App',
-    desc: `Participate in creating an MPC wallet via Safeheron Snap App and then follow the steps on the right side.`,
+    title: 'Step 1: Connect to Safeheron Snap App on one phone',
+    desc: `Open Safeheron Snap App and choose the sending wallet. Click on "MPC Sign" and then place the QR code in front of your desktop's camera.`,
     successText: 'Connected',
   },
   {
-    title: 'Step2: Confirm the transaction in the connected Safeheron Snap App',
+    title:
+      'Step 2: Confirm the transaction on the connected Safeheron Snap App',
     successText: 'Confirmed',
   },
   {
     title:
-      'Step3: Keep the Safeheron Snap App open and do not switch to other pages. Wait for the transaction success',
+      'Step 3: Keep the Safeheron Snap App open and do not switch to other pages. Wait for transaction success',
     successText: 'Success',
     loadingText:
-      'Waiting for the three parties to compute and then sign the transaction.',
+      'Waiting for the two parties to compute and then sign the transaction.',
   },
 ]
 
@@ -97,7 +98,7 @@ const SignDialog = () => {
 
   const handleTxnHash = async () => {
     // TODO to ensure that some special explorer
-    if (explorer) {
+    if (explorer && interactive.txHash) {
       window.open(`${explorer}/tx/${interactive.txHash}`)
     }
   }
@@ -128,6 +129,8 @@ const SignDialog = () => {
 
     setupRtcChannel()
 
+    interactive.setTxHash('')
+
     return () => {
       interactive.setCreateStep(1)
     }
@@ -140,12 +143,15 @@ const SignDialog = () => {
           buttonContent={
             isSuccess ? (
               <>
-                <Button
-                  type="primary"
-                  onClick={handleTxnHash}
-                  style={{ marginRight: 30 }}>
-                  Txn Hash
-                </Button>
+                {interactive.txHash && (
+                  <Button
+                    type="primary"
+                    onClick={handleTxnHash}
+                    style={{ marginRight: 30 }}>
+                    Txn Hash
+                  </Button>
+                )}
+
                 <Button onClick={handleClose}>Close</Button>
               </>
             ) : (
