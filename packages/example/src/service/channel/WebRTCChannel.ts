@@ -2,7 +2,7 @@ import 'webrtc-adapter'
 
 import { Buffer } from 'buffer'
 
-import { MPCMessage } from '@/service/types'
+import { MPCMessage, MPCMessageType } from '@/service/types'
 
 import { MessageChannel } from './MessageChannel'
 
@@ -79,8 +79,18 @@ export class WebRTCChannel extends MessageChannel {
     console.debug(
       `WebRTC peer connection: [${this.name}] state changed, new state is: ${this.pc.connectionState}`
     )
-    if (this.pc.connectionState === 'closed') {
+    const state = this.pc.connectionState
+    if (state === 'closed') {
       this.emit('peerClosed')
+    } else if (state === 'disconnected' || state === 'failed') {
+      this.receiveExternal(
+        JSON.stringify({
+          messageType: MPCMessageType.abort,
+          sendType: 'broadcast',
+        })
+      )
+    } else {
+      /* no op */
     }
   }
 
@@ -163,7 +173,7 @@ export class WebRTCChannel extends MessageChannel {
   }
 
   connect(callback): void {
-    // TODO xxx
+    /* no op */
   }
 
   disconnect(): void {
