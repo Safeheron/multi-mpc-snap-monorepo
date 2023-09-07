@@ -143,7 +143,10 @@ const RecoverDialog = () => {
           buttonContent={
             isSuccess ? (
               <>
-                <Button type="primary" onClick={handleBackupWallet}>
+                <Button
+                  type="primary"
+                  onClick={handleBackupWallet}
+                  style={{ marginRight: '20px' }}>
                   Backup Wallet Now
                 </Button>
                 <Button onClick={handleBackupLater}>Backup Later</Button>

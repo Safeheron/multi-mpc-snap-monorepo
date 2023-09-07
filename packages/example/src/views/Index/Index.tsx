@@ -26,8 +26,11 @@ const Index = () => {
           <h1>A Multi-Factor Auth Wallet for Everyone</h1>
           <p>
             A fully decentralized MPC wallet with 3 key shards distributedly
-            stored on MetaMask Snap, Safeheron Snap App 1, and Safeheron Snap
-            App 2. Two devices are used to sign a transaction.
+            stored on MetaMask Snap,
+          </p>
+          <p>
+            Safeheron Snap App 1, and Safeheron Snap App 2. Two devices are used
+            to sign a transaction.
           </p>
           <Button onClick={goHome}>Launch Wallet</Button>
         </div>
@@ -44,7 +47,7 @@ const Index = () => {
         </div>
         <div className={styles.partner}>
           <h1>MPC Wallet Solution Powered by</h1>
-          <img src={safeheron} width="232" />
+          <img src={safeheron} width="200" />
         </div>
       </div>
     </>

@@ -103,7 +103,7 @@ const ScanDynamicQrCode: FC<Props> = ({ onComplete }) => {
           id="videoRef"
           width="150"
           height="150"
-          style={{ filter: 'blur(12px)' }}
+          // style={{ filter: 'blur(12px)' }}
         />
       </div>
       {progress > 0 && progress < 1 && (

@@ -134,7 +134,10 @@ const CreateDialog = () => {
           buttonContent={
             isSuccess ? (
               <>
-                <Button type="primary" onClick={handleBackup}>
+                <Button
+                  type="primary"
+                  onClick={handleBackup}
+                  style={{ marginRight: '20px' }}>
                   Backup Wallet Now
                 </Button>
                 <Button onClick={handleBackupLater}>Backup Later</Button>

@@ -84,9 +84,9 @@ const ScanQrcode: FC<Props> = ({ step, desc, onComplete }) => {
           id="videoRef"
           width="190"
           height="190"
-          style={{
-            filter: 'blur(12px)',
-          }}
+          // style={{
+          //   filter: 'blur(12px)',
+          // }}
         />
       </div>
     </div>

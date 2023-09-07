@@ -84,6 +84,10 @@ const CheckShardDialog = () => {
               </p>
               <ul className={styles.warnList}>
                 <li>Stay clear of cameras devices.</li>
+                <li>
+                  We suggest that you disconnect your device from the Internet
+                  for offline backup.
+                </li>
               </ul>
             </div>
           </ButtonContainer>

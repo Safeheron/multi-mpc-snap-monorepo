@@ -1,15 +1,14 @@
 @import '../variable.less';
 .indexPage {
-  padding-top: 180px;
+  padding-top: 130px;
   background: url(../../assets/bg.png) top center no-repeat;
   background-size: contain;
-  background-repeat: no-repeat;
 
   .feat-list {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
-    margin-top: 126px;
+    margin-top: 60px;
     justify-content: flex-start;
     width: 1045px;
     margin-left: 50px;
@@ -30,12 +29,14 @@
 
       .feat-right{
         h1 {
-          font-size: 18px;
+          font-size: 16px;
           margin-bottom: 5px;
+          font-weight: 500;
         }
         p {
           font-size: 14px;
-          margin-top: 15px;
+          margin-top: 5px;
+          font-weight: 300;
           color: @light-color;
         }
       }
@@ -45,7 +46,6 @@
 
 .slogan {
   text-align: center;
-  padding: 0 280px;
 
   h1 {
     font-size: 26px;
@@ -56,6 +56,7 @@
     font-size: 16px;
     color: @light-color;
     line-height: 20px;
+    font-weight: 300;
   }
 
   & > button {
@@ -74,9 +75,21 @@
 .partner {
   text-align: center;
   margin-top: 70px;
+
   h1 {
     font-size: 20px;
-    font-weight: 500;
+    font-weight: 400;
     margin-bottom: 20px;
+  }
+}
+
+.home-partner{
+  text-align: center;
+  margin-top: 35px;
+  color: #6B6D7C;
+  h1 {
+    font-size: 12px;
+    font-weight: 400;
+    margin-bottom: 10px;
   }
 }

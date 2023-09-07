@@ -2,6 +2,7 @@ import { Button } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useContext, useEffect } from 'react'
 
+import safeheron from '@/assets/safeheron.png'
 import Loading from '@/components/Loading'
 import { snap_origin } from '@/configs/snap'
 import AddressCard from '@/containers/AddressCard'
@@ -18,6 +19,7 @@ import WalletNameDialog from '@/containers/WalletNameDialog'
 import Welcome from '@/containers/Welcome'
 import { MetamaskActions, MetaMaskContext } from '@/hooks/MetamaskContext'
 import { useStore } from '@/store'
+import styles from '@/styles/app/index.module.less'
 import { connectSnap, getSnap, isLocalSnap } from '@/utils/snap'
 
 const Home = () => {
@@ -62,7 +64,8 @@ const Home = () => {
 
     if (!address && requestAccountLoading) {
       return (
-        <div style={{ textAlign: 'center', marginTop: '200px' }}>
+        <div
+          style={{ textAlign: 'center', marginTop: '200px', height: '400px' }}>
           Request MPC Account...
         </div>
       )
@@ -97,6 +100,11 @@ const Home = () => {
       </Header>
 
       {renderContent()}
+
+      <div className={styles.homePartner}>
+        <h1>MPC Wallet Solution Powered by</h1>
+        <img src={safeheron} width="120" />
+      </div>
 
       <Loading loading={loading} />
 
