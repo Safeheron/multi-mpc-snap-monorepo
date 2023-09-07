@@ -17,22 +17,22 @@ import styles from '@/styles/containers/RecoverDialog.module.less'
 
 const steps = [
   {
-    title: 'Step1: Connect to Safeheron Snap App of your first phone',
+    title: 'Step 1: Connect to Safeheron Snap App on your first phone',
     desc: `Participate in recovering an MPC wallet via Safeheron Snap App and then place the QR code generated in front of the desktop's camera.`,
     successText: 'Connected',
   },
   {
-    title: 'Step2: Connect to Safeheron Snap App of your second phone',
+    title: 'Step 2: Connect to Safeheron Snap App on your second phone',
     desc: `Participate in recovering an MPC wallet via Safeheron Snap App and then place the QR code generated in front of the desktop's camera.`,
     successText: 'Connected',
   },
   {
     title:
-      'Step3: Enter the recovery phrase for each private key shard separately as prompted and submit them for confirmation',
+      'Step 3: Enter the recovery phrase for each private key shard separately as prompted and submit them for confirmation',
     successText: 'Filled',
   },
   {
-    title: 'Step4: Wait for recovery to complete successfully',
+    title: 'Step 4: Wait for recovery to complete successfully',
     successText: 'The MPC wallet is recovered successfully',
     loadingText:
       'Waiting for the three parties to compute and recover the MPC Wallet.',

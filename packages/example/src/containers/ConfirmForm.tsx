@@ -1,6 +1,6 @@
 import { TransactionObject } from '@safeheron/mpcsnap-types'
 import { Button, Form, Input } from 'antd'
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
+import { parseEther } from 'ethers/lib/utils'
 import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
 
@@ -20,7 +20,9 @@ const ConfirmForm = () => {
     networkModule,
   } = useStore()
   const { feeData, fee, baseTx } = transactionModule
-  const { intChainId, chainName } = networkModule
+  const { intChainId, chainName, currentChain } = networkModule
+
+  const currentSymbol = currentChain?.nativeCurrency.symbol
 
   useEffect(() => {}, [])
 
@@ -81,7 +83,7 @@ const ConfirmForm = () => {
       <h1>Confirm</h1>
       <div className={styles.amount}>
         <strong>{baseTx.value}</strong>
-        <span>ETH</span>
+        <span>{currentSymbol}</span>
       </div>
       <Form
         className={styles.confirmForm}
@@ -122,7 +124,7 @@ const ConfirmForm = () => {
           <div className={styles.infoItem}>
             <span>Network Fee</span>
             <span>
-              {wei2eth(fee)} ETH{' '}
+              {wei2eth(fee)} {currentSymbol}{' '}
               <small>({ethers.utils.formatUnits(fee, 'gwei')}Gwei)</small>
             </span>
           </div>

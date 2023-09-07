@@ -109,7 +109,10 @@ const SendForm = () => {
                   if (!value) {
                     return Promise.reject('Please enter the amount')
                   }
-                  if (value > wei2eth(availableBalance)) {
+                  if (
+                    ethers.BigNumber.from(value).isZero() ||
+                    value > wei2eth(availableBalance)
+                  ) {
                     return Promise.reject('Insufficient balance')
                   }
                   return Promise.resolve()

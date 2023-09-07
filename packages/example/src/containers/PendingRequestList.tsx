@@ -197,7 +197,7 @@ const PendingRequestList: React.FC = () => {
           <div className={styles.emptyContainer}>
             <img src={emptyPng} width={80} alt={''} />
 
-            <div>Steps to use Safeheron Snap in MetaMask</div>
+            <div>Use Safeheron Snap in MetaMask</div>
 
             <div className={styles.emptyTipList}>
               <div>
@@ -210,8 +210,8 @@ const PendingRequestList: React.FC = () => {
                 3. Process the signature request on the Safeheron Snap website.
               </div>
               <div>
-                4. Follow the instructions to complete the MPC signature in the
-                Safeheron Snap app.
+                4. Follow the instructions to complete the MPC Sign in the
+                Safeheron Snap App
               </div>
             </div>
           </div>

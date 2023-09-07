@@ -49,12 +49,12 @@ const RecoverPrepareDialog = () => {
           title={'Recover an MPC Wallet'}
           desc={
             <p>
-              To recover an MPC Wallet, make sure you have MetaMask Flask on
-              your Google Chrome and the Safeheron Snap App on two separate
+              To recover an MPC Wallet, please make sure you have MetaMask Flask
+              on your Google Chrome and the Safeheron Snap App on two separate
               phones.
               <br /> <br />
-              Moreover, for wallet recovery, you'll need at least two out of the
-              three backed-up private key shards (A, B, and C).
+              For wallet recovery, you'll need at least two out of the three
+              backed-up private key shards (A, B, and C).
               <br /> <br />
               Using all three shards will keep the wallet address unchanged.
               <br /> <br />

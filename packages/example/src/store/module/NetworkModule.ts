@@ -62,12 +62,23 @@ class NetworkModule {
     window.location.reload()
   }
 
-  getChainName(chainId: string | number | undefined): string {
-    if (!chainId) return ''
+  getChain(chainId: string | number | undefined): Chain | undefined {
+    if (!chainId) return undefined
     chainId = String(chainId)
     const chain = this.chainList.find(
       c => c.chainId === parseInt(chainId as string)
     )
+    return chain
+  }
+
+  getExplorer(chainId: string | number | undefined): string | undefined {
+    const chain = this.getChain(chainId)
+    const explorer = chain?.explorers?.[0]
+    return explorer?.url
+  }
+
+  getChainName(chainId: string | number | undefined): string {
+    const chain = this.getChain(chainId)
     return chain?.title || chain?.name || ''
   }
 

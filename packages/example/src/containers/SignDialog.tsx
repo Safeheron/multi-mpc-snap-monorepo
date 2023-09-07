@@ -48,7 +48,7 @@ const SignDialog = () => {
     accountModule,
   } = useStore()
 
-  const { explorer, currentChain } = networkModule
+  const { currentChain } = networkModule
   const { balanceEth } = accountModule
 
   const step = interactive.signStep
@@ -97,7 +97,9 @@ const SignDialog = () => {
   }
 
   const handleTxnHash = async () => {
-    // TODO to ensure that some special explorer
+    const { originalMethod, params } = signModule.pendingRequest
+    const thisChainId = tryToExtractChainId(originalMethod, params)
+    const explorer = networkModule.getExplorer(thisChainId)
     if (explorer && interactive.txHash) {
       window.open(`${explorer}/tx/${interactive.txHash}`)
     }
