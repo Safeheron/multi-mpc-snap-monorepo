@@ -58,7 +58,6 @@ const ConfirmForm = () => {
       // @ts-ignore
       const res = await signApproval('eth_signTransaction', txObj)
       interactive.setLoading(false)
-      console.log(res)
 
       if (res.success) {
         interactive.setSessionId(res.data)

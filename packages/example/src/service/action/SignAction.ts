@@ -35,11 +35,6 @@ const SignAction = {
         if (signedTransaction) {
           console.log('signedTransaction:', signedTransaction)
 
-          console.log(
-            'parseTransaction',
-            ethers.utils.parseTransaction(signedTransaction)
-          )
-
           await this.sendTransaction(signedTransaction)
         }
         store.interactive.setSignStep(4)

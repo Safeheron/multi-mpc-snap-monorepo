@@ -3,6 +3,8 @@ import 'webrtc-adapter'
 import { Buffer } from 'buffer'
 
 import { MPCMessage, MPCMessageType } from '@/service/types'
+import { getLogger, LogType } from '@/utils/Log'
+import metrics from '@/utils/Metrics'
 
 import { MessageChannel } from './MessageChannel'
 
@@ -15,7 +17,11 @@ export type RTCSignaling = {
   candidates: RTCIceCandidate[]
 }
 
+const TRACE_CONNECT = 'trace_webrtc_connect'
+
 export class WebRTCChannel extends MessageChannel {
+  private logger = getLogger(LogType.WEBRTC)
+
   private pc: RTCPeerConnection
   private readonly dc: RTCDataChannel
 
@@ -28,6 +34,9 @@ export class WebRTCChannel extends MessageChannel {
 
   constructor(name: string) {
     super(name)
+    metrics.startTransaction(TRACE_CONNECT)
+
+    metrics.startChild(TRACE_CONNECT, 'createPC', name)
     const pc = new RTCPeerConnection()
     pc.addEventListener('icecandidate', this.onIceCandidate.bind(this))
     pc.addEventListener(
@@ -35,17 +44,30 @@ export class WebRTCChannel extends MessageChannel {
       this.onIceGatheringStateChange.bind(this)
     )
     pc.addEventListener(
+      'iceconnectionstatechange',
+      this.onIceConnectionStateChange.bind(this)
+    )
+    pc.addEventListener(
       'connectionstatechange',
       this.onPeerConnectionStateChanged.bind(this)
     )
+    pc.addEventListener(
+      'signalingstatechange',
+      this.onSignalingStateChanged.bind(this)
+    )
+    metrics.endChild(TRACE_CONNECT, 'createPC')
 
+    metrics.startChild(TRACE_CONNECT, 'createDataChannel', name)
     const dc = pc.createDataChannel('MPC Data Channel')
     dc.bufferedAmountLowThreshold = this.BUFFER_THRESHOLD
     dc.binaryType = 'arraybuffer'
 
     dc.addEventListener('open', this.onDataChannelOpened.bind(this))
-    dc.addEventListener('close', this.onDataChannelClosed.bind(this))
     dc.addEventListener('message', this.onReceiveMessage.bind(this))
+    dc.addEventListener('close', this.onDataChannelClosed.bind(this))
+    dc.addEventListener('closing', this.onDataChannelClosing.bind(this))
+    dc.addEventListener('error', this.onDataChannelError.bind(this))
+    metrics.endChild(TRACE_CONNECT, 'createDataChannel')
 
     this.pc = pc
     this.dc = dc
@@ -59,9 +81,11 @@ export class WebRTCChannel extends MessageChannel {
   }
 
   async createOffer(): Promise<RTCSessionDescriptionInit> {
+    metrics.startChild(TRACE_CONNECT, 'createOffer', this.name)
     const offer = await this.pc.createOffer()
     await this.pc.setLocalDescription(new RTCSessionDescription(offer))
     this.offer = offer
+    metrics.endChild(TRACE_CONNECT, 'createOffer')
     return offer
   }
 
@@ -69,67 +93,125 @@ export class WebRTCChannel extends MessageChannel {
     answer: RTCSessionDescriptionInit,
     iceCandidates: RTCIceCandidate[]
   ) {
+    this.logger.info(
+      `[webrtc](${this.name}) start to set remote ice candidate, local signaling data is: %s, \n remote ice candidates is: %s`,
+      JSON.stringify(this.getICEAndOffer()),
+      JSON.stringify(iceCandidates)
+    )
+    metrics.startChild(TRACE_CONNECT, 'receive signaling', {
+      answer,
+      ices: iceCandidates,
+      name: this.name,
+    })
     await this.pc.setRemoteDescription(new RTCSessionDescription(answer))
     iceCandidates.forEach(candidate => {
       this.pc.addIceCandidate(candidate)
     })
+    metrics.endChild(TRACE_CONNECT, 'receive signaling')
+  }
+
+  private onIceConnectionStateChange() {
+    const state = this.pc.iceConnectionState
+
+    metrics.startChild(TRACE_CONNECT, 'ice-state-changed', state)
+    this.logger.info(
+      `[webrtc](${this.name}) ice connection state changed, new state is: `,
+      state
+    )
+    metrics.endChild(TRACE_CONNECT, 'ice-state-changed')
   }
 
   private onPeerConnectionStateChanged() {
-    console.debug(
-      `WebRTC peer connection: [${this.name}] state changed, new state is: ${this.pc.connectionState}`
-    )
     const state = this.pc.connectionState
-    if (state === 'closed') {
-      this.emit('peerClosed')
-    } else if (state === 'disconnected' || state === 'failed') {
+
+    metrics.startChild(TRACE_CONNECT, 'peer-state-changed', state)
+    this.logger.info(
+      `[webrtc](${this.name}) peer connection state changed, new state is: ${state}`
+    )
+    metrics.endChild(TRACE_CONNECT, 'peer-state-changed')
+
+    if (state === 'closed' || state === 'failed') {
       this.receiveExternal(
         JSON.stringify({
           messageType: MPCMessageType.abort,
           sendType: 'broadcast',
         })
       )
-    } else {
-      /* no op */
+      this.emit('peerClosed')
     }
+
+    if (state === 'connected' || state === 'failed' || state === 'closed') {
+      metrics.endTransaction(TRACE_CONNECT)
+    }
+  }
+
+  private onSignalingStateChanged() {
+    const state = this.pc.signalingState
+
+    metrics.startChild(TRACE_CONNECT, 'signal-state-changed', state)
+    this.logger.info(
+      `[webrtc](${this.name}) signaling state changed, new state is: ${state}`
+    )
+    metrics.endChild(TRACE_CONNECT, 'signal-state-changed')
   }
 
   private onIceCandidate(event: RTCPeerConnectionIceEvent) {
     if (event.candidate) {
+      metrics.startChild(TRACE_CONNECT, 'localIceAdd', event.candidate)
       this.iceCandidateList.push(event.candidate)
+      metrics.endChild(TRACE_CONNECT, 'localIceAdd')
     }
   }
 
   private onIceGatheringStateChange() {
     const iceGatheringState = this.pc.iceGatheringState
+
     if (iceGatheringState === 'complete') {
+      metrics.startChild(TRACE_CONNECT, 'iceReady')
       this.emit('iceReady')
+      metrics.endChild(TRACE_CONNECT, 'iceReady')
     }
   }
 
   private onDataChannelOpened() {
-    console.debug(`WebRTC dataChannel:[${this.name}] opened...`)
+    metrics.startChild(TRACE_CONNECT, 'dataChannelOpen')
+    this.logger.info(`[webrtc](${this.name}) data channel opened ✅`)
+    metrics.endChild(TRACE_CONNECT, 'dataChannelOpen')
     this.emit('channelOpen')
   }
 
+  private onDataChannelClosing() {
+    metrics.startChild(TRACE_CONNECT, 'dataChannelClosing')
+    this.logger.info(`[webrtc](${this.name}) data channel closing 💀`)
+    metrics.endChild(TRACE_CONNECT, 'dataChannelClosing')
+  }
+
   private onDataChannelClosed() {
-    console.debug(`WebRTC dataChannel:[${this.name}] closed...`)
+    metrics.startChild(TRACE_CONNECT, 'dataChannelClosed')
+    this.logger.info(`[webrtc](${this.name}) data channel closed ❌`)
     this.emit('channelClosed')
+    metrics.endChild(TRACE_CONNECT, 'dataChannelClosed')
     this.disconnect()
+  }
+
+  private onDataChannelError(event: RTCErrorEvent) {
+    metrics.startChild(TRACE_CONNECT, 'dataChannelError')
+    this.logger.info(`[webrtc](${this.name}) dataChannel error ❌`, event)
+    metrics.endChild(TRACE_CONNECT, 'dataChannelError')
   }
 
   private onReceiveMessage(event: MessageEvent) {
     if (typeof event.data === 'string') {
-      console.log(
-        `[data channel](${this.name}) receive string message from phone: `,
+      this.logger.debug(
+        `[webrtc] [data channel](${this.name}) receive string message: `,
         event.data
       )
       const messageMeta = JSON.parse(event.data) as RTCMetaMessage
       this.peerMessage = new PeerMessage(
         messageMeta.size,
         (message: string) => {
-          console.debug(
-            `[data channel](${this.name}) receive buffer message from phone: `,
+          this.logger.debug(
+            `[webrtc] [data channel](${this.name}) receive buffer message: `,
             message
           )
           this.receiveExternal(message)
@@ -149,6 +231,21 @@ export class WebRTCChannel extends MessageChannel {
   }
 
   async sendMessage(message: string) {
+    if (!this.dc) {
+      this.logger.error(
+        `[webrtc](${this.name}) dataChannel is undefined, ignore this message`
+      )
+      return
+    }
+
+    if (this.dc.readyState !== 'open') {
+      this.logger.error(
+        `[webrtc](${this.name}) dataChannel cannot send message, invalid readyState: %s.`,
+        this.dc.readyState
+      )
+      return
+    }
+
     const buffer = Buffer.from(message, 'utf-8')
 
     // Send Message meta first
@@ -189,10 +286,10 @@ export class WebRTCChannel extends MessageChannel {
 
   protected async sendExternal(messageArray: MPCMessage[]) {
     try {
-      console.log(`[WebRtcChannel](${this.name}): send >>`, messageArray)
+      this.logger.info(`[WebRtcChannel](${this.name}): send >>`, messageArray)
       await this.sendMessage(JSON.stringify(messageArray))
     } catch (e) {
-      console.error(`[WebRtcChannel](${this.name}): send occur an error`, e)
+      this.logger.error(`[WebRtcChannel](${this.name}): send occur an error`, e)
       throw e
     }
   }

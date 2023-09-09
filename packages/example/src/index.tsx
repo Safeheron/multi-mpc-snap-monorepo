@@ -7,6 +7,12 @@ import App from '@/App'
 import { MetaMaskProvider } from '@/hooks/MetamaskContext'
 import { SnapKeepAliveProvider } from '@/hooks/SnapKeepAliveContext'
 import { store, StoreContext } from '@/store'
+import { logger } from '@/utils/Log'
+import metrics from '@/utils/Metrics'
+
+logger.setLevel('trace')
+metrics.setup()
+
 const root = document.getElementById('root') as HTMLElement
 
 ReactDOM.createRoot(root).render(

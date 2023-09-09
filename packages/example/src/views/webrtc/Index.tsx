@@ -17,7 +17,7 @@ const WebRTC = () => {
   const [channelState, setChannelState] = useState(false)
 
   const init = async () => {
-    channelRef.current = new WebRTCChannel('app1')
+    channelRef.current = new WebRTCChannel('webrtc-test')
 
     channelRef.current.on('iceReady', () => {
       const signalingData = channelRef.current!.getICEAndOffer()
@@ -70,7 +70,7 @@ const WebRTC = () => {
 
       <br />
 
-      {/*<ScanDynamicQrCode onComplete={setUpAnswer} />*/}
+      <ScanDynamicQrCode onComplete={setUpAnswer} />
 
       <Form.Item>
         <Input
