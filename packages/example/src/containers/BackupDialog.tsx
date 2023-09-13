@@ -18,6 +18,7 @@ import { IS_PROD, randomFromArray } from '@/utils'
 const steps = ['Backup', 'Verify', 'Complete']
 
 const RANDOM_NUMBER = IS_PROD ? 6 : 1
+
 const BackupDialog = () => {
   useSnapKeepAlive()
 
@@ -36,6 +37,8 @@ const BackupDialog = () => {
 
   const { showConfirm } = useConfirm()
 
+  const [backupLoading, setBackupLoading] = useState(false)
+
   const next = async () => {
     if (step === 0) {
       showConfirm({
@@ -50,7 +53,9 @@ const BackupDialog = () => {
       setFinallyMnemonic(random)
       setStep(2)
     } else if (step === 2) {
+      setBackupLoading(true)
       const res = await backupUpdate(interactive.sessionId)
+      setBackupLoading(false)
       if (!res.success) return
       accountModule.setAccount(res.data)
       setStep(3)
@@ -137,6 +142,7 @@ const BackupDialog = () => {
                 <Button
                   type="primary"
                   onClick={next}
+                  loading={backupLoading}
                   disabled={!(allFilled && !errorList.length)}>
                   Confirm
                 </Button>

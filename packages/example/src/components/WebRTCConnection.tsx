@@ -7,14 +7,22 @@ import { RTCSignaling, WebRTCChannel } from '@/service/channel/WebRTCChannel'
 import { PartyId } from '@/service/types'
 import styles from '@/styles/components/WebRTCConnection.module.less'
 
+type BusinessType = 'create' | 'recovery' | 'sign'
+
 interface WebRTCConnectionProps {
   webrtcChannel?: WebRTCChannel
+  businessType: BusinessType
 }
 
-type ReceivedSignaling = RTCSignaling & { name: string; partyId?: string }
+type ReceivedSignaling = RTCSignaling & {
+  name: string
+  partyId?: string
+  businessType: BusinessType
+}
 
 const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
   webrtcChannel,
+  businessType,
 }) => {
   const [offerAndIce, setOfferAndIce] = useState<string>('')
 
@@ -22,7 +30,8 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
 
   const init = async () => {
     webrtcChannel!.on('iceReady', () => {
-      setOfferAndIce(JSON.stringify(webrtcChannel!.getICEAndOffer()))
+      const localSignalData = webrtcChannel!.getICEAndOffer()
+      setOfferAndIce(JSON.stringify({ ...localSignalData, businessType }))
     })
     await webrtcChannel!.createOffer()
   }
@@ -34,7 +43,16 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
       if (!answerAndIceObj.sdp || !answerAndIceObj.candidates) {
         throw 'Invalid data, must include '
       }
-      setAnswerAndIce(answerAndIceObj)
+      const phoneBusinessType = answerAndIceObj.businessType
+      if (phoneBusinessType !== businessType) {
+        message.error(
+          `Operation error, web operation type is [${
+            businessType ?? 'unknown'
+          }] and phone's operation type is [${phoneBusinessType}]`
+        )
+      } else {
+        setAnswerAndIce(answerAndIceObj)
+      }
     } catch (e) {
       message.error(e.message ?? 'Parse QrCode data error!')
       return

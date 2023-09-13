@@ -166,7 +166,10 @@ const SignDialog = () => {
           rightContent={
             <>
               {step === 1 ? (
-                <WebRTCConnection webrtcChannel={webrtcChannel} />
+                <WebRTCConnection
+                  webrtcChannel={webrtcChannel}
+                  businessType={'sign'}
+                />
               ) : step === 2 ? (
                 <div>
                   <img src={waiting} width="168" />

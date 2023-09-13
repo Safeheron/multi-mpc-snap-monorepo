@@ -103,6 +103,7 @@ const ScanDynamicQrCode: FC<Props> = ({ onComplete }) => {
           id="videoRef"
           width="150"
           height="150"
+          style={{ transform: 'rotateY(180deg)' }}
           // style={{ filter: 'blur(12px)' }}
         />
       </div>

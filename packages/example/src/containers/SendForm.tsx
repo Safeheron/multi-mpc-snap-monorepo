@@ -20,6 +20,8 @@ const SendForm = () => {
   const [submittable, setSubmittable] = useState(false)
   const values = Form.useWatch([], form)
 
+  const balanceIsZero = ethers.BigNumber.from(availableBalance).isZero()
+
   useEffect(() => {
     form
       // @ts-ignore
@@ -64,10 +66,11 @@ const SendForm = () => {
 
   useEffect(() => {
     transactionModule.getFeeData()
-    console.log({ ...baseTx })
 
     forceUpdate({})
   }, [])
+
+  console.log('avaiable balance...', availableBalance)
 
   return (
     <div className={styles.sendDialog}>
@@ -151,7 +154,10 @@ const SendForm = () => {
           {() => (
             <div className="btn-control">
               <Button onClick={handleCancel}>Cancel</Button>
-              <Button type="primary" htmlType="submit" disabled={!submittable}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                disabled={!submittable || balanceIsZero}>
                 Continue
               </Button>
             </div>

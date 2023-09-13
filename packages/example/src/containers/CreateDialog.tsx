@@ -152,11 +152,17 @@ const CreateDialog = () => {
           rightContent={
             <>
               {step === 1 && (
-                <WebRTCConnection webrtcChannel={webrtcChannel1} />
+                <WebRTCConnection
+                  webrtcChannel={webrtcChannel1}
+                  businessType={'create'}
+                />
               )}
 
               {step === 2 && (
-                <WebRTCConnection webrtcChannel={webrtcChannel2} />
+                <WebRTCConnection
+                  webrtcChannel={webrtcChannel2}
+                  businessType={'create'}
+                />
               )}
 
               {step === 3 && (

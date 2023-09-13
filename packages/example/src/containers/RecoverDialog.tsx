@@ -165,10 +165,16 @@ const RecoverDialog = () => {
           rightContent={
             <>
               {step === 1 && (
-                <WebRTCConnection webrtcChannel={webrtcChannel1} />
+                <WebRTCConnection
+                  webrtcChannel={webrtcChannel1}
+                  businessType={'recovery'}
+                />
               )}
               {step === 2 && (
-                <WebRTCConnection webrtcChannel={webrtcChannel2} />
+                <WebRTCConnection
+                  webrtcChannel={webrtcChannel2}
+                  businessType={'recovery'}
+                />
               )}
               {step === 3 && <MnemonicForm />}
               {step === 4 && (
