@@ -1,8 +1,9 @@
+import { LoadingOutlined } from '@ant-design/icons'
 import { Button, Form, Input, Space } from 'antd'
 import { isAddress } from 'ethers/lib/utils'
 import { debounce } from 'lodash'
 import { observer } from 'mobx-react-lite'
-import { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 
 import NumberInput from '@/components/NumberInput'
 import { useStore } from '@/store'
@@ -11,7 +12,8 @@ import { ethers, wei2eth } from '@/utils'
 
 const SendForm = () => {
   const { interactive, transactionModule, networkModule } = useStore()
-  const { baseTx, fee, feeData, availableBalance } = transactionModule
+  const { baseTx, fee, feeData, availableBalance, feeDataLoading } =
+    transactionModule
   const { currentChain } = networkModule
   const currentSymbol = currentChain?.nativeCurrency.symbol
 
@@ -136,17 +138,21 @@ const SendForm = () => {
         <div className={styles.info}>
           <div className={styles.infoItem}>
             <span>Network Fee</span>
-            <span>
-              {wei2eth(fee)} {currentSymbol}
-              <small>
-                (
-                {ethers.utils.formatUnits(
-                  feeData.maxFeePerGas || feeData.gasPrice || '0',
-                  'gwei'
-                )}
-                Gwei)
-              </small>
-            </span>
+            {feeDataLoading ? (
+              <LoadingOutlined style={{ color: '#496ce9' }} />
+            ) : (
+              <span>
+                {wei2eth(fee)} {currentSymbol}
+                <small>
+                  (
+                  {ethers.utils.formatUnits(
+                    feeData.maxFeePerGas || feeData.gasPrice || '0',
+                    'gwei'
+                  )}
+                  Gwei)
+                </small>
+              </span>
+            )}
           </div>
         </div>
 
@@ -157,7 +163,7 @@ const SendForm = () => {
               <Button
                 type="primary"
                 htmlType="submit"
-                disabled={!submittable || balanceIsZero}>
+                disabled={!submittable || balanceIsZero || feeDataLoading}>
                 Continue
               </Button>
             </div>

@@ -13,6 +13,7 @@ class TransactionModule {
   baseTx: BaseTxObj = {} as BaseTxObj
   transactionObject: TransactionObject = {} as TransactionObject
 
+  feeDataLoading = false
   feeData: FeeData = {
     gasLimit: '21000',
   } as FeeData
@@ -30,10 +31,9 @@ class TransactionModule {
 
   async getFeeData() {
     if (!provider) return
-    store.interactive.setLoading(true)
+    this.feeDataLoading = true
     try {
       const feeData = await provider.getFeeData()
-      store.interactive.setLoading(false)
       const maxFeePerGas = feeData.maxFeePerGas?.toString() ?? ''
       const maxPriorityFeePerGas =
         feeData.maxPriorityFeePerGas?.toString() ?? ''
@@ -63,8 +63,9 @@ class TransactionModule {
         }
       }
     } catch (error) {
-      store.interactive.setLoading(false)
       console.error(error)
+    } finally {
+      this.feeDataLoading = false
     }
   }
 
