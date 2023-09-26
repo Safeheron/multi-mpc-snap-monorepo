@@ -11,15 +11,18 @@ import { useStore } from '@/store'
 import styles from '@/styles/containers/RecoverPrepareDialog.module.less'
 
 const RecoverPrepareDialog = () => {
-  const { interactive, accountModule, messageModule } = useStore()
+  const { interactive, accountModule, messageModule, recoveryModule } =
+    useStore()
   const handleRecover = async () => {
-    interactive.setRecoverPrepareDialogVisible(false)
+    recoveryModule.setRecoverPrepareDialogVisible(false)
     interactive.setLoading(true)
     const res = await recoverApproval(accountModule.walletName)
+
     interactive.setLoading(false)
+
     if (res.success) {
       interactive.setSessionId(res.data.sessionId)
-      interactive.setMnemonic(res.data.mnemonic)
+      recoveryModule.setLocalKeyshareExist(res.data.keyshareExist)
       await startRecover()
     }
   }
@@ -38,8 +41,8 @@ const RecoverPrepareDialog = () => {
         index: 1,
       },
     })
-    interactive.setRecoverStep(1)
-    interactive.setRecoverDialogVisible(true)
+    recoveryModule.setRecoverStep(1)
+    recoveryModule.setRecoverDialogVisible(true)
   }
 
   return (
@@ -67,7 +70,7 @@ const RecoverPrepareDialog = () => {
             <>
               <Button
                 onClick={() =>
-                  interactive.setRecoverPrepareDialogVisible(false)
+                  recoveryModule.setRecoverPrepareDialogVisible(false)
                 }>
                 Cancel
               </Button>

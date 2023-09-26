@@ -9,7 +9,7 @@ export function formatToUSDateTime(timestamp: number) {
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const ampm = date.getHours() >= 12 ? 'PM' : 'AM'
 
-  const formattedDate = `${month}/${day}/${year}`
+  const formattedDate = `${day}/${month}/${year}`
   const formattedTime = `${hours}:${minutes} ${ampm}`
 
   return `${formattedDate} ${formattedTime}`

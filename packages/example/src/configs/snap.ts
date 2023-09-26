@@ -11,4 +11,4 @@ export const snap_origin = IS_PROD
   ? 'npm:@safeheron/mpcsnap'
   : 'local:http://localhost:4100'
 
-export const snap_version = '2.0.0-beta.2'
+export const snap_version = '2.0.0-beta.7'

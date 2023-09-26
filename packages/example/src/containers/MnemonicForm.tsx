@@ -12,17 +12,18 @@ import { mnemonicValidator } from '@/utils/validator'
 
 const MnemonicForm = () => {
   const [form] = Form.useForm()
-  const { interactive, messageModule } = useStore()
+  const { interactive, messageModule, recoveryModule } = useStore()
   const { showConfirm, showInfo } = useConfirm()
+
   const handleSkip = async () => {
-    if (interactive.isSkip) {
+    if (recoveryModule.isSkip) {
       showInfo({
         content:
           'A minimum of 2 private key shards is necessary for wallet recovery. If other devices have already bypassed entering the mnemonic phrase, this device can no longer skip this step. Please input the mnemonic phrase for this device.',
       })
     } else {
       try {
-        if (!interactive.hasOtherShard) {
+        if (!recoveryModule.hasOtherShard) {
           await form.validateFields(['walletName'])
         }
         showConfirm({
@@ -31,8 +32,7 @@ const MnemonicForm = () => {
           onOk() {
             const walletName = form.getFieldValue('walletName')
 
-            console.log(walletName)
-            interactive.setMnemonic('')
+            recoveryModule.setInputMnemonic('')
             interactive.setWalletName(walletName)
 
             messageModule.rpcChannel?.next({
@@ -49,7 +49,7 @@ const MnemonicForm = () => {
               },
             })
 
-            interactive.setMnemonicFormType('done')
+            recoveryModule.setMnemonicFormType('done')
           },
         })
       } catch (error) {}
@@ -57,8 +57,9 @@ const MnemonicForm = () => {
   }
   const onFinish = values => {
     interactive.setWalletName(values.walletName)
-    interactive.setMnemonic(values.mnemonic)
-    interactive.setMnemonicFormType('done')
+
+    recoveryModule.setInputMnemonic(values.mnemonic)
+    recoveryModule.setMnemonicFormType('done')
     messageModule.rpcChannel?.next({
       messageType: MPCMessageType.mnemonicReady,
       messageContent: {
@@ -71,7 +72,7 @@ const MnemonicForm = () => {
 
   return (
     <>
-      {interactive.mnemonicFormType === 'init' ? (
+      {recoveryModule.mnemonicFormType === 'init' ? (
         <Form
           form={form}
           name="mnemonicForm"
@@ -79,7 +80,7 @@ const MnemonicForm = () => {
           layout="vertical"
           onFinish={onFinish}
           requiredMark={false}>
-          {!interactive.hasOtherShard && (
+          {!recoveryModule.hasOtherShard && (
             <Form.Item
               label="Wallet name"
               name="walletName"
@@ -119,7 +120,7 @@ const MnemonicForm = () => {
             </Button>
           </Form.Item>
         </Form>
-      ) : interactive.mnemonicFormType === 'done' ? (
+      ) : recoveryModule.mnemonicFormType === 'done' ? (
         <div className={styles.done}>
           <p>
             Please follow the prompts in the Safeheron Snap App on each phone,

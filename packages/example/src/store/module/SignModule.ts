@@ -18,4 +18,5 @@ export type PendingRequest = {
   originalMethod: KeyringRequest['request']['method']
   method: SignApproval['params']['method']
   params: Record<string, any>
+  createTime: number
 }

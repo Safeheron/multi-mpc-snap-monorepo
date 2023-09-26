@@ -37,7 +37,7 @@ const steps = [
 const CreateDialog = () => {
   useSnapKeepAlive()
 
-  const { interactive, messageModule, accountModule } = useStore()
+  const { interactive, messageModule, accountModule, backupModule } = useStore()
   const step = interactive.createStep
 
   const [webrtcChannel1, setWebrtcChannel1] = useState<WebRTCChannel>()
@@ -122,8 +122,8 @@ const CreateDialog = () => {
     if (res.success) {
       interactive.setCreateDialogVisible(false)
       interactive.setSessionId(res.data.sessionId)
-      interactive.setMnemonic(res.data.mnemonic)
-      interactive.setBackupDialogVisible(true)
+      backupModule.setMnemonic(res.data.mnemonic)
+      backupModule.setBackupDialogVisible(true)
     }
   }
 

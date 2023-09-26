@@ -11,8 +11,9 @@ import { v4 as uuidV4 } from 'uuid'
 
 import StateManager, { SnapAccount } from '@/StateManager'
 import { SUPPORTED_METHODS } from '@/utils/configs'
+import { newSnapAccount } from '@/utils/snapAccountApi'
 import { requestConfirm } from '@/utils/snapDialog'
-import { succeed } from '@/utils/snapRpcUtil'
+import { errored, succeed } from '@/utils/snapRpcUtil'
 
 import { BaseFlow } from './BaseFlow'
 
@@ -27,12 +28,19 @@ class KeyGenFlow extends BaseFlow {
     super(stateManager, mpcInstance)
   }
 
-  // TODO validate wallet name
-  // TODO only support one wallet
   async keyGenApproval(
     walletName: string,
     party: Party
   ): Promise<SnapRpcResponse<string>> {
+    if (walletName.replace(/[^\x00-\xff]/g, 'aa').length > 60) {
+      return errored(`Wallet name must Within 60 characters.`)
+    }
+
+    const existWallet = this.getWallet()
+    if (existWallet) {
+      return errored('Wallet exist.can not create one more wallet.')
+    }
+
     await requestConfirm(
       panel([
         heading('Confirm to create an MPC wallet?'),
@@ -84,29 +92,33 @@ class KeyGenFlow extends BaseFlow {
   ): Promise<SnapRpcResponse<AccountItem>> {
     this.verifySession(sessionId)
 
-    // TODO validate pubkey
     const backuped = false
     const address = ethers.utils.computeAddress(`0x${this.pubKey}`)
 
-    const snapAccount: SnapAccount = {
-      id: uuidV4(),
-      name: this.walletName!,
+    const snapAccount: SnapAccount = newSnapAccount(
+      this.walletName!,
       address,
-      options: {},
-      supportedMethods: SUPPORTED_METHODS,
-      type: 'eip155:eoa',
-      backuped: false,
-      pubkey: this.pubKey!,
-      signKey: this.signKey,
-    }
+      this.pubKey!,
+      this.signKey
+    )
 
     await this.stateManager.saveOrUpdateAccount(snapAccount)
+
+    this.cleanup()
 
     return succeed({
       walletName: this.walletName!,
       address,
       backuped,
     })
+  }
+
+  private cleanup() {
+    this.signKey = ''
+    this.keyGen = undefined
+    this.sessionId = ''
+    this.walletName = ''
+    this.pubKey = ''
   }
 }
 

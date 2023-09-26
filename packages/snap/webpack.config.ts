@@ -3,10 +3,19 @@ import CopyPlugin from 'copy-webpack-plugin'
 import path from 'path'
 import webpack, { Configuration } from 'webpack'
 
+const isProd = process.env.NODE_ENV === 'production'
+
+const ALLOW_SITES = [
+  'https://test-mpcsnap.safeheron.com',
+  'https://mpcsnap.safeheron.com',
+]
+if (!isProd) {
+  ALLOW_SITES.push('http://localhost:8080')
+}
+
 const config: Configuration = {
-  mode: 'none',
   entry: './src/index.ts',
-  devtool: 'source-map',
+  devtool: false,
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
@@ -14,7 +23,7 @@ const config: Configuration = {
     libraryTarget: 'commonjs',
   },
   resolve: {
-    extensions: ['.ts', '...'],
+    extensions: ['.ts', '.js', '...'],
     alias: {
       '@': path.resolve(__dirname, 'src'),
       process: 'process/browser',
@@ -34,19 +43,10 @@ const config: Configuration = {
   module: {
     rules: [
       {
-        test: /\.wasm$/,
-        type: 'javascript/auto',
-        use: [
-          {
-            loader: 'webassembly-loader',
-            options: {
-              export: 'buffer',
-            },
-          },
-        ],
-      },
-      {
-        test: /\.(m?js|ts)x?$/u,
+        test: /\.(c|m?js|ts)x?$/u,
+        resolve: {
+          fullySpecified: false,
+        },
         use: [
           {
             loader: 'babel-loader',
@@ -55,8 +55,10 @@ const config: Configuration = {
             },
           },
         ],
+        exclude: /@safeheron\/mpc-wasm-sdk/,
       },
     ],
+    noParse: [/@safeheron\/mpc-wasm-sdk/],
   },
   plugins: [
     // @ts-ignore
@@ -71,10 +73,16 @@ const config: Configuration = {
     new webpack.ProvidePlugin({
       process: 'process/browser',
     }),
+    new webpack.DefinePlugin({
+      ALLOW_SITES: JSON.stringify(ALLOW_SITES),
+    }),
   ],
   stats: 'minimal',
   watchOptions: {
     ignored: ['**/snap.manifest.json'],
+  },
+  optimization: {
+    minimize: isProd,
   },
 }
 

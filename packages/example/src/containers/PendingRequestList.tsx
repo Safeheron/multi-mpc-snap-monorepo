@@ -1,4 +1,5 @@
 import { KeyringRequest } from '@metamask/keyring-api'
+import { WrappedKeyringRequest } from '@safeheron/mpcsnap-types'
 import { Space, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { toJS } from 'mobx'
@@ -16,6 +17,7 @@ import {
 import MessageRelayer from '@/service/relayer/MessageRelayer'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/TransactionList.module.less'
+import { formatToUSDateTime } from '@/utils/dateUtil'
 import { tryToExtractChainId } from '@/utils/snapRequestUtil'
 
 function convertRequestTitle(rpcRequest: KeyringRequest['request']) {
@@ -58,16 +60,21 @@ const PendingRequestList: React.FC = () => {
   } = useStore()
   const { address, backuped } = accountModule
 
-  const [requests, setRequests] = useState<KeyringRequest[]>([])
+  const [requests, setRequests] = useState<WrappedKeyringRequest[]>([])
 
   const getSnapRequests = async () => {
-    console.debug('Start to loop request...')
     const r = await listKeyringRequests()
-    setRequests(r)
+    console.debug('loop request result ...', r)
+    if (r.success) {
+      setRequests(r.data)
+    }
   }
   const { pause, resume } = useAsyncInterval(getSnapRequests, LOOP_GAP)
 
-  const resolveRequest = async (rpcRequest: KeyringRequest['request']) => {
+  const resolveRequest = async (
+    rpcRequest: KeyringRequest['request'],
+    time: number
+  ) => {
     let requestMethod = rpcRequest.method
     // @ts-ignore
     const originParams = rpcRequest.params[1]
@@ -86,6 +93,7 @@ const PendingRequestList: React.FC = () => {
       method: requestMethod,
       // @ts-ignore
       params: originParams,
+      createTime: time,
     })
 
     // approval send transaction
@@ -104,6 +112,7 @@ const PendingRequestList: React.FC = () => {
       const messageRelayer = new MessageRelayer(2)
       messageModule.setMessageRelayer(messageRelayer)
       interactive.setSignStep(1)
+
       // open dialog
       interactive.setSignTransactionDialogVisible(true)
     }
@@ -120,12 +129,11 @@ const PendingRequestList: React.FC = () => {
     })
   }
 
-  const columns: ColumnsType<KeyringRequest> = [
+  const columns: ColumnsType<WrappedKeyringRequest> = [
     {
       title: 'Date Time (UTC)',
       render: (_, record) => {
-        // @ts-ignore
-        return <span>---</span>
+        return <span>{formatToUSDateTime(record.createTime)}</span>
       },
     },
     {
@@ -134,7 +142,8 @@ const PendingRequestList: React.FC = () => {
         return (
           <div>
             <p style={{ fontWeight: 'bold' }}>
-              {record.request.method}: {convertRequestTitle(record.request)}
+              {record.request.request.method}:{' '}
+              {convertRequestTitle(record.request.request)}
             </p>
           </div>
         )
@@ -144,11 +153,10 @@ const PendingRequestList: React.FC = () => {
       title: 'Network',
       align: 'right',
       render: (_, record) => {
-        const paramsJson = toJS(record.request)
+        const paramsJson = toJS(record.request.request)
         // @ts-ignore
         const { method, params } = paramsJson
         const chainId = tryToExtractChainId(
-          // @ts-ignore
           method,
           Array.isArray(params) ? params[1] : {}
         )
@@ -160,9 +168,14 @@ const PendingRequestList: React.FC = () => {
       align: 'right',
       render: (_, record) => (
         <Space>
-          <a onClick={() => resolveRequest(toJS(record.request))}>MPC Sign</a>
           <a
-            onClick={() => rejectRequest(record.request.id)}
+            onClick={() =>
+              resolveRequest(toJS(record.request.request), record.createTime)
+            }>
+            MPC Sign
+          </a>
+          <a
+            onClick={() => rejectRequest(record.request.request.id)}
             style={{ marginLeft: 20 }}>
             Reject
           </a>
@@ -188,7 +201,7 @@ const PendingRequestList: React.FC = () => {
       <div className={styles.record}>
         {requests.length > 0 ? (
           <Table
-            rowKey={row => row['request'].id}
+            rowKey={row => row['request'].request.id}
             dataSource={requests}
             columns={columns}
             pagination={false}

@@ -1,4 +1,3 @@
-import { Json } from '@metamask/snaps-types'
 import {
   Eip1559Params,
   LegacyParams,

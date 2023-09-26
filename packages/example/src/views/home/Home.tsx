@@ -23,17 +23,17 @@ import styles from '@/styles/app/index.module.less'
 import { connectSnap, getSnap, isLocalSnap } from '@/utils/snap'
 
 const Home = () => {
-  const { accountModule, interactive } = useStore()
+  const { accountModule, interactive, recoveryModule, backupModule } =
+    useStore()
   const {
     loading,
     walletNameDialogVisible,
     createDialogVisible,
     signTransactionDialogVisible,
-    backupDialogVisible,
-    checkShardDialogVisible,
-    recoverDialogVisible,
-    recoverPrepareDialogVisible,
   } = interactive
+
+  const { backupDialogVisible, checkShardDialogVisible } = backupModule
+  const { recoverDialogVisible, recoverPrepareDialogVisible } = recoveryModule
   const { address, requestAccountLoading } = accountModule
 
   const [state, dispatch] = useContext(MetaMaskContext)
@@ -92,7 +92,7 @@ const Home = () => {
     <>
       <Header>
         <Button
-          disabled={!isMetaMaskReady || Boolean(state.installedSnap)}
+          disabled={!isMetaMaskReady}
           color={'primary'}
           onClick={connectMetamask}>
           {state.installedSnap ? 'Connected' : 'Connect MetaMask'}

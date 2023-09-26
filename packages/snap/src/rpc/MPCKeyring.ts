@@ -8,7 +8,10 @@ import { Json } from '@metamask/snaps-types'
 import { panel, text } from '@metamask/snaps-ui'
 
 import StateManager from '@/StateManager'
-import { convertAccount, submitSignResponse } from '@/utils/snapAccountApi'
+import {
+  convertSnapAccountToKeyringAccount,
+  submitSignResponse,
+} from '@/utils/snapAccountApi'
 import { requestAlert } from '@/utils/snapDialog'
 
 export class MPCKeyring implements Keyring {
@@ -36,6 +39,7 @@ export class MPCKeyring implements Keyring {
     const account = this.stateManager.account
     if (account && account.id === id) {
       await this.stateManager.deleteAccount(id)
+      await this.stateManager.deleteAllRequests()
     }
   }
 
@@ -46,24 +50,26 @@ export class MPCKeyring implements Keyring {
   async getAccount(id: string): Promise<KeyringAccount | undefined> {
     const localAccount = this.stateManager.account
     const keyringAccount = localAccount
-      ? convertAccount(localAccount)
+      ? convertSnapAccountToKeyringAccount(localAccount)
       : undefined
     return keyringAccount
   }
 
   async getRequest(id: string): Promise<KeyringRequest | undefined> {
-    return this.stateManager.requests[id]
+    return this.stateManager.findRequest(id)
   }
 
   async listAccounts(): Promise<KeyringAccount[]> {
     const localAccount = this.stateManager.account
-    const keyringAccount = localAccount && convertAccount(localAccount)
-    console.log('list accounts result >>', keyringAccount)
-    return keyringAccount ? [keyringAccount] : []
+    const keyringAccount =
+      localAccount && convertSnapAccountToKeyringAccount(localAccount)
+    const result = keyringAccount ? [keyringAccount] : []
+    console.log('list accounts result >>', result)
+    return result
   }
 
   async listRequests(): Promise<KeyringRequest[]> {
-    return Object.values(this.stateManager.requests)
+    return Object.values(this.stateManager.requests).map(r => r.request)
   }
 
   async submitRequest(request: KeyringRequest): Promise<SubmitRequestResponse> {

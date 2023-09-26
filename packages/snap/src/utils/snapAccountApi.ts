@@ -1,7 +1,9 @@
 import { KeyringAccount } from '@metamask/keyring-api'
 import { pick } from 'loadsh'
+import { v4 as uuidV4 } from 'uuid'
 
 import { SnapAccount } from '@/StateManager'
+import { SUPPORTED_METHODS } from '@/utils/configs'
 
 export async function syncAccountToMetaMask(
   account: KeyringAccount
@@ -12,6 +14,8 @@ export async function syncAccountToMetaMask(
       method: 'listAccounts',
     },
   })) as KeyringAccount[]
+
+  console.log('snap list accounts >>', listedAccounts)
 
   let needUpdate = false
   if (listedAccounts && listedAccounts.length > 0) {
@@ -35,6 +39,8 @@ export async function syncAccountToMetaMask(
       },
     })
   }
+
+  console.log('complete create or update account to metamask')
 }
 
 /**
@@ -52,13 +58,34 @@ export async function submitSignResponse(id: string, signature: string | null) {
   })
 }
 
-export function convertAccount(snapAccount: SnapAccount): KeyringAccount {
-  return pick(snapAccount, [
-    'id',
-    'name',
-    'address',
-    'options',
-    'supportedMethods',
-    'type',
-  ])
+export function convertSnapAccountToKeyringAccount(
+  snapAccount: SnapAccount
+): KeyringAccount {
+  return {
+    id: snapAccount.id,
+    name: snapAccount.name,
+    address: snapAccount.address,
+    supportedMethods: snapAccount.supportedMethods,
+    type: snapAccount.type,
+    options: snapAccount.options,
+  }
+}
+
+export function newSnapAccount(
+  name: string,
+  address: string,
+  pubKey: string,
+  signKey: string
+): SnapAccount {
+  return {
+    id: uuidV4(),
+    name,
+    address,
+    options: {},
+    supportedMethods: SUPPORTED_METHODS,
+    type: 'eip155:eoa',
+    backuped: false,
+    pubkey: pubKey,
+    signKey: signKey,
+  }
 }

@@ -6,10 +6,10 @@ import { useStore } from '@/store'
 import styles from '@/styles/containers/NotBackupDialog.module.less'
 
 const NotBackupDialog = ({ onSubmit }) => {
-  const { interactive, accountModule } = useStore()
+  const { interactive, accountModule, backupModule } = useStore()
 
   const handleSubmit = () => {
-    interactive.setNotBackupDialogVisible(false)
+    backupModule.setNotBackupDialogVisible(false)
     onSubmit()
   }
 
@@ -21,8 +21,8 @@ const NotBackupDialog = ({ onSubmit }) => {
 
     if (res.success) {
       interactive.setSessionId(res.data.sessionId)
-      interactive.setMnemonic(res.data.mnemonic)
-      interactive.setBackupDialogVisible(true)
+      backupModule.setMnemonic(res.data.mnemonic)
+      backupModule.setBackupDialogVisible(true)
     }
   }
 
@@ -34,7 +34,7 @@ const NotBackupDialog = ({ onSubmit }) => {
           buttonContent={
             <>
               <Button
-                onClick={() => interactive.setNotBackupDialogVisible(false)}>
+                onClick={() => backupModule.setNotBackupDialogVisible(false)}>
                 Cancel
               </Button>
               <Button type="primary" onClick={handleSubmit}>

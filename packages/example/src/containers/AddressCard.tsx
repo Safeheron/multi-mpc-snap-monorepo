@@ -50,8 +50,14 @@ const DASHBOARD_LIST = [
 ]
 
 const AddressCard = () => {
-  const { accountModule, interactive, transactionModule, networkModule } =
-    useStore()
+  const {
+    accountModule,
+    interactive,
+    transactionModule,
+    networkModule,
+    recoveryModule,
+    backupModule,
+  } = useStore()
   const { address, walletName, balance, backuped, requestAccountLoading } =
     accountModule
 
@@ -72,7 +78,7 @@ const AddressCard = () => {
 
   const handleSend = () => {
     if (!backuped) {
-      interactive.setNotBackupDialogVisible(true)
+      backupModule.setNotBackupDialogVisible(true)
       return
     }
 
@@ -85,7 +91,7 @@ const AddressCard = () => {
     if (backuped) {
       setQrcodeVisible(true)
     } else {
-      interactive.setNotBackupDialogVisible(true)
+      backupModule.setNotBackupDialogVisible(true)
     }
   }
 
@@ -97,21 +103,21 @@ const AddressCard = () => {
 
     if (res.success) {
       interactive.setSessionId(res.data.sessionId)
-      interactive.setMnemonic(res.data.mnemonic)
-      interactive.setBackupDialogVisible(true)
+      backupModule.setMnemonic(res.data.mnemonic)
+      backupModule.setBackupDialogVisible(true)
     }
   }
 
   const handleCheckShard = async () => {
     const res = await checkMnemonic(walletName)
     if (res.success) {
-      interactive.setMnemonic(res.data)
-      interactive.setCheckShardDialogVisible(true)
+      backupModule.setMnemonic(res.data)
+      backupModule.setCheckShardDialogVisible(true)
     }
   }
 
   const handleRecover = async () => {
-    interactive.setRecoverPrepareDialogVisible(true)
+    recoveryModule.setRecoverPrepareDialogVisible(true)
   }
 
   const handleSyncAccountToMetaMask = async () => {
@@ -150,12 +156,17 @@ const AddressCard = () => {
       )}
 
       <div className={styles.account}>
-        <h1>{walletName || 'test'} </h1>
+        <h1>{walletName} </h1>
         {backuped ? (
-          <p>
-            <span>{address}</span>
-            <img src={copy} onClick={() => copyText(address, 'Address')} />
-          </p>
+          <>
+            <p>
+              <span>{address}</span>
+              <img src={copy} onClick={() => copyText(address, 'Address')} />
+            </p>
+            <h2>
+              {wei2eth(balance)} {currentChain?.nativeCurrency.symbol}
+            </h2>
+          </>
         ) : (
           <p className={styles.backup}>
             Your wallet has not been backed up yet. <br />
@@ -164,9 +175,6 @@ const AddressCard = () => {
             timely to ensure asset security.
           </p>
         )}
-        <h2>
-          {wei2eth(balance)} {currentChain?.nativeCurrency.symbol}
-        </h2>
       </div>
 
       <div className={styles.action}>
@@ -228,7 +236,7 @@ const AddressCard = () => {
         onClose={() => setQrcodeVisible(false)}
       />
       {interactive.sendDialogVisible && <SendDialog />}
-      {interactive.notBackupDialogVisible && (
+      {backupModule.notBackupDialogVisible && (
         <NotBackupDialog onSubmit={handleBackupApproval} />
       )}
     </div>

@@ -15,6 +15,7 @@ import { PartyId } from '@/service/types'
 import { MPCMessageType } from '@/service/types'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/CreateDialog.module.less'
+import { formatToUSDateTime } from '@/utils/dateUtil'
 import { tryToExtractChainId } from '@/utils/snapRequestUtil'
 
 const steps = [
@@ -61,7 +62,8 @@ const SignDialog = () => {
     setWebrtcChannel(rtcChannel)
     rtcChannel.on('channelOpen', async () => {
       setTimeout(async () => {
-        const { method, originalMethod, params } = signModule.pendingRequest
+        const { method, originalMethod, params, createTime } =
+          signModule.pendingRequest
         const thisChainId = tryToExtractChainId(originalMethod, params)
         const thisChainName = networkModule.getChainName(thisChainId)
 
@@ -76,9 +78,8 @@ const SignDialog = () => {
                 chainId: thisChainId,
                 balance: balanceEth,
                 nativeCurrency: currentChain?.nativeCurrency,
-                // TODO set timestamp and formatTime
-                timestamp: 0,
-                formatTime: '--',
+                timestamp: createTime,
+                formatTime: formatToUSDateTime(createTime),
               },
             },
           })

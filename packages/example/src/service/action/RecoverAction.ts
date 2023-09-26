@@ -39,7 +39,7 @@ class RecoverAction {
   ) {
     store.messageModule.rpcChannel?.next({
       messageType: MPCMessageType.recoverReady,
-      messageContent: !!store.interactive.mnemonic,
+      messageContent: store.recoveryModule.localKeyshareExist,
     })
   }
 
@@ -50,13 +50,13 @@ class RecoverAction {
       !!store.accountModule.address
     ) {
       // If both side have key shards, don't needed recovery
-      store.interactive.setMnemonicFormType('noNeed')
+      store.recoveryModule.setMnemonicFormType('noNeed')
       return
     }
     if (!!store.accountModule.address) {
       // If I have private key shards on my side
       store.interactive.setWalletName(store.accountModule.walletName)
-      store.interactive.setMnemonicFormType('done')
+      store.recoveryModule.setMnemonicFormType('done')
       store.messageModule.rpcChannel?.next({
         messageType: MPCMessageType.mnemonicReady,
         messageContent: {
@@ -67,13 +67,14 @@ class RecoverAction {
       })
     } else {
       // If I don't have a private key shard, jump to enter the mnemonic step
-      store.interactive.setMnemonicFormType('init')
+      store.recoveryModule.setMnemonicFormType('init')
       // If other side have key shards, there is no need to enter wallet Name
       if (messageArray.some(v => v.messageContent === true)) {
-        store.interactive.setOtherShard(true)
+        store.recoveryModule.setOtherShard(true)
       }
     }
   }
+
   async handleMnemonicReady(
     messageArray: MPCMessage<{
       hasMnemonic: boolean
@@ -88,10 +89,10 @@ class RecoverAction {
         ?.messageContent.walletName
       store.interactive.setWalletName(walletName)
     }
-    store.interactive.setRecoverStep(4)
+    store.recoveryModule.setRecoverStep(4)
     if (
       messageArray.every(v => v.messageContent.hasMnemonic) &&
-      store.interactive.mnemonic
+      store.recoveryModule.localKeyshareExist
     ) {
       await this.recoverPrepare(() => {
         store.messageModule.rpcChannel?.next({
@@ -100,7 +101,7 @@ class RecoverAction {
         })
       })
     } else {
-      if (store.interactive.mnemonic) {
+      if (store.recoveryModule.localKeyshareExist) {
         const remoteParty = messageArray.find(v => v.messageContent.hasMnemonic)
 
         const lostParty = messageArray.find(v => !v.messageContent.hasMnemonic)
@@ -108,7 +109,6 @@ class RecoverAction {
         if (!remoteParty || !lostParty) {
           throw new Error('failed')
         }
-
         this.remotePartyInfo = {
           partyId: remoteParty.messageContent.partyId,
           name: remoteParty.from,
@@ -136,7 +136,7 @@ class RecoverAction {
   async handleKeyPairReady(
     messageArray: MPCMessage<{ partyId: PartyId; pubKey: string }>[]
   ) {
-    if (store.interactive.mnemonic) {
+    if (store.recoveryModule.localKeyshareExist) {
       const remotePub = messageArray.find(
         v => v.messageContent.partyId === this.lostPartyInfo?.partyId
       )?.messageContent.pubKey
@@ -272,15 +272,16 @@ class RecoverAction {
     const res = await refreshSuccess(store.interactive.sessionId)
     if (res.success) {
       store.accountModule.setAccount(res.data)
-      store.interactive.setRecoverStep(5)
+      store.recoveryModule.setRecoverStep(5)
       this.destroy()
     }
   }
 
   // --broadcast--
   async handleMnemonicSkip() {
-    store.interactive.setSkip(true)
+    store.recoveryModule.setSkip(true)
   }
+
   async handlePartySecretKeyReady(
     message: MPCMessage<{
       partyId: PartyId
@@ -307,8 +308,8 @@ class RecoverAction {
         pubKeyOfThreeParty,
         this.remotePubKeys
       )
+
       if (res.success) {
-        store.interactive.setMnemonic(res.data)
         await this.recoverPrepare(() => {
           store.messageModule.rpcChannel?.next({
             messageType: MPCMessageType.recoverSuccess,
@@ -323,7 +324,7 @@ class RecoverAction {
     const res = await recoverPrepare(
       store.interactive.sessionId,
       store.interactive.walletName,
-      store.interactive.mnemonic
+      store.recoveryModule.inputMnemonic
     )
     if (res.success) {
       next && next()
@@ -333,10 +334,11 @@ class RecoverAction {
   destroy() {
     store.interactive.setProgress(0)
     store.interactive.setWalletName('')
-    store.interactive.setMnemonic('')
-    store.interactive.setOtherShard(false)
-    store.interactive.setSkip(false)
-    store.interactive.setMnemonicFormType('init')
+
+    store.recoveryModule.setInputMnemonic('')
+    store.recoveryModule.setOtherShard(false)
+    store.recoveryModule.setSkip(false)
+    store.recoveryModule.setMnemonicFormType('init')
   }
 }
 

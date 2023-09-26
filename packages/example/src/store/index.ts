@@ -1,7 +1,9 @@
 import { configure } from 'mobx'
 import { createContext, useContext } from 'react'
 
+import BackupModule from '@/store/module/BackupModule'
 import NetworkModule from '@/store/module/NetworkModule'
+import RecoveryModule from '@/store/module/RecoveryModule'
 import SignModule from '@/store/module/SignModule'
 
 import AccountModule from './module/AccountModule'
@@ -20,6 +22,9 @@ const store = {
   transactionModule: new TransactionModule(),
   signModule: new SignModule(),
   networkModule: new NetworkModule(),
+
+  backupModule: new BackupModule(),
+  recoveryModule: new RecoveryModule(),
 }
 const StoreContext = createContext<typeof store>(store)
 

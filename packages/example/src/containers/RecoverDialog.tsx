@@ -41,15 +41,21 @@ const steps = [
 const RecoverDialog = () => {
   useSnapKeepAlive()
 
-  const { interactive, messageModule, accountModule } = useStore()
+  const {
+    interactive,
+    messageModule,
+    accountModule,
+    recoveryModule,
+    backupModule,
+  } = useStore()
 
   const [webrtcChannel1, setWebrtcChannel1] = useState<WebRTCChannel>()
   const [webrtcChannel2, setWebrtcChannel2] = useState<WebRTCChannel>()
 
-  const step = interactive.recoverStep
+  const step = recoveryModule.recoverStep
   useEffect(() => {
     return () => {
-      interactive.setRecoverStep(0)
+      recoveryModule.setRecoverStep(0)
     }
   }, [])
 
@@ -76,7 +82,7 @@ const RecoverDialog = () => {
             ])
           )
           messageModule.messageRelayer?.join(channel1)
-          interactive.setRecoverStep(step + 1)
+          recoveryModule.setRecoverStep(step + 1)
         }, 1000)
       })
     } else if (step === 2) {
@@ -95,7 +101,7 @@ const RecoverDialog = () => {
             ])
           )
           messageModule.messageRelayer?.join(channel2)
-          interactive.setRecoverStep(step + 1)
+          recoveryModule.setRecoverStep(step + 1)
         }, 1000)
       })
     }
@@ -107,7 +113,7 @@ const RecoverDialog = () => {
       content:
         'Do you confirm the cancellation? Canceling will terminate this operational process.',
       onOk: () => {
-        interactive.setRecoverDialogVisible(false)
+        recoveryModule.setRecoverDialogVisible(false)
         messageModule.rpcChannel?.next({
           messageType: MPCMessageType.abort,
           sendType: 'broadcast',
@@ -118,21 +124,21 @@ const RecoverDialog = () => {
   }
 
   const handleBack = () => {
-    interactive.setRecoverDialogVisible(false)
+    recoveryModule.setRecoverDialogVisible(false)
   }
 
   const handleBackupLater = () => {
-    interactive.setRecoverDialogVisible(false)
+    recoveryModule.setRecoverDialogVisible(false)
   }
 
   const handleBackupWallet = async () => {
     await accountModule.requestAccount()
     const res = await backupApproval(accountModule.walletName)
     if (res.success) {
-      interactive.setRecoverDialogVisible(false)
+      recoveryModule.setRecoverDialogVisible(false)
       interactive.setSessionId(res.data.sessionId)
-      interactive.setMnemonic(res.data.mnemonic)
-      interactive.setBackupDialogVisible(true)
+      backupModule.setMnemonic(res.data.mnemonic)
+      backupModule.setBackupDialogVisible(true)
     }
   }
 
@@ -151,7 +157,7 @@ const RecoverDialog = () => {
                 </Button>
                 <Button onClick={handleBackupLater}>Backup Later</Button>
               </>
-            ) : step === 3 && interactive.mnemonicFormType === 'noNeed' ? (
+            ) : step === 3 && recoveryModule.mnemonicFormType === 'noNeed' ? (
               <Button type="primary" onClick={handleBack}>
                 Back to the MPC Wallet
               </Button>

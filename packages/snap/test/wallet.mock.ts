@@ -1,5 +1,4 @@
 import sinon from 'sinon'
-
 export interface Wallet {
   registerRpcMessageHandler: (fn) => unknown
   request(options: {
@@ -14,8 +13,8 @@ export class WalletMock implements Wallet {
   public readonly requestStub = sinon.stub()
 
   public readonly rpcStubs = {
+    snap_getBip44Entropy: sinon.stub(),
     snap_dialog: sinon.stub(),
-    snap_getBip44Entropy_461: sinon.stub(),
     snap_manageState: sinon.stub(),
   }
 
@@ -23,8 +22,11 @@ export class WalletMock implements Wallet {
    * Calls this.requestStub or this.rpcStubs[req.method], if the method has
    * a dedicated stub.
    */
-  public request(args: { method: string; params: unknown[] }): unknown {
-    const { method, params = [] } = args
+  public request(args: {
+    method: string
+    params: { [key: string]: unknown } | unknown[]
+  }): unknown {
+    const { method, params } = args
     if (Object.hasOwnProperty.call(this.rpcStubs, method)) {
       if (Array.isArray(params)) {
         return this.rpcStubs[method](...params)
@@ -42,6 +44,4 @@ export class WalletMock implements Wallet {
       (stub: ReturnType<typeof sinon.stub>) => stub.reset()
     )
   }
-
-  public prepareForKeyShard(): void {}
 }

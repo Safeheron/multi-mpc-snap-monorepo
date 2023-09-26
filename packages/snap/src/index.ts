@@ -1,43 +1,67 @@
-import { buildHandlersChain } from '@metamask/keyring-api'
 import type { OnRpcRequestHandler } from '@metamask/snaps-types'
 
 import {
   backupHandler,
-  internalMPCHandler,
   keygenHandler,
   keyringHandler,
+  otherHandlers,
   recoverHandler,
-  setupHandler,
+  setup,
   signHandler,
-} from '@/rpc/internalMPCHandler'
-import { loggerHandler } from '@/rpc/loggerHandler'
-import { permissionsHandler } from '@/rpc/permissions'
-import { errored } from '@/utils/snapRpcUtil'
+} from '@/rpc/handlers'
+import {
+  isBackupMethod,
+  isKeyringRpcMethod,
+  isMPCKeygenMethod,
+  isMPCSignMethod,
+  isRecoveryMethod,
+  permissionsDetect,
+} from '@/rpc/permissions'
 
-// don't change the sort of handlers
-const handler: OnRpcRequestHandler = buildHandlersChain(
-  setupHandler,
-  loggerHandler,
-  permissionsHandler,
-  internalMPCHandler,
-  keygenHandler,
-  backupHandler,
-  signHandler,
-  recoverHandler,
-  keyringHandler
-)
+const onRpcRequest: OnRpcRequestHandler = async snapRequest => {
+  const { request, origin } = snapRequest
+  const method = request.method
 
-const onRpcRequest: OnRpcRequestHandler = async snapRpcRequest => {
+  console.log(
+    `request >> (id=${
+      request.id ?? 'null'
+    }, origin=${origin}, method=${method}) :`,
+    request
+  )
   try {
-    const response = await handler(snapRpcRequest)
-    console.log(
-      `response by request method [${snapRpcRequest.request.method}] >>`,
-      response
-    )
-    return response
+    await permissionsDetect(snapRequest)
+    await setup()
+
+    // Handle keyring methods.
+    if (isKeyringRpcMethod(method)) {
+      return keyringHandler(snapRequest)
+    }
+
+    if (isMPCKeygenMethod(method)) {
+      return keygenHandler(snapRequest)
+    }
+
+    if (isMPCSignMethod(method)) {
+      return signHandler(snapRequest)
+    }
+
+    if (isRecoveryMethod(method)) {
+      return recoverHandler(snapRequest)
+    }
+
+    if (isBackupMethod(method)) {
+      return backupHandler(snapRequest)
+    }
+
+    return otherHandlers(snapRequest)
   } catch (e) {
-    console.log('handle rpc request error: ', e)
-    return errored(e?.message ?? 'Unknown error.')
+    console.log(
+      `request error (id=${
+        request.id ?? 'null'
+      }, origin=${origin}, method=${method}) :`,
+      e
+    )
+    throw e
   }
 }
 

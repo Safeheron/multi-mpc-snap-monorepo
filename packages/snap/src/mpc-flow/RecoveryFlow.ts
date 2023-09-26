@@ -12,6 +12,7 @@ import {
   Party,
   PartyWithZkp,
   PubKey,
+  RecoverApprovalResult,
   SnapRpcResponse,
 } from '@safeheron/mpcsnap-types'
 import { ethers } from 'ethers'
@@ -19,7 +20,11 @@ import { v4 as uuidV4 } from 'uuid'
 
 import StateManager, { SnapAccount } from '@/StateManager'
 import { SUPPORTED_METHODS } from '@/utils/configs'
-import { convertAccount, syncAccountToMetaMask } from '@/utils/snapAccountApi'
+import {
+  convertSnapAccountToKeyringAccount,
+  newSnapAccount,
+  syncAccountToMetaMask,
+} from '@/utils/snapAccountApi'
 import { requestConfirm } from '@/utils/snapDialog'
 import { errored, succeed } from '@/utils/snapRpcUtil'
 
@@ -28,6 +33,7 @@ import { BaseFlow } from './BaseFlow'
 class RecoveryFlow extends BaseFlow {
   private keyRecovery?: KeyRecovery
   private keyRefresh?: KeyRefresh
+
   private mpcHelper: MPCHelper
   private signKey = ''
   private walletName = ''
@@ -44,18 +50,9 @@ class RecoveryFlow extends BaseFlow {
     this.mpcHelper = mpcInstance.mpcHelper
   }
 
-  async recoverApproval(): Promise<
-    SnapRpcResponse<{ sessionId: string; mnemonic: string }>
-  > {
+  async recoverApproval(): Promise<SnapRpcResponse<RecoverApprovalResult>> {
     await requestConfirm(panel([heading('Confirm to recover an MPC wallet?')]))
-
-    this.walletName = ''
-    this.pubKey = ''
-    this.privKey = ''
-    this.remotePub = ''
-    this.newSignKey = ''
-    this.mnemonic = ''
-    this.backuped = false
+    this.cleanup()
 
     this.sessionId = uuidV4()
     const wallet = this.getWallet()
@@ -71,20 +68,29 @@ class RecoveryFlow extends BaseFlow {
 
     this.keyRecovery = this.mpcInstance.KeyRecovery.getCoSigner()
 
-    // TODO The mnemonic should not be returned here
-    return succeed({ sessionId: this.sessionId, mnemonic: this.mnemonic })
+    return succeed({ sessionId: this.sessionId, keyshareExist: !!this.signKey })
   }
 
   async recoverPrepare(
     sessionId: string,
     walletName: string,
-    mnemonic: string
+    mnemonic?: string
   ): Promise<SnapRpcResponse<boolean>> {
     this.verifySession(sessionId)
 
+    if (walletName.replace(/[^\x00-\xff]/g, 'aa').length > 60) {
+      return errored(`Wallet name must Within 60 characters.`)
+    }
+
+    if (mnemonic && !!this.signKey) {
+      return errored('Local keyshare exist. Param [mnemonic] is not needed.')
+    }
+
     this.walletName = walletName
-    this.mnemonic = mnemonic
-    this.backuped = true
+    if (mnemonic) {
+      this.mnemonic = mnemonic
+      this.backuped = true
+    }
     return succeed(true)
   }
 
@@ -160,19 +166,18 @@ class RecoveryFlow extends BaseFlow {
         pub => pub.partyId === shard.partyId
       )?.pubKey
 
-      console.log('remotePub', remotePub)
       const res = await this.decrypt(shard.shard, remotePub)
-      console.log('decrypt res', res)
 
       decryptedPartialShard.push(res)
     }
-    console.log('partialShards', decryptedPartialShard)
 
     const res = await this.mpcHelper.aggregateKeyShard(decryptedPartialShard, X)
-    console.log('generateMnemonic res', res)
+    if (res.err) {
+      return errored('cannot aggregate keyshard.')
+    }
+    this.mnemonic = res.mnemo
 
-    // TODO The mnemonic should not be returned here
-    return succeed(res.mnemo)
+    return succeed('')
   }
 
   async refreshPrepare(
@@ -237,25 +242,22 @@ class RecoveryFlow extends BaseFlow {
         backuped: this.backuped,
       }
     } else {
-      newState = {
-        id: uuidV4(),
-        name: this.walletName!,
+      newState = newSnapAccount(
+        this.walletName!,
         address,
-        options: {},
-        supportedMethods: SUPPORTED_METHODS,
-        type: 'eip155:eoa',
-        backuped: this.backuped,
-        pubkey: this.pubKey!,
-        signKey: this.newSignKey!,
-      }
+        this.pubKey!,
+        this.newSignKey!
+      )
     }
 
     await this.stateManager.saveOrUpdateAccount(newState)
 
     if (this.backuped) {
-      const metamaskAccount = convertAccount(newState)
+      const metamaskAccount = convertSnapAccountToKeyringAccount(newState)
       await syncAccountToMetaMask(metamaskAccount)
     }
+
+    this.cleanup()
 
     return succeed({
       walletName,
@@ -282,6 +284,20 @@ class RecoveryFlow extends BaseFlow {
     }
     const res = await this.mpcHelper.decrypt(this.privKey, remotePub, cypher)
     return res.plain
+  }
+
+  private cleanup() {
+    this.sessionId = ''
+    this.walletName = ''
+    this.pubKey = ''
+    this.privKey = ''
+    this.remotePub = ''
+    this.newSignKey = ''
+    this.mnemonic = ''
+    this.backuped = false
+
+    this.keyRecovery = undefined
+    this.keyRefresh = undefined
   }
 }
 

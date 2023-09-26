@@ -1,6 +1,9 @@
 import { MPCMessage } from '../types'
 import { MessageChannel } from './MessageChannel'
 
+/**
+ * @deprecated
+ */
 export class WebsocketMessageChannel extends MessageChannel {
   websocketClient: WebSocket
 

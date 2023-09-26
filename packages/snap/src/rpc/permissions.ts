@@ -1,6 +1,3 @@
-import { MethodNotSupportedError } from '@metamask/keyring-api'
-import { OnRpcRequestHandler } from '@metamask/snaps-types'
-
 enum SnapKeyringAccountMethods {
   ListAccounts = 'keyring_listAccounts',
   CreateAccount = 'keyring_createAccount',
@@ -19,26 +16,29 @@ enum SnapKeyringRequestMethods {
   RejectRequest = 'keyring_rejectRequest',
 }
 
+// ----------------------------------
+//  internal mpc methods
+
 enum InternalSnapCommonMethods {
   KeepAlive = 'mpc_snapKeepAlive',
 }
 
-enum InternalMPCAccountMethods {
-  ListAccounts = 'mpc_requestAccount',
-  DeleteAccount = 'mpc_deleteWallet',
-  SyncAccount = 'mpc_syncAccount',
+// keygen methods
+enum InternalMPCKeygenMethods {
   ApprovalCreateAccount = 'mpc_createApproval',
   CreateAccountContext = 'mpc_createContext',
   CreateAccountRound = 'mpc_createRound',
   CreateAccountDone = 'mpc_createSuccess',
 }
 
+// mpc-sign methods
 enum InternalMPCSignMethods {
   ApprovalSign = 'mpc_signApproval',
   SignContext = 'mpc_signContext',
   SignRound = 'mpc_signRound',
 }
 
+// recovery methods
 enum InternalMPCRecoveryMethods {
   ApprovalRecovery = 'mpc_recoverApproval',
   RecoveryPrepare = 'mpc_recoverPrepare',
@@ -46,19 +46,24 @@ enum InternalMPCRecoveryMethods {
   RecoveryContext = 'mpc_recoverContext',
   RecoveryRound = 'mpc_recoverRound',
   RecoveryMnemonic = 'mpc_recoverMnemonic',
-}
-
-enum InternalMPCRefreshMethods {
   RefreshPrepare = 'mpc_refreshPrepare',
   RefreshContext = 'mpc_refreshContext',
   RefreshRound = 'mpc_refreshRound',
   RefreshDone = 'mpc_refreshSuccess',
 }
 
+// backup methods
 enum InternalMPCMnemonicMethods {
   ApprovalBackup = 'mpc_backupApproval',
   BackupDone = 'mpc_backupUpdate',
+}
+
+enum InternalMPCOtherMethods {
+  ListAccounts = 'mpc_requestAccount',
+  DeleteAccount = 'mpc_deleteWallet',
+  SyncAccount = 'mpc_syncAccount',
   CheckMnemonic = 'mpc_checkMnemonic',
+  listPendingRequests = 'internal_listPendingRequests',
 }
 
 const PERMISSIONS = new Map<string, string[]>()
@@ -67,33 +72,24 @@ const PERMISSIONS = new Map<string, string[]>()
  * resolve request by metamask
  */
 PERMISSIONS.set('metamask', [
-  SnapKeyringAccountMethods.ListAccounts,
-  SnapKeyringAccountMethods.DeleteAccount,
-  SnapKeyringAccountMethods.UpdateAccount,
-  SnapKeyringRequestMethods.ListRequests,
-  SnapKeyringRequestMethods.SubmitRequest,
-  SnapKeyringRequestMethods.ApproveRequest,
-  SnapKeyringRequestMethods.RejectRequest,
+  ...Object.values(SnapKeyringAccountMethods),
+  ...Object.values(SnapKeyringRequestMethods),
 ])
 
-const local_websites = [
-  'http://localhost:8080',
-  'http://127.0.0.1:8080',
-  'https://test-mpcsnap.safeheron.com',
-  'https://mpcsnap.safeheron.com',
-]
+const websites = ALLOW_SITES
+
 const website_permissions = [
   ...Object.values(InternalMPCMnemonicMethods),
-  ...Object.values(InternalMPCRefreshMethods),
+  ...Object.values(InternalMPCKeygenMethods),
   ...Object.values(InternalMPCRecoveryMethods),
   ...Object.values(InternalMPCSignMethods),
-  ...Object.values(InternalMPCAccountMethods),
+  ...Object.values(InternalMPCOtherMethods),
   ...Object.values(InternalSnapCommonMethods),
   ...Object.values(SnapKeyringAccountMethods),
   ...Object.values(SnapKeyringRequestMethods),
 ]
 
-local_websites.forEach(lw => {
+websites.forEach(lw => {
   PERMISSIONS.set(lw, website_permissions)
 })
 
@@ -101,12 +97,39 @@ function hasPermission(origin: string, method: string): boolean {
   return Boolean(PERMISSIONS.get(origin)?.includes(method))
 }
 
-export const permissionsHandler: OnRpcRequestHandler = async ({
-  origin,
-  request,
-}): Promise<never> => {
+export const permissionsDetect = async ({ origin, request }): Promise<void> => {
   if (!hasPermission(origin, request.method)) {
     throw new Error(`origin ${origin} cannot call method ${request.method}`)
   }
-  throw new MethodNotSupportedError(request.method)
+}
+
+export function isKeyringRpcMethod(method) {
+  return (
+    Object.values(SnapKeyringAccountMethods).includes(method) ||
+    Object.values(SnapKeyringRequestMethods).includes(method)
+  )
+}
+
+export function isMPCKeygenMethod(method: string) {
+  return Object.values(InternalMPCKeygenMethods).includes(
+    method as InternalMPCKeygenMethods
+  )
+}
+
+export function isMPCSignMethod(method: string) {
+  return Object.values(InternalMPCSignMethods).includes(
+    method as InternalMPCSignMethods
+  )
+}
+
+export function isRecoveryMethod(method: string) {
+  return Object.values(InternalMPCRecoveryMethods).includes(
+    method as InternalMPCRecoveryMethods
+  )
+}
+
+export function isBackupMethod(method: string) {
+  return Object.values(InternalMPCMnemonicMethods).includes(
+    method as InternalMPCMnemonicMethods
+  )
 }

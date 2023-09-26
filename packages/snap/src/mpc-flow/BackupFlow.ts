@@ -5,7 +5,7 @@ import { AccountItem, SnapRpcResponse } from '@safeheron/mpcsnap-types'
 import { v4 as getUuid } from 'uuid'
 
 import StateManager from '@/StateManager'
-import { convertAccount, syncAccountToMetaMask } from '@/utils/snapAccountApi'
+import { convertSnapAccountToKeyringAccount, syncAccountToMetaMask } from '@/utils/snapAccountApi'
 import { requestConfirm } from '@/utils/snapDialog'
 import { errored, succeed } from '@/utils/snapRpcUtil'
 
@@ -19,7 +19,6 @@ class BackupFlow extends BaseFlow {
     this.mpcHelper = mpcInstance.mpcHelper
   }
 
-  // TODO add wallet id param
   async backupApproval(
     walletName: string
   ): Promise<SnapRpcResponse<{ sessionId: string; mnemonic: string }>> {
@@ -49,7 +48,7 @@ class BackupFlow extends BaseFlow {
     wallet.backuped = true
 
     // First add account to metamask
-    const metamaskAccount: KeyringAccount = convertAccount(wallet)
+    const metamaskAccount: KeyringAccount = convertSnapAccountToKeyringAccount(wallet)
     await syncAccountToMetaMask(metamaskAccount)
     console.log('sync account to metamask result: ', metamaskAccount)
 

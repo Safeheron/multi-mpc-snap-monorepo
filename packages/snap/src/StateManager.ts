@@ -17,14 +17,9 @@ class StateManager {
       params: { operation: 'get' },
     })) as MPCSnapState
 
-    console.debug('Snap init state: ', state)
-
     state = state ?? {}
     // shim empty requests
     state.requests = state.requests ?? {}
-
-    // TODO delete in release version
-    console.debug('State Manager init: ', state.account, state.requests)
 
     this.#state = state
   }
@@ -46,18 +41,23 @@ class StateManager {
   }
 
   async addRequest(requestId: string, request: KeyringRequest) {
+    const newWrapRequest: WrappedKeyringRequest = {
+      createTime: Date.now(),
+      request,
+    }
+
     this.#state = {
       account: this.account,
       requests: {
         ...this.requests,
-        [requestId]: request,
+        [requestId]: newWrapRequest,
       },
     }
     await this.#saveState()
   }
 
   findRequest(requestId: string): KeyringRequest | undefined {
-    return this.#state?.requests?.[requestId]
+    return this.#state?.requests?.[requestId]?.request
   }
 
   isValidRequest(requestId: string) {
@@ -80,6 +80,14 @@ class StateManager {
     await this.#saveState()
   }
 
+  async deleteAllRequests() {
+    this.#state = {
+      account: this.account,
+      requests: {},
+    }
+    await this.#saveState()
+  }
+
   async #saveState() {
     await snap.request({
       method: 'snap_manageState',
@@ -88,17 +96,21 @@ class StateManager {
   }
 }
 
-export type MPCSnapState = {
-  account?: SnapAccount
-  requests: Record<string, KeyringRequest>
+export type WrappedKeyringRequest = {
+  createTime: number
+  request: KeyringRequest
 }
 
-export type WrappedKeyringRequest = { createTime: number } & KeyringRequest
+export type MPCSnapState = {
+  account?: SnapAccount
+  requests: Record<string, WrappedKeyringRequest>
+}
 
 export type SnapAccount = KeyringAccount & {
   signKey: string
   backuped: boolean
   pubkey: string
+  name: string
 }
 
 export default StateManager

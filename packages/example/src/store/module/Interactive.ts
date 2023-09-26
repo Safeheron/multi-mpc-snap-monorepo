@@ -2,8 +2,6 @@ import { makeAutoObservable } from 'mobx'
 
 import { HashItemModel } from '@/service/models'
 
-type MnemonicFormType = 'init' | 'done' | 'noNeed'
-
 class Interactive {
   // common
   loading = false
@@ -22,18 +20,6 @@ class Interactive {
   signTransactionDialogVisible = false
   signStep = 1
   txHash: HashItemModel = {} as HashItemModel
-
-  // recover
-  mnemonic = ''
-  notBackupDialogVisible = false
-  backupDialogVisible = false
-  checkShardDialogVisible = false
-  recoverPrepareDialogVisible = false
-  recoverDialogVisible = false
-  recoverStep = 1
-  mnemonicFormType: MnemonicFormType = 'init'
-  isSkip: boolean
-  hasOtherShard: boolean
 
   constructor() {
     makeAutoObservable(this)
@@ -89,40 +75,6 @@ class Interactive {
 
   setProgressAdd(value) {
     this.progress += value
-  }
-
-  // TODO fix here, move mnemonic to another place
-  setMnemonic(value) {
-    this.mnemonic = value
-  }
-  setNotBackupDialogVisible(value) {
-    this.notBackupDialogVisible = value
-  }
-  setBackupDialogVisible(value) {
-    this.backupDialogVisible = value
-  }
-  setCheckShardDialogVisible(value) {
-    this.checkShardDialogVisible = value
-  }
-  setRecoverPrepareDialogVisible(value) {
-    this.recoverPrepareDialogVisible = value
-  }
-  setRecoverDialogVisible(value) {
-    this.recoverDialogVisible = value
-  }
-  setRecoverStep(step) {
-    this.recoverStep = step
-  }
-
-  setSkip(value) {
-    this.isSkip = value
-  }
-
-  setOtherShard(value) {
-    this.hasOtherShard = value
-  }
-  setMnemonicFormType(type: MnemonicFormType) {
-    this.mnemonicFormType = type
   }
 }
 

@@ -5,14 +5,14 @@ import { useStore } from '@/store'
 import styles from '@/styles/containers/CreateOrImportGuide.module.less'
 
 const CreateOrImportGuide = () => {
-  const { interactive } = useStore()
+  const { interactive, recoveryModule } = useStore()
 
   const handleCreate = async () => {
     interactive.setWalletNameDialogVisible(true)
   }
 
   const handleRecover = async () => {
-    interactive.setRecoverPrepareDialogVisible(true)
+    recoveryModule.setRecoverPrepareDialogVisible(true)
   }
 
   return (

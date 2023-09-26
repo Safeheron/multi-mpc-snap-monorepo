@@ -36,5 +36,5 @@ export enum SnapInvokeMethods {
   refreshRound = 'mpc_refreshRound',
   refreshSuccess = 'mpc_refreshSuccess',
 
-  test = 'mpc_test',
+  listPendingRequests = 'internal_listPendingRequests',
 }

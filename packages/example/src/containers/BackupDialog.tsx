@@ -22,8 +22,8 @@ const RANDOM_NUMBER = IS_PROD ? 6 : 1
 const BackupDialog = () => {
   useSnapKeepAlive()
 
-  const { interactive, accountModule } = useStore()
-  const { mnemonic } = interactive
+  const { interactive, accountModule, backupModule } = useStore()
+  const { mnemonic } = backupModule
 
   const [step, setStep] = useState(0)
   const [lackMnemonic, setLackMnemonic] = useState<string[]>([])
@@ -63,8 +63,8 @@ const BackupDialog = () => {
   }
 
   const onClose = () => {
-    interactive.setBackupDialogVisible(false)
-    interactive.setMnemonic('')
+    backupModule.setBackupDialogVisible(false)
+    backupModule.setMnemonic('')
   }
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>, index) => {

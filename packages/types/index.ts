@@ -1,4 +1,10 @@
 import {
+  KeyringAccount,
+  KeyringAccountStruct,
+  KeyringRequest,
+} from '@metamask/keyring-api'
+import {
+  any,
   array,
   assign,
   enums,
@@ -8,7 +14,7 @@ import {
   optional,
   record,
   string,
-  unknown,
+  union,
 } from 'superstruct'
 
 export const PartyIdStruct = enums(['A', 'B', 'C'])
@@ -178,32 +184,24 @@ export const CreateSuccessStruct = object({
 
 export type CreateSuccess = Infer<typeof CreateSuccessStruct>
 
-enum EthMethod {
-  PersonalSign = 'personal_sign',
-  Sign = 'eth_sign',
-  SendTransaction = 'eth_sendTransaction',
-  SignTransaction = 'eth_signTransaction',
-  SignTypedData = 'eth_signTypedData',
-  SignTypedDataV1 = 'eth_signTypedData_v1',
-  SignTypedDataV3 = 'eth_signTypedData_v3',
-  SignTypedDataV4 = 'eth_signTypedData_v4',
-}
+const KeyringAccountSupportedMethodsStruct = enums([
+  'personal_sign',
+  'eth_sendTransaction',
+  'eth_sign',
+  'eth_signTransaction',
+  'eth_signTypedData',
+  'eth_signTypedData_v1',
+  'eth_signTypedData_v2',
+  'eth_signTypedData_v3',
+  'eth_signTypedData_v4',
+])
 
 export const SignApprovalStruct = object({
   ...CommonHeader,
   method: literal('mpc_signApproval'),
   params: object({
-    method: enums([
-      `${EthMethod.PersonalSign}`,
-      `${EthMethod.Sign}`,
-      `${EthMethod.SignTransaction}`,
-      `${EthMethod.SendTransaction}`,
-      `${EthMethod.SignTypedData}`,
-      `${EthMethod.SignTypedDataV1}`,
-      `${EthMethod.SignTypedDataV3}`,
-      `${EthMethod.SignTypedDataV4}`,
-    ]),
-    params: record(string(), unknown()),
+    method: KeyringAccountSupportedMethodsStruct,
+    params: union([record(string(), any()), string()]),
     requestId: optional(string()),
   }),
 })
@@ -236,13 +234,18 @@ export interface RecoverApproval {
   method: 'mpc_recoverApproval'
 }
 
+export type RecoverApprovalResult = {
+  sessionId: string
+  keyshareExist: boolean
+}
+
 export const RecoverPrepareStruct = object({
   ...CommonHeader,
   method: literal('mpc_recoverPrepare'),
   params: object({
     sessionId: string(),
     walletName: string(),
-    mnemonic: string(),
+    mnemonic: optional(string()),
   }),
 })
 
@@ -365,9 +368,6 @@ export type MetamaskSnapMpcSnapRequest =
   | RefreshRound
   | RefreshPrepare
   | RefreshSuccess
-  | {
-      method: 'mpc_test'
-    }
 
 export interface AccountItem {
   walletName: string
@@ -412,3 +412,14 @@ export interface Eip1559Params {
 
 export type TransactionObject = TransactionBaseParams &
   (LegacyParams | Eip1559Params)
+
+export type KeyringAccountSupportedMethodsArray =
+  KeyringAccount['supportedMethods']
+
+export type KeyringAccountSupportedMethods =
+  KeyringAccountSupportedMethodsArray[number]
+
+export type WrappedKeyringRequest = {
+  createTime: number
+  request: KeyringRequest
+}

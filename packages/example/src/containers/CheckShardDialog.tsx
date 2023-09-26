@@ -10,8 +10,8 @@ import { useStore } from '@/store'
 import styles from '@/styles/containers/BackupDialog.module.less'
 
 const CheckShardDialog = () => {
-  const { interactive } = useStore()
-  const { mnemonic } = interactive
+  const { backupModule } = useStore()
+  const { mnemonic } = backupModule
   const [step, setStep] = useState(0)
 
   const prev = () => {
@@ -23,7 +23,7 @@ const CheckShardDialog = () => {
   }
 
   const onClose = () => {
-    interactive.setCheckShardDialogVisible(false)
+    backupModule.setCheckShardDialogVisible(false)
   }
 
   const renderStep = () => {

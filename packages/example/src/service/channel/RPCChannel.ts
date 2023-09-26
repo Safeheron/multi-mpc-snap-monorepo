@@ -130,7 +130,7 @@ export class RPCChannel extends MessageChannel {
   }
 
   private handleAbort(type) {
-    const { interactive } = store
+    const { interactive, recoveryModule } = store
     interactive.setProgress(0)
     switch (type) {
       case 'create':
@@ -145,14 +145,14 @@ export class RPCChannel extends MessageChannel {
 
       case 'recover':
         message.error('Recover canceled')
-        interactive.setRecoverDialogVisible(false)
+        recoveryModule.setRecoverDialogVisible(false)
         break
 
       default:
         message.error('Process Aborted.')
         interactive.setCreateDialogVisible(false)
         interactive.setSignTransactionDialogVisible(false)
-        interactive.setRecoverDialogVisible(false)
+        recoveryModule.setRecoverDialogVisible(false)
         break
     }
   }

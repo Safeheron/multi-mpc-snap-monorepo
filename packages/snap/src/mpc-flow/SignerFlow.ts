@@ -8,6 +8,10 @@ import {
 import { ethers, UnsignedTransaction } from 'ethers'
 import { v4 as uuidV4 } from 'uuid'
 
+import {
+  KeyringAccountSupportedMethods,
+  KeyringAccountSupportedMethodsArray,
+} from '@/@types/interface'
 import StateManager from '@/StateManager'
 import { serialize } from '@/utils/serializeUtil'
 import { submitSignResponse } from '@/utils/snapAccountApi'
@@ -16,8 +20,8 @@ import { normalizeTx, trimNullableProperty } from '@/utils/transactionUtil'
 
 import { BaseFlow } from './BaseFlow'
 
-function isTransaction(method: KeyringAccount['supportedMethods'][number]) {
-  return method === 'eth_sendTransaction' || method === 'eth_signTransaction'
+function isTransaction(method: KeyringAccountSupportedMethods) {
+  return method === 'eth_signTransaction'
 }
 
 class KeyGenFlow extends BaseFlow {
@@ -25,8 +29,8 @@ class KeyGenFlow extends BaseFlow {
 
   private requestOrigin: 'metamask' | 'website' = 'website'
   private metamaskRequestId?: string
-  private signMethod?: KeyringAccount['supportedMethods'][number]
-  private signParams?: Record<string, any>
+  private signMethod?: KeyringAccountSupportedMethods
+  private signParams?: Record<string, any> | string
 
   private normalizedTx?: UnsignedTransaction
   private signKey?: string
@@ -41,8 +45,8 @@ class KeyGenFlow extends BaseFlow {
    * @param requestId
    */
   async signApproval(
-    method: KeyringAccount['supportedMethods'][number],
-    params: Record<string, any>,
+    method: KeyringAccountSupportedMethods,
+    params: Record<string, any> | string,
     requestId?: string
   ): Promise<SnapRpcResponse<string>> {
     const wallet = this.getWalletWithError()
@@ -73,7 +77,7 @@ class KeyGenFlow extends BaseFlow {
     this.requestOrigin = Boolean(requestId) ? 'metamask' : 'website'
     this.signMethod = method
     this.signParams = params
-    if (isTransaction(this.signMethod)) {
+    if (isTransaction(this.signMethod!)) {
       this.normalizedTx = normalizeTx(params as TransactionObject)
     }
     this.signKey = wallet.signKey
@@ -102,20 +106,17 @@ class KeyGenFlow extends BaseFlow {
   async runRound(sessionId: string, remoteMessageList: ComputeMessage[]) {
     this.verifySession(sessionId)
 
-    const round = this.signer!.lastIndex
-
-    console.log('start sign round: ', round)
     const res = await this.signer!.runRound(remoteMessageList)
-    console.log('end sign round: ', round, res)
+    const isComplete = this.signer!.isComplete
 
-    if (this.signer!.isComplete) {
+    if (isComplete) {
       const signature = this.signer!.getSignature()
       if (this.requestOrigin === 'metamask') {
         const { r, s, v } = signature
+        const { maxFeePerGas, chainId } = this.signParams as Record<string, any>
         let resultSig: any
         if (isTransaction(this.signMethod!)) {
-          const isEip1559 = Boolean(this.signParams!.maxFeePerGas)
-          const chainId = this.signParams!.chainId
+          const isEip1559 = Boolean(maxFeePerGas)
 
           // Fixed Metamask validate
           const recoveryId =
@@ -124,14 +125,14 @@ class KeyGenFlow extends BaseFlow {
               : v + 27
 
           resultSig = trimNullableProperty({
-            ...this.signParams,
+            ...(this.signParams as Record<string, any>),
             r: this.padHexPrefix(r),
             s: this.padHexPrefix(s),
             v: isEip1559 ? v : this.padHexPrefix(recoveryId.toString(16)),
             chainId: ethers.BigNumber.from(chainId).toHexString(),
           })
 
-          console.log('signed transaction for metamask request>> ', resultSig)
+          console.log('signed transaction for metamask request >> ', resultSig)
         } else {
           resultSig = `0x${r}${s}${v.toString(16).padStart(2, '0')}`
         }
@@ -139,20 +140,24 @@ class KeyGenFlow extends BaseFlow {
         await submitSignResponse(this.metamaskRequestId!, resultSig)
         await this.stateManager.deleteRequest(this.metamaskRequestId!)
 
+        this.cleanup()
         return succeed({
-          isComplete: this.signer!.isComplete,
+          isComplete,
         })
       } else {
         const signedTransaction =
           this.serializeTransactionWithSignature(signature)
+
+        this.cleanup()
         return succeed({
-          isComplete: this.signer!.isComplete,
+          isComplete,
           signedTransaction: signedTransaction,
         })
       }
     }
+
     return succeed({
-      isComplete: this.signer!.isComplete,
+      isComplete,
       message: res,
     })
   }
@@ -177,10 +182,12 @@ class KeyGenFlow extends BaseFlow {
       recoveryParam: v,
     }
 
-    console.log('normalized tx >>', this.normalizedTx)
-    console.log('signature >>', signature)
-
     return ethers.utils.serializeTransaction(this.normalizedTx!, signature)
+  }
+
+  private cleanup() {
+    this.signer = undefined
+    this.signKey = ''
   }
 }
 

@@ -5,20 +5,19 @@ import {
   TypedMessage,
   typedSignatureHash,
 } from '@metamask/eth-sig-util'
-import { KeyringAccount } from '@metamask/keyring-api'
 import { TransactionObject } from '@safeheron/mpcsnap-types'
 import { ethers } from 'ethers'
 import { isHexString } from 'ethers/lib/utils'
 
+import { KeyringAccountSupportedMethods } from '@/@types/interface'
 import { normalizeTx } from '@/utils/transactionUtil'
 
 export function serialize(
-  method: KeyringAccount['supportedMethods'][number],
-  params: Record<string, any>
+  method: KeyringAccountSupportedMethods,
+  params: Record<string, any> | string
 ) {
   switch (method) {
     case 'eth_signTransaction':
-    case 'eth_sendTransaction':
       // @ts-ignore
       return serializeTransaction(params)
     case 'eth_sign':
@@ -27,7 +26,6 @@ export function serialize(
     case 'personal_sign':
       // @ts-ignore
       return serializePersonalMessage(params)
-    case 'eth_signTypedData':
     case 'eth_signTypedData_v1':
       return serializeTypedData(SignTypedDataVersion.V1, params)
     case 'eth_signTypedData_v3':

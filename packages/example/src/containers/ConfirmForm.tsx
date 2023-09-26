@@ -9,6 +9,7 @@ import MessageRelayer from '@/service/relayer/MessageRelayer'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/SendDialog.module.less'
 import { ethers, provider, wei2eth } from '@/utils'
+import { formatToUSDateTime } from '@/utils/dateUtil'
 
 const ConfirmForm = () => {
   const {
@@ -53,6 +54,7 @@ const ConfirmForm = () => {
         originalMethod: 'eth_signTransaction',
         method: 'eth_signTransaction',
         params: txObj,
+        createTime: Date.now(),
       })
 
       // @ts-ignore

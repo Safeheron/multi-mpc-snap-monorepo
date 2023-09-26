@@ -8,11 +8,13 @@ import type {
   PartyWithZkp,
   PubAndZkp,
   PubKey,
+  RecoverApprovalResult,
   RecoverResult,
   RunRoundResponse,
   SignApproval,
   SignResult,
   SnapRpcResponse,
+  WrappedKeyringRequest,
 } from '@safeheron/mpcsnap-types'
 
 import { SnapInvokeMethods } from '@/configs/Enums'
@@ -58,9 +60,12 @@ export async function walletInvokeSnap(req: InvokeReqModel<any>): Promise<any> {
 }
 
 // ----------- keyring request --------------
-
-export async function listKeyringRequests() {
-  return keyringClient.listRequests()
+export async function listKeyringRequests(): Promise<
+  SnapRpcResponse<WrappedKeyringRequest[]>
+> {
+  return walletInvokeSnap({
+    method: SnapInvokeMethods.listPendingRequests,
+  })
 }
 
 export async function keyringRejectRequestId(requestId: string) {
@@ -184,7 +189,7 @@ export async function signRound(
 
 export async function recoverApproval(
   walletName?: string
-): Promise<SnapRpcResponse<{ sessionId: string; mnemonic: string }>> {
+): Promise<SnapRpcResponse<RecoverApprovalResult>> {
   return walletInvokeSnap({
     method: SnapInvokeMethods.recoverApproval,
     params: {
@@ -196,7 +201,7 @@ export async function recoverApproval(
 export async function recoverPrepare(
   sessionId: string,
   walletName: string,
-  mnemonic: string
+  mnemonic?: string
 ): Promise<SnapRpcResponse<any>> {
   return walletInvokeSnap({
     method: SnapInvokeMethods.recoverPrepare,
@@ -321,11 +326,5 @@ export async function refreshSuccess(
 export async function syncAccountToMetamask() {
   return walletInvokeSnap({
     method: SnapInvokeMethods.syncAccount,
-  })
-}
-
-export async function test() {
-  return walletInvokeSnap({
-    method: SnapInvokeMethods.test,
   })
 }

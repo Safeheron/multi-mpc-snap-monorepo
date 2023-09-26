@@ -4,7 +4,10 @@ import { AccountItem, SnapRpcResponse } from '@safeheron/mpcsnap-types'
 
 import StateManager from '@/StateManager'
 import ErrorMessage from '@/utils/Errors'
-import { convertAccount, syncAccountToMetaMask } from '@/utils/snapAccountApi'
+import {
+  convertSnapAccountToKeyringAccount,
+  syncAccountToMetaMask,
+} from '@/utils/snapAccountApi'
 import { requestConfirm } from '@/utils/snapDialog'
 import { errored, succeed } from '@/utils/snapRpcUtil'
 
@@ -35,41 +38,10 @@ export async function requestAccount(
 export async function syncAccount(stateManager: StateManager) {
   const snapAccount = stateManager.account
   if (snapAccount) {
-    const metamaskAccount = convertAccount(snapAccount)
+    const metamaskAccount = convertSnapAccountToKeyringAccount(snapAccount)
     await syncAccountToMetaMask(metamaskAccount)
   }
   return succeed()
-}
-
-/**
- * TODO delete
- * @deprecated
- * @param stateManager
- */
-export async function deleteWallet(
-  stateManager: StateManager
-): Promise<SnapRpcResponse> {
-  const wallet = stateManager.account
-
-  if (!wallet) {
-    return errored(ErrorMessage.NO_WALLET)
-  }
-
-  await requestConfirm(
-    panel([
-      heading('Delete MPC Wallet'),
-      text('Address:'),
-      text(wallet.address),
-    ])
-  )
-
-  try {
-    return { success: true, data: true }
-  } catch (error) {
-    console.error(error)
-
-    return { success: false, errMsg: error.message || 'Delete failed.' }
-  }
 }
 
 export async function checkMnemonic(

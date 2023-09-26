@@ -33,10 +33,10 @@ import RecoveryFlow from '@/mpc-flow/RecoveryFlow'
 import SignerFlow from '@/mpc-flow/SignerFlow'
 import {
   checkMnemonic,
-  deleteWallet,
   requestAccount,
   syncAccount,
 } from '@/mpc-flow/walletManage'
+import { listPendingRequests } from '@/rpc/internalKeyringHandler'
 import { MPCKeyring } from '@/rpc/MPCKeyring'
 import StateManager from '@/StateManager'
 
@@ -48,7 +48,7 @@ let signFlow: SignerFlow
 let recoveryFlow: RecoveryFlow
 let mpcKeyring: MPCKeyring
 
-export const setupHandler: OnRpcRequestHandler = async ({ request }) => {
+export const setup = async () => {
   if (!mpcInstance) {
     console.log('init mpc instance...')
     mpcInstance = await MPC.init()
@@ -60,8 +60,6 @@ export const setupHandler: OnRpcRequestHandler = async ({ request }) => {
     await tmpStateManager.loadState()
     stateManager = tmpStateManager
   }
-
-  throw new MethodNotSupportedError(request.method)
 }
 
 /**
@@ -126,6 +124,10 @@ export const keygenHandler: OnRpcRequestHandler = async ({ request }) => {
   }
 }
 
+/**
+ * mpc sign
+ * @param request
+ */
 export const signHandler: OnRpcRequestHandler = async ({ request }) => {
   if (!signFlow) {
     signFlow = new SignerFlow(stateManager, mpcInstance)
@@ -133,8 +135,7 @@ export const signHandler: OnRpcRequestHandler = async ({ request }) => {
 
   switch (request.method) {
     case 'mpc_signApproval':
-      // assert(request, SignApprovalStruct)
-      // @ts-ignore
+      assert(request, SignApprovalStruct)
       const { method, params, requestId } = request.params
       return signFlow.signApproval(method, params, requestId)
 
@@ -156,6 +157,10 @@ export const signHandler: OnRpcRequestHandler = async ({ request }) => {
   }
 }
 
+/**
+ * mpc recovery
+ * @param request
+ */
 export const recoverHandler: OnRpcRequestHandler = async ({ request }) => {
   if (!recoveryFlow) {
     recoveryFlow = new RecoveryFlow(stateManager, mpcInstance)
@@ -227,7 +232,7 @@ export const recoverHandler: OnRpcRequestHandler = async ({ request }) => {
   }
 }
 
-export const internalMPCHandler: OnRpcRequestHandler = async ({ request }) => {
+export const otherHandlers: OnRpcRequestHandler = async ({ request }) => {
   switch (request.method) {
     case 'mpc_snapKeepAlive':
       return 'lived'
@@ -235,15 +240,15 @@ export const internalMPCHandler: OnRpcRequestHandler = async ({ request }) => {
     case 'mpc_requestAccount':
       return requestAccount(stateManager)
 
-    case 'mpc_deleteWallet':
-      return deleteWallet(stateManager)
-
     case 'mpc_checkMnemonic':
       assert(request, CheckMnemonicStruct)
       return checkMnemonic(request.params.walletName, stateManager, mpcInstance)
 
     case 'mpc_syncAccount':
       return syncAccount(stateManager)
+
+    case 'internal_listPendingRequests':
+      return listPendingRequests(stateManager)
 
     default:
       throw new MethodNotSupportedError(request.method)
