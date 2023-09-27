@@ -5,7 +5,7 @@ import feat4 from '@/assets/feat4.png'
 import feat5 from '@/assets/feat5.png'
 import feat6 from '@/assets/feat6.png'
 
-export const feats = [
+export const narrower_feats = [
   {
     img: feat1,
     title: 'Secure and User-Friendly',
@@ -23,9 +23,12 @@ export const feats = [
   },
   {
     img: feat4,
-    title: 'MPC Wallet in MetaMask',
-    desc: 'After backing up created wallets, the MPC wallets will be automatically added to users’ MetaMask accounts. Users can directly utilize MPC wallets in MetaMask.',
+    title: 'Fully Decentralized',
+    desc: "Users have all 3 MPC key shards, with no reliance on cloud servers. MPC signing and communication perform exclusively on the user's device.",
   },
+]
+
+export const wider_feats = [
   {
     img: feat5,
     title: 'Secure and Convenient Web3 access',
@@ -33,7 +36,7 @@ export const feats = [
   },
   {
     img: feat6,
-    title: 'Fully Decentralized',
-    desc: "Users have all 3 MPC key shards, with no reliance on cloud servers. MPC signing and communication perform exclusively on the user's device.",
+    title: 'MPC Wallet in MetaMask',
+    desc: 'After backing up created wallets, the MPC wallets will be automatically added to users’ MetaMask accounts. Users can directly utilize MPC wallets in MetaMask.',
   },
 ]

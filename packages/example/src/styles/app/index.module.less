@@ -4,73 +4,73 @@
   background: url(../../assets/bg.png) top center no-repeat;
   background-size: contain;
 
+  .slogan {
+    text-align: center;
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    p {
+      font-size: 16px;
+      color: @light-color;
+      line-height: 22px;
+      font-weight: 300;
+    }
+
+    & > button {
+      margin-top: 50px;
+      border: 2px solid @brand-color!important;
+      height: 54px;
+      width: 220px;
+
+      &:hover {
+        background-color: @brand-color;
+        color: white !important;
+      }
+    }
+  }
+
   .feat-list {
-    list-style: none;
-    display: flex;
     flex-wrap: wrap;
-    margin-top: 60px;
-    justify-content: flex-start;
-    width: 1045px;
-    margin-left: 50px;
+    margin-top: 140px;
+    justify-content: space-around;
+    align-items: center;
+    width: 1110px;
+    font-size: 14px;
+    display: flex;
 
-    .feat-wrap {
+    .narrower-feat-wrap {
       margin-bottom: 20px;
-      width: 462px;
-      height: 160px;
+      width: 245px;
+      height: 340px;
       border-radius: 16px;
-      background-color: #fff;
-      padding: 25px;
-      margin-right: 20px;
-      display: flex;
+      padding-top: 184px;
+      padding-left: 16px;
+      padding-right: 16px;
+      color: white;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      box-shadow: 0 6px 20px rgba(2, 125, 239, 30);
 
-      img{
-        margin-right: 20px;
+      h1 {
+        font-size: 18px;
+        font-weight: 500;
+        text-align: center;
       }
-
-      .feat-right{
-        h1 {
-          font-size: 16px;
-          margin-bottom: 5px;
-          font-weight: 500;
-        }
-        p {
-          font-size: 14px;
-          margin-top: 5px;
-          font-weight: 300;
-          color: @light-color;
-        }
+      p {
+        font-size: 14px;
+        letter-spacing: 0.01px;
+        margin-top: 5px;
+        line-height: 19px;
       }
     }
   }
 }
 
-.slogan {
-  text-align: center;
-
-  h1 {
-    font-size: 26px;
-    margin-bottom: 10px;
-  }
-
-  p {
-    font-size: 16px;
-    color: @light-color;
-    line-height: 20px;
-    font-weight: 300;
-  }
-
-  & > button {
-    margin-top: 50px;
-    border: 2px solid @brand-color!important;
-    height: 54px;
-    width: 220px;
-
-    &:hover {
-      background-color: @brand-color;
-      color: white !important;
-    }
-  }
-}
 
 .partner {
   text-align: center;

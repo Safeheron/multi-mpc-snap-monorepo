@@ -6,7 +6,7 @@ import { RouterEnum } from '@/configs/Enums'
 import Header from '@/containers/Header'
 import styles from '@/styles/app/index.module.less'
 
-import { feats } from './feats'
+import { narrower_feats, wider_feats } from './feats'
 
 const Index = () => {
   const navigate = useNavigate()
@@ -35,13 +35,13 @@ const Index = () => {
           <Button onClick={goHome}>Launch Wallet</Button>
         </div>
         <div className={styles.featList}>
-          {feats.map((v, i) => (
-            <div className={styles.featWrap} key={i}>
-              <img src={v.img} width="180" />
-              <div className={styles.featRight}>
-                <h1>{v.title}</h1>
-                <p>{v.desc}</p>
-              </div>
+          {narrower_feats.map((v, i) => (
+            <div
+              className={styles.narrowerFeatWrap}
+              style={{ backgroundImage: `url(${v.img})` }}
+              key={i}>
+              <h1>{v.title}</h1>
+              <p>{v.desc}</p>
             </div>
           ))}
         </div>

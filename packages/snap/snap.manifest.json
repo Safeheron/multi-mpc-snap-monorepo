@@ -3,7 +3,7 @@
   "description": "The Safeheron MPC Snap.",
   "proposedName": "Safeheron Snap",
   "source": {
-    "shasum": "h/8IFqTaFE/SOAIDYFRHG7TbK0wtrl/CW7D91Fpd+44=",
+    "shasum": "PfRkrNQuuxZeuMjtrFgdvqpvsR/HM26Bzy3qrWCfdR4=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

@@ -3,10 +3,9 @@
 declare namespace IndexModuleLessNamespace {
   export interface IIndexModuleLess {
     featList: string
-    featRight: string
-    featWrap: string
     homePartner: string
     indexPage: string
+    narrowerFeatWrap: string
     partner: string
     slogan: string
   }
