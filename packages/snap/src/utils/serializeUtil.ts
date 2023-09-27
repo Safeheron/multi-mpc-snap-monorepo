@@ -18,14 +18,13 @@ export function serialize(
 ) {
   switch (method) {
     case 'eth_signTransaction':
-      // @ts-ignore
-      return serializeTransaction(params)
+    case 'eth_sendTransaction':
+      return serializeTransaction(params as TransactionObject)
     case 'eth_sign':
-      // @ts-ignore
-      return serializeRawMessage(params)
+      return serializeRawMessage(params as string)
     case 'personal_sign':
-      // @ts-ignore
-      return serializePersonalMessage(params)
+      return serializePersonalMessage(params as string)
+    case 'eth_signTypedData':
     case 'eth_signTypedData_v1':
       return serializeTypedData(SignTypedDataVersion.V1, params)
     case 'eth_signTypedData_v3':
