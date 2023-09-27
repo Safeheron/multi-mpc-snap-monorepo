@@ -18,9 +18,7 @@ const Header: FC<PropsWithChildren> = ({ children }) => {
           </div>
           <div className={styles.text}>
             <div className={styles.title}>Safeheron Snap</div>
-            <div className={styles.desc}>
-              Enables MPC Wallet inside MetaMask
-            </div>
+            <div className={styles.desc}>Enable MPC Wallet within MetaMask</div>
           </div>
         </div>
         {children}
