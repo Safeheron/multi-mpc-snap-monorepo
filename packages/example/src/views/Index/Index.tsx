@@ -45,6 +45,19 @@ const Index = () => {
             </div>
           ))}
         </div>
+        <div className={styles.featList}>
+          {wider_feats.map((v, i) => (
+            <div className={styles.widerFeatWrap} key={i}>
+              <div className={styles.left}>
+                <img src={v.img} style={{ width: v.imgWidth + 'px' }} alt="" />
+              </div>
+              <div className={styles.right}>
+                <h1>{v.title}</h1>
+                <p>{v.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
         <div className={styles.partner}>
           <h1>MPC Wallet Solution Powered by</h1>
           <img src={safeheron} width="200" />

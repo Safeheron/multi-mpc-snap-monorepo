@@ -6,6 +6,7 @@
 
   .slogan {
     text-align: center;
+    margin-bottom: 140px;
 
     h1 {
       font-size: 26px;
@@ -35,7 +36,6 @@
 
   .feat-list {
     flex-wrap: wrap;
-    margin-top: 140px;
     justify-content: space-around;
     align-items: center;
     width: 1110px;
@@ -66,6 +66,39 @@
         letter-spacing: 0.01px;
         margin-top: 5px;
         line-height: 19px;
+      }
+    }
+
+    .wider-feat-wrap{
+      width: 520px;
+      height: 206px;
+      display: flex;
+      justify-content: space-around;
+      background-color: #fff;
+      border-radius: 16px;
+
+      .left{
+        width: 180px;
+        height: 206px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .right{
+        flex: 1;
+        padding-top: 38px;
+        padding-right: 16px;
+        h1 {
+          font-size: 18px;
+          font-weight: 500;
+        }
+        p {
+          color: #6B6D7C;
+          font-size: 14px;
+          letter-spacing: 1px;
+          margin-top: 5px;
+          line-height: 22px;
+        }
       }
     }
   }

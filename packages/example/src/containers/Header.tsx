@@ -1,33 +1,16 @@
 import { observer } from 'mobx-react-lite'
-import { FC, PropsWithChildren, useEffect, useState } from 'react'
+import { FC, PropsWithChildren } from 'react'
 
 import logo from '@/assets/logo.png'
 import styles from '@/styles/containers/Header.module.less'
 
 const Header: FC<PropsWithChildren> = ({ children }) => {
-  const [percent, setPercent] = useState(0)
-  useEffect(() => {
-    onScroll()
-    window.addEventListener('scroll', onScroll)
-
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-    }
-  }, [])
-
-  const onScroll = () => {
-    if (percent > 100) return
-    setPercent(document.documentElement.scrollTop)
-  }
-
   const toIndex = () => {
     window.open(location.origin)
   }
 
   return (
-    <div
-      className={styles.header}
-      style={{ backgroundColor: `rgba(255,255,255,${percent / 10})` }}>
+    <div className={styles.header}>
       <div className={styles.container}>
         <div className={styles.logoBox} onClick={toIndex}>
           <div>

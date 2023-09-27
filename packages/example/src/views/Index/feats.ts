@@ -31,11 +31,13 @@ export const narrower_feats = [
 export const wider_feats = [
   {
     img: feat5,
+    imgWidth: 180,
     title: 'Secure and Convenient Web3 access',
     desc: 'Safeheron Snap wallet can easily connect to any Web3 application, offering hardware wallet-level security and the convenience of MPC signing.',
   },
   {
     img: feat6,
+    imgWidth: 155,
     title: 'MPC Wallet in MetaMask',
     desc: 'After backing up created wallets, the MPC wallets will be automatically added to users’ MetaMask accounts. Users can directly utilize MPC wallets in MetaMask.',
   },
