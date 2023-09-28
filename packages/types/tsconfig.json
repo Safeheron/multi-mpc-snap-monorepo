@@ -4,5 +4,7 @@
     "baseUrl": ".",
     "target": "ES2015"
   },
-  "include": ["index.ts"]
+  "include": [
+    "src/"
+  ]
 }

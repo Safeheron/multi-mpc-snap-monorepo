@@ -1,13 +1,13 @@
 {
   "extends": "../../tsconfig.packages.build.json",
   "compilerOptions": {
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": true,
     "sourceMap": true,
     "target": "ES2015",
     "inlineSources": true,
     "baseUrl": "./",
-    "outDir": "./dist",
-    "rootDir": "./"
+    "outDir": "./dist/types",
+    "rootDir": "./src"
   },
   "include": ["."]
 }
