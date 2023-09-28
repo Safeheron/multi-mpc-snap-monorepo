@@ -23,7 +23,7 @@
     "start:snap": "yarn workspace @safeheron/mpcsnap serve",
     "start:example": "yarn workspace example dev",
     "prestart": "yarn workspace @safeheron/mpcsnap-types run build",
-    "start": "concurrently --raw --kill-others \"yarn run start:snap\" \"yarn run start:example\"",
+    "start": "yarn prestart && concurrently --raw --kill-others \"yarn run start:snap\" \"yarn run start:example\"",
     "test": "yarn workspaces foreach -vp run test",
     "build": "yarn workspaces foreach -vpt run build"
   },
