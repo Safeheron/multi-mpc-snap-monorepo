@@ -5,11 +5,13 @@ import {
   TypedMessage,
   typedSignatureHash,
 } from '@metamask/eth-sig-util'
-import { TransactionObject } from '@safeheron/mpcsnap-types'
+import {
+  KeyringAccountSupportedMethods,
+  TransactionObject,
+} from '@safeheron/mpcsnap-types'
 import { ethers } from 'ethers'
 import { isHexString } from 'ethers/lib/utils'
 
-import { KeyringAccountSupportedMethods } from '@/@types/interface'
 import { normalizeTx } from '@/utils/transactionUtil'
 
 export function serialize(
@@ -18,13 +20,11 @@ export function serialize(
 ) {
   switch (method) {
     case 'eth_signTransaction':
-    case 'eth_sendTransaction':
       return serializeTransaction(params as TransactionObject)
     case 'eth_sign':
       return serializeRawMessage(params as string)
     case 'personal_sign':
       return serializePersonalMessage(params as string)
-    case 'eth_signTypedData':
     case 'eth_signTypedData_v1':
       return serializeTypedData(SignTypedDataVersion.V1, params)
     case 'eth_signTypedData_v3':

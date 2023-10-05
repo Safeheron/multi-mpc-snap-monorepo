@@ -58,14 +58,12 @@ const AddressCard = () => {
     recoveryModule,
     backupModule,
   } = useStore()
+  const { currentChain } = networkModule
   const { address, walletName, balance, backuped, requestAccountLoading } =
     accountModule
 
   const [qrcodeVisible, setQrcodeVisible] = useState(false)
   const popoverRef = useRef<any>()
-
-  const { hexChainId, chainName, fetchChainListFailed, currentChain } =
-    networkModule
 
   const filledDashboardList = useMemo(() => {
     return DASHBOARD_LIST.map(d => {
@@ -143,11 +141,6 @@ const AddressCard = () => {
 
   return (
     <div className={styles.addressCard}>
-      <div className={styles.network}>
-        {fetchChainListFailed && <span>ChainId: {parseInt(hexChainId)}</span>}
-        {chainName && <span>{chainName}</span>}
-      </div>
-
       {!mentioned && backuped && (
         <p className={styles.tip}>
           The wallet has been added to your MetaMask account. You can now

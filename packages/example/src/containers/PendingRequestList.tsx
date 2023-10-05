@@ -1,4 +1,4 @@
-import { KeyringRequest } from '@metamask/keyring-api'
+import { EthMethod, KeyringRequest } from '@metamask/keyring-api'
 import { WrappedKeyringRequest } from '@safeheron/mpcsnap-types'
 import { Space, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
@@ -18,35 +18,10 @@ import MessageRelayer from '@/service/relayer/MessageRelayer'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/TransactionList.module.less'
 import { formatToUSDateTime } from '@/utils/dateUtil'
-import { tryToExtractChainId } from '@/utils/snapRequestUtil'
-
-function convertRequestTitle(rpcRequest: KeyringRequest['request']) {
-  let title = ''
-  switch (rpcRequest.method) {
-    case 'eth_signTransaction':
-    case 'eth_sendTransaction':
-      title = 'Send Transaction'
-      break
-    case 'eth_sign':
-    case 'personal_sign':
-      title = 'Request for signature'
-      break
-    case 'eth_signTypedData':
-      // @ts-ignore
-      const version = rpcRequest.params[2] as { version: string }
-      if (version && ['v3', 'v4'].includes(version.version.toLowerCase())) {
-        // @ts-ignore
-        const params = rpcRequest.params[1] as Record<string, any>
-        title = params.domain.name
-      } else {
-        title = 'Request for signature'
-      }
-      break
-    default:
-      title = 'Unsupported Request Type'
-  }
-  return title
-}
+import {
+  convertRequestTitle,
+  tryToExtractChainId,
+} from '@/utils/snapRequestUtil'
 
 const LOOP_GAP = 5_000
 
@@ -67,43 +42,51 @@ const PendingRequestList: React.FC = () => {
     console.debug('loop request result ...', r)
     if (r.success) {
       setRequests(r.data)
+    } else {
+      // TODO show rpc error
     }
   }
   const { pause, resume } = useAsyncInterval(getSnapRequests, LOOP_GAP)
 
   const resolveRequest = async (
     rpcRequest: KeyringRequest['request'],
-    time: number
+    time: number,
+    requestId: string
   ) => {
-    let requestMethod = rpcRequest.method
-    // @ts-ignore
-    const originParams = rpcRequest.params[1]
+    const { method: requestMethod, params } = rpcRequest
 
-    if (requestMethod === 'eth_signTypedData') {
-      // @ts-ignore
-      const version = rpcRequest.params[2] as { version: string }
-      if (version && version.version) {
-        requestMethod = 'eth_signTypedData_' + version.version.toLowerCase()
+    let originalParams
+    switch (requestMethod) {
+      case EthMethod.PersonalSign: {
+        const [message, _] = params as [string, string]
+        originalParams = message
+        break
       }
+      case EthMethod.SignTypedDataV1:
+      case EthMethod.SignTypedDataV3:
+      case EthMethod.SignTypedDataV4:
+        const [_, data] = params as [string, any]
+        originalParams = data
+        break
+      case EthMethod.SignTransaction:
+        const [tx] = params as [any]
+        originalParams = {
+          ...tx,
+          type: parseInt(tx.type, 16),
+        }
+        break
+      default:
+        throw new Error('Unknown request method: ' + requestMethod)
     }
-
     signModule.setPendingRequest({
-      originalMethod: rpcRequest.method,
-      // @ts-ignore
       method: requestMethod,
-      // @ts-ignore
-      params: originParams,
+      params: originalParams,
       createTime: time,
+      chainId: tryToExtractChainId(requestMethod, params),
     })
 
     // approval send transaction
-    const ret = await signApproval(
-      // @ts-ignore
-      requestMethod,
-      // @ts-ignore
-      originParams,
-      rpcRequest.id
-    )
+    const ret = await signApproval(requestMethod, originalParams, requestId)
 
     if (ret.success) {
       interactive.setSessionId(ret.data)
@@ -123,8 +106,12 @@ const PendingRequestList: React.FC = () => {
     showConfirm({
       content: 'Confirm rejection of signature?',
       onOk: async () => {
-        await keyringRejectRequestId(requestId)
-        await getSnapRequests()
+        try {
+          await keyringRejectRequestId(requestId)
+          await getSnapRequests()
+        } catch (e) {
+          /* log error */
+        }
       },
     })
   }
@@ -138,11 +125,10 @@ const PendingRequestList: React.FC = () => {
     },
     {
       title: 'Action',
-      render: (text, record) => {
+      render: (_, record) => {
         return (
           <div>
             <p style={{ fontWeight: 'bold' }}>
-              {record.request.request.method}:{' '}
               {convertRequestTitle(record.request.request)}
             </p>
           </div>
@@ -156,10 +142,7 @@ const PendingRequestList: React.FC = () => {
         const paramsJson = toJS(record.request.request)
         // @ts-ignore
         const { method, params } = paramsJson
-        const chainId = tryToExtractChainId(
-          method,
-          Array.isArray(params) ? params[1] : {}
-        )
+        const chainId = tryToExtractChainId(method as EthMethod, params)
         return <span>{networkModule.getChainName(chainId) || '--'}</span>
       },
     },
@@ -170,12 +153,16 @@ const PendingRequestList: React.FC = () => {
         <Space>
           <a
             onClick={() =>
-              resolveRequest(toJS(record.request.request), record.createTime)
+              resolveRequest(
+                toJS(record.request.request),
+                record.createTime,
+                record.request.id
+              )
             }>
             MPC Sign
           </a>
           <a
-            onClick={() => rejectRequest(record.request.request.id)}
+            onClick={() => rejectRequest(record.request.id)}
             style={{ marginLeft: 20 }}>
             Reject
           </a>
@@ -201,7 +188,7 @@ const PendingRequestList: React.FC = () => {
       <div className={styles.record}>
         {requests.length > 0 ? (
           <Table
-            rowKey={row => row['request'].request.id}
+            rowKey={row => row['request'].id}
             dataSource={requests}
             columns={columns}
             pagination={false}

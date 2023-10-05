@@ -61,14 +61,16 @@ export default {
   ]),
   resolve: {
     alias: aliasItems,
-    extensions: ['.tsx', '.ts', '.js', '.jsx'],
+    extensions: ['.tsx', '.ts', '.js', '.jsx', '...'],
     fallback: {
       buffer: require.resolve('buffer/'),
       crypto: require.resolve('crypto-browserify'),
       stream: require.resolve('stream-browserify'),
       http: false,
       https: false,
-      zlib: false
+      zlib: false,
+      tty: false,
+      os: false
     },
   },
   optimization,

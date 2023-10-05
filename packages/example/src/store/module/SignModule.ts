@@ -1,5 +1,4 @@
-import { KeyringRequest } from '@metamask/keyring-api'
-import { SignApproval } from '@safeheron/mpcsnap-types'
+import { EthMethod } from '@metamask/keyring-api'
 import { makeAutoObservable } from 'mobx'
 
 export default class SignModule {
@@ -10,13 +9,23 @@ export default class SignModule {
   }
 
   setPendingRequest(pr: PendingRequest) {
-    this.pendingRequest = pr
+    const { method, params } = pr
+    if (method === EthMethod.SignTransaction) {
+      const fixedParams = {
+        ...params,
+        type: parseInt('' + params.type, 16),
+      }
+      this.pendingRequest = { ...pr, params: fixedParams }
+    } else {
+      this.pendingRequest = pr
+    }
   }
 }
 
 export type PendingRequest = {
-  originalMethod: KeyringRequest['request']['method']
-  method: SignApproval['params']['method']
+  method: EthMethod
   params: Record<string, any>
   createTime: number
+  // hex-string
+  chainId?: string
 }

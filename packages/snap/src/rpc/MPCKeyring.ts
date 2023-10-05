@@ -1,6 +1,8 @@
 import {
+  emitSnapKeyringEvent,
   Keyring,
   KeyringAccount,
+  KeyringEvent,
   KeyringRequest,
   SubmitRequestResponse,
 } from '@metamask/keyring-api'
@@ -8,10 +10,7 @@ import { Json } from '@metamask/snaps-types'
 import { panel, text } from '@metamask/snaps-ui'
 
 import StateManager from '@/StateManager'
-import {
-  convertSnapAccountToKeyringAccount,
-  submitSignResponse,
-} from '@/utils/snapAccountApi'
+import { convertSnapAccountToKeyringAccount } from '@/utils/snapAccountApi'
 import { requestAlert } from '@/utils/snapDialog'
 
 export class MPCKeyring implements Keyring {
@@ -21,7 +20,6 @@ export class MPCKeyring implements Keyring {
   }
 
   createAccount(
-    name: string,
     options?: Record<string, Json> | null
   ): Promise<KeyringAccount> {
     throw new Error(
@@ -73,7 +71,7 @@ export class MPCKeyring implements Keyring {
   }
 
   async submitRequest(request: KeyringRequest): Promise<SubmitRequestResponse> {
-    const requestId = request.request.id
+    const requestId = request.id
     await this.stateManager.addRequest(requestId, request)
     await requestAlert(
       panel([
@@ -82,7 +80,14 @@ export class MPCKeyring implements Keyring {
         ),
       ])
     )
-    return { pending: true }
+    return {
+      pending: true,
+      redirect: {
+        message:
+          'Please go to the Safeheron Snap Website to continue with the transaction.',
+        url: 'https://mpcsnap.safeheron.com',
+      },
+    }
   }
 
   async approveRequest(id: string): Promise<void> {
@@ -92,8 +97,12 @@ export class MPCKeyring implements Keyring {
   }
 
   async rejectRequest(id: string): Promise<void> {
-    await submitSignResponse(id, null)
     await this.stateManager.deleteRequest(id)
+    try {
+      await emitSnapKeyringEvent(snap, KeyringEvent.RequestRejected, { id })
+    } catch (e) {
+      /* do nothing */
+    }
   }
 }
 

@@ -45,7 +45,7 @@ const Index = () => {
             </div>
           ))}
         </div>
-        <div className={styles.featList}>
+        <div className={styles.featList} style={{ marginTop: '48px' }}>
           {wider_feats.map((v, i) => (
             <div className={styles.widerFeatWrap} key={i}>
               <div className={styles.left}>

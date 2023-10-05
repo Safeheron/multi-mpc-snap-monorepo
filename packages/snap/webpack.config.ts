@@ -1,7 +1,9 @@
-import SnapsWebpackPlugin from '@metamask/snaps-webpack-plugin'
 import CopyPlugin from 'copy-webpack-plugin'
 import path from 'path'
+import TerserPlugin from 'terser-webpack-plugin'
 import webpack, { Configuration } from 'webpack'
+
+import SnapsWebpackPlugin from './customSnapPlugin'
 
 const isProd = process.env.NODE_ENV === 'production'
 
@@ -35,6 +37,8 @@ const config: Configuration = {
       http: false,
       https: false,
       zlib: false,
+      tty: false,
+      os: false,
     },
   },
   experiments: {
@@ -82,7 +86,21 @@ const config: Configuration = {
     ignored: ['**/snap.manifest.json'],
   },
   optimization: {
-    minimize: isProd,
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        parallel: true,
+        exclude: /@safeheron\/mpc-wasm-sdk/,
+        extractComments: true,
+        terserOptions: {
+          compress: {
+            drop_debugger: true,
+            drop_console: true,
+          },
+        },
+        minify: TerserPlugin.swcMinify,
+      }),
+    ],
   },
 }
 

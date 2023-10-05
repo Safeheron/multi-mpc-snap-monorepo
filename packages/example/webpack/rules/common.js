@@ -1,4 +1,3 @@
-import pkg from '../../package.json'
 import { babelLoader } from './useLoaderRuleItems'
 
 /**
@@ -10,15 +9,22 @@ export const typescriptRule = {
   options: {
     transpileOnly: true,
   },
+  resolve: {
+    fullySpecified: false,
+  },
   exclude: /node_modules/,
 }
 /**
  * @see https://webpack.js.org/loaders/babel-loader
  */
 export const javascriptRule = {
-  test: /\.(js|jsx)$/,
+  test: /\.(c|m?js|jsx)$/,
+  type: 'javascript/auto',
   use: [babelLoader],
   exclude: /node_modules/,
+  resolve: {
+    fullySpecified: false,
+  },
 }
 
 /**

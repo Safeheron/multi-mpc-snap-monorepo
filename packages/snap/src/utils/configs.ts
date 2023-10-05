@@ -1,4 +1,4 @@
-import { KeyringAccountSupportedMethodsArray } from '@/@types/interface'
+import { KeyringAccountSupportedMethodsArray } from '@safeheron/mpcsnap-types'
 
 export const SUPPORTED_METHODS: KeyringAccountSupportedMethodsArray = [
   'eth_sign',

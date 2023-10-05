@@ -10,7 +10,6 @@ import { ethers } from 'ethers'
 import { v4 as uuidV4 } from 'uuid'
 
 import StateManager, { SnapAccount } from '@/StateManager'
-import { SUPPORTED_METHODS } from '@/utils/configs'
 import { newSnapAccount } from '@/utils/snapAccountApi'
 import { requestConfirm } from '@/utils/snapDialog'
 import { errored, succeed } from '@/utils/snapRpcUtil'

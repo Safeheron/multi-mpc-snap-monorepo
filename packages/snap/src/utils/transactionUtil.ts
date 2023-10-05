@@ -83,6 +83,7 @@ export function normalizeTx(
   }
 
   let specialTxParams: LegacyParams | Eip1559Params
+
   if (type === 2) {
     const { maxFeePerGas, maxPriorityFeePerGas, accessList } = transaction
     specialTxParams = {

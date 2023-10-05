@@ -1,3 +1,4 @@
+import { EthMethod } from '@metamask/keyring-api'
 import {
   any,
   array,
@@ -13,23 +14,11 @@ import {
 
 import { CommonHeader, ComputeMessageStruct } from './common'
 
-const KeyringAccountSupportedMethodsStruct = enums([
-  'personal_sign',
-  'eth_sendTransaction',
-  'eth_sign',
-  'eth_signTransaction',
-  'eth_signTypedData',
-  'eth_signTypedData_v1',
-  'eth_signTypedData_v2',
-  'eth_signTypedData_v3',
-  'eth_signTypedData_v4',
-])
-
 export const SignApprovalStruct = object({
   ...CommonHeader,
   method: literal('mpc_signApproval'),
   params: object({
-    method: KeyringAccountSupportedMethodsStruct,
+    method: enums(Object.values(EthMethod)),
     params: union([record(string(), any()), string()]),
     requestId: optional(string()),
   }),

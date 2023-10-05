@@ -12,7 +12,6 @@ declare namespace AddressCardModuleLessNamespace {
     dashboardLogo: string
     dashboardWrapper: string
     more: string
-    network: string
     qrcode: string
     tip: string
   }

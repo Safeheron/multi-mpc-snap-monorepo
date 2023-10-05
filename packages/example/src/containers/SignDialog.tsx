@@ -16,7 +16,6 @@ import { MPCMessageType } from '@/service/types'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/CreateDialog.module.less'
 import { formatToUSDateTime } from '@/utils/dateUtil'
-import { tryToExtractChainId } from '@/utils/snapRequestUtil'
 
 const steps = [
   {
@@ -62,9 +61,12 @@ const SignDialog = () => {
     setWebrtcChannel(rtcChannel)
     rtcChannel.on('channelOpen', async () => {
       setTimeout(async () => {
-        const { method, originalMethod, params, createTime } =
-          signModule.pendingRequest
-        const thisChainId = tryToExtractChainId(originalMethod, params)
+        const {
+          method,
+          params,
+          createTime,
+          chainId: thisChainId,
+        } = signModule.pendingRequest
         const thisChainName = networkModule.getChainName(thisChainId)
 
         await rtcChannel.sendMessage(
@@ -98,8 +100,7 @@ const SignDialog = () => {
   }
 
   const handleTxnHash = async () => {
-    const { originalMethod, params } = signModule.pendingRequest
-    const thisChainId = tryToExtractChainId(originalMethod, params)
+    const { method, params, chainId: thisChainId } = signModule.pendingRequest
     const explorer = networkModule.getExplorer(thisChainId)
     if (explorer && interactive.txHash) {
       window.open(`${explorer}/tx/${interactive.txHash}`)

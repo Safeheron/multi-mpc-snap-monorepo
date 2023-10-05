@@ -6,6 +6,8 @@ declare namespace HeaderModuleLessNamespace {
     desc: string
     header: string
     logoBox: string
+    network: string
+    rightContent: string
     text: string
     title: string
   }

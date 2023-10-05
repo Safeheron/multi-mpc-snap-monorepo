@@ -1,3 +1,4 @@
+import { EthMethod } from '@metamask/keyring-api'
 import { TransactionObject } from '@safeheron/mpcsnap-types'
 import { Button, Form, Input } from 'antd'
 import { parseEther } from 'ethers/lib/utils'
@@ -9,7 +10,6 @@ import MessageRelayer from '@/service/relayer/MessageRelayer'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/SendDialog.module.less'
 import { ethers, provider, wei2eth } from '@/utils'
-import { formatToUSDateTime } from '@/utils/dateUtil'
 
 const ConfirmForm = () => {
   const {
@@ -21,7 +21,7 @@ const ConfirmForm = () => {
     networkModule,
   } = useStore()
   const { feeData, fee, baseTx } = transactionModule
-  const { intChainId, chainName, currentChain } = networkModule
+  const { intChainId, chainName, currentChain, hexChainId } = networkModule
 
   const currentSymbol = currentChain?.nativeCurrency.symbol
 
@@ -51,10 +51,10 @@ const ConfirmForm = () => {
 
       transactionModule.setTransactionObject(txObj)
       signModule.setPendingRequest({
-        originalMethod: 'eth_signTransaction',
-        method: 'eth_signTransaction',
+        method: EthMethod.SignTransaction,
         params: txObj,
         createTime: Date.now(),
+        chainId: hexChainId,
       })
 
       // @ts-ignore

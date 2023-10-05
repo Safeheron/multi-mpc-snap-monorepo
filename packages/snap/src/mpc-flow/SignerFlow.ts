@@ -1,20 +1,16 @@
-import { KeyringAccount } from '@metamask/keyring-api'
+import { emitSnapKeyringEvent, KeyringEvent } from '@metamask/keyring-api'
 import { MPC, Signer } from '@safeheron/mpc-wasm-sdk'
 import {
   ComputeMessage,
+  KeyringAccountSupportedMethods,
   SnapRpcResponse,
   TransactionObject,
 } from '@safeheron/mpcsnap-types'
 import { ethers, UnsignedTransaction } from 'ethers'
 import { v4 as uuidV4 } from 'uuid'
 
-import {
-  KeyringAccountSupportedMethods,
-  KeyringAccountSupportedMethodsArray,
-} from '@/@types/interface'
 import StateManager from '@/StateManager'
 import { serialize } from '@/utils/serializeUtil'
-import { submitSignResponse } from '@/utils/snapAccountApi'
 import { succeed } from '@/utils/snapRpcUtil'
 import { normalizeTx, trimNullableProperty } from '@/utils/transactionUtil'
 
@@ -51,20 +47,6 @@ class KeyGenFlow extends BaseFlow {
   ): Promise<SnapRpcResponse<string>> {
     const wallet = this.getWalletWithError()
 
-    // TODO delete approval
-    // if (method === 'eth_sendTransaction' || method === 'eth_signTransaction') {
-    //   const jsonList = Object.keys(params).map(key =>
-    //     text(`${key}: ${params[key]}`)
-    //   )
-    //
-    //   await requestConfirm(
-    //     panel([
-    //       heading('Confirm to sign this transaction?'),
-    //       text(' '),
-    //       ...jsonList,
-    //     ])
-    //   )
-    // }
     if (requestId) {
       const requestIdIsValid = this.stateManager.isValidRequest(requestId)
       if (!requestIdIsValid) {
@@ -128,7 +110,9 @@ class KeyGenFlow extends BaseFlow {
             ...(this.signParams as Record<string, any>),
             r: this.padHexPrefix(r),
             s: this.padHexPrefix(s),
-            v: isEip1559 ? v : this.padHexPrefix(recoveryId.toString(16)),
+            v: isEip1559
+              ? this.padHexPrefix(v.toString(16))
+              : this.padHexPrefix(recoveryId.toString(16)),
             chainId: ethers.BigNumber.from(chainId).toHexString(),
           })
 
@@ -137,8 +121,15 @@ class KeyGenFlow extends BaseFlow {
           resultSig = `0x${r}${s}${v.toString(16).padStart(2, '0')}`
         }
 
-        await submitSignResponse(this.metamaskRequestId!, resultSig)
         await this.stateManager.deleteRequest(this.metamaskRequestId!)
+        try {
+          await emitSnapKeyringEvent(snap, KeyringEvent.RequestApproved, {
+            id: this.metamaskRequestId!,
+            result: resultSig,
+          })
+        } catch (e) {
+          /* do nothing */
+        }
 
         this.cleanup()
         return succeed({

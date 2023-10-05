@@ -19,11 +19,12 @@
     "strictBindCallApply": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
+    "isolatedModules": true,
     "resolveJsonModule": true,
     "paths": {
       "@/*": ["src/*"]
     }
   },
   "exclude": ["node_modules"],
-  "include": ["src", "webpack.config.ts", "package.json"]
+  "include": ["src", "webpack.config.ts", "customSnapPlugin.ts","package.json"]
 }

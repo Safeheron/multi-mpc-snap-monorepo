@@ -2,9 +2,13 @@ import { observer } from 'mobx-react-lite'
 import { FC, PropsWithChildren } from 'react'
 
 import logo from '@/assets/logo.png'
+import { useStore } from '@/store'
 import styles from '@/styles/containers/Header.module.less'
 
 const Header: FC<PropsWithChildren> = ({ children }) => {
+  const { networkModule } = useStore()
+  const { hexChainId, chainName, fetchChainListFailed } = networkModule
+
   const toIndex = () => {
     window.open(location.origin)
   }
@@ -21,7 +25,11 @@ const Header: FC<PropsWithChildren> = ({ children }) => {
             <div className={styles.desc}>Enable MPC Wallet within MetaMask</div>
           </div>
         </div>
-        {children}
+        <div className={styles.network}>
+          {fetchChainListFailed && <span>ChainId: {parseInt(hexChainId)}</span>}
+          {chainName && <span>{chainName}</span>}
+        </div>
+        <div className={styles.rightContent}>{children}</div>
       </div>
     </div>
   )
