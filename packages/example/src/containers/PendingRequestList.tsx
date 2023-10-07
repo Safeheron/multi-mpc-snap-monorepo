@@ -62,6 +62,7 @@ const PendingRequestList: React.FC = () => {
         originalParams = message
         break
       }
+      case EthMethod.Sign:
       case EthMethod.SignTypedDataV1:
       case EthMethod.SignTypedDataV3:
       case EthMethod.SignTypedDataV4:
