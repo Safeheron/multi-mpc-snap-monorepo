@@ -1,9 +1,10 @@
 export interface AccountItem {
   walletName: string
   address: string
+  synced: boolean
+  backuped?: boolean
   pubKey?: string
   signKey?: string
-  backuped?: boolean
 }
 
 export interface TransactionBaseParams {
@@ -43,4 +44,5 @@ export type TransactionObject = TransactionBaseParams &
   (LegacyParams | Eip1559Params)
 
 export * from './keyring.types'
-export * from './snap-rpc/index'
+export * from './relay-message'
+export * from './snap-rpc'
