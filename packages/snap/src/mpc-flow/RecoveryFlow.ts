@@ -247,6 +247,7 @@ class RecoveryFlow extends BaseFlow {
         this.pubKey!,
         this.newSignKey!
       )
+      newState.backuped = this.backuped
     }
 
     await this.stateManager.saveOrUpdateAccount(newState)
@@ -293,7 +294,6 @@ class RecoveryFlow extends BaseFlow {
     this.remotePub = ''
     this.newSignKey = ''
     this.mnemonic = ''
-    this.backuped = false
 
     this.keyRecovery = undefined
     this.keyRefresh = undefined
