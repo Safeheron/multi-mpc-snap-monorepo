@@ -74,7 +74,8 @@ class Interactive {
   }
 
   setProgressAdd(value) {
-    this.progress += value
+    const newVal = Math.max(this.progress + value, value)
+    this.progress = Math.min(100, newVal)
   }
 }
 

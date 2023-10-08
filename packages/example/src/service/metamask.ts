@@ -40,7 +40,10 @@ export async function walletInvokeSnap(req: InvokeReqModel<any>): Promise<any> {
       method: 'wallet_invokeSnap',
       params,
     })
-    console.debug('walletInvokeSnap response:::', res)
+    console.debug(
+      `[wallet_invokeSnap] method: (${req.method}),  response: `,
+      res
+    )
     if (res.success) {
       return res
     }
@@ -50,7 +53,6 @@ export async function walletInvokeSnap(req: InvokeReqModel<any>): Promise<any> {
       success: false,
     }
   } catch (error) {
-    console.error(error)
     handleSnapResponse(error, req)
 
     return {

@@ -49,10 +49,12 @@ const RecoverDialog = () => {
     backupModule,
   } = useStore()
 
+  const { recoverStep: step } = recoveryModule
+  const { backuped } = accountModule
+
   const [webrtcChannel1, setWebrtcChannel1] = useState<WebRTCChannel>()
   const [webrtcChannel2, setWebrtcChannel2] = useState<WebRTCChannel>()
 
-  const step = recoveryModule.recoverStep
   useEffect(() => {
     return () => {
       recoveryModule.setRecoverStep(0)
@@ -148,15 +150,21 @@ const RecoverDialog = () => {
         <StepContainer
           buttonContent={
             isSuccess ? (
-              <>
-                <Button
-                  type="primary"
-                  onClick={handleBackupWallet}
-                  style={{ marginRight: '20px' }}>
-                  Backup Wallet Now
+              !backuped ? (
+                <>
+                  <Button
+                    type="primary"
+                    onClick={handleBackupWallet}
+                    style={{ marginRight: '20px' }}>
+                    Backup Wallet Now
+                  </Button>
+                  <Button onClick={handleBackupLater}>Backup Later</Button>
+                </>
+              ) : (
+                <Button type="primary" onClick={handleBack}>
+                  Back to the MPC Wallet
                 </Button>
-                <Button onClick={handleBackupLater}>Backup Later</Button>
-              </>
+              )
             ) : step === 3 && recoveryModule.mnemonicFormType === 'noNeed' ? (
               <Button type="primary" onClick={handleBack}>
                 Back to the MPC Wallet

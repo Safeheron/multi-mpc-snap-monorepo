@@ -17,7 +17,7 @@ const Index = () => {
 
   return (
     <>
-      <Header>
+      <Header hideNetwork>
         <Button onClick={goHome}>Launch Wallet</Button>
       </Header>
 

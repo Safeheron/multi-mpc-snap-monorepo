@@ -59,8 +59,14 @@ const AddressCard = () => {
     backupModule,
   } = useStore()
   const { currentChain } = networkModule
-  const { address, walletName, balance, backuped, requestAccountLoading } =
-    accountModule
+  const {
+    address,
+    walletName,
+    balance,
+    backuped,
+    synced,
+    requestAccountLoading,
+  } = accountModule
 
   const [qrcodeVisible, setQrcodeVisible] = useState(false)
   const popoverRef = useRef<any>()
@@ -120,8 +126,13 @@ const AddressCard = () => {
 
   const handleSyncAccountToMetaMask = async () => {
     interactive.setLoading(true)
-    await syncAccountToMetamask()
+    try {
+      await syncAccountToMetamask()
+    } catch (e) {
+      console.error('sync account to metamask error: ', e)
+    }
     interactive.setLoading(false)
+    await accountModule.requestAccount()
   }
 
   const [mentioned, setMentioned] = useState(false)
@@ -141,7 +152,7 @@ const AddressCard = () => {
 
   return (
     <div className={styles.addressCard}>
-      {!mentioned && backuped && (
+      {!mentioned && synced && (
         <p className={styles.tip}>
           The wallet has been added to your MetaMask account. You can now
           directly use the wallet in MetaMask. <a onClick={hideTip}>Hide</a>
@@ -216,8 +227,11 @@ const AddressCard = () => {
                 <>
                   <a onClick={handleCheckShard}>View Key Shard A</a>
                   <a onClick={handleRecover}>Recover for Other Device</a>
-                  <a onClick={handleSyncAccountToMetaMask}>Add to MetaMask</a>
                 </>
+              )}
+
+              {backuped && !synced && (
+                <a onClick={handleSyncAccountToMetaMask}>Add to MetaMask</a>
               )}
             </>
           }

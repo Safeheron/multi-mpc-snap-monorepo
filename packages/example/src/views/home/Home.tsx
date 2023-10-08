@@ -37,9 +37,6 @@ const Home = () => {
   const { address, requestAccountLoading } = accountModule
 
   const [state, dispatch] = useContext(MetaMaskContext)
-  const isMetaMaskReady = isLocalSnap(snap_origin)
-    ? state.isFlask
-    : state.snapsDetected
 
   const connectMetamask = async () => {
     try {
@@ -60,7 +57,7 @@ const Home = () => {
   }
 
   const renderContent = () => {
-    if (!state.installedSnap) return <Welcome />
+    if (!state.installedSnap?.id) return <Welcome />
 
     if (!address && requestAccountLoading) {
       return (
@@ -92,7 +89,7 @@ const Home = () => {
     <>
       <Header>
         <Button
-          disabled={!isMetaMaskReady || !!state.installedSnap}
+          disabled={!state.isFlask || !!state.installedSnap}
           color={'primary'}
           onClick={connectMetamask}>
           {state.installedSnap ? 'Connected' : 'Connect MetaMask'}

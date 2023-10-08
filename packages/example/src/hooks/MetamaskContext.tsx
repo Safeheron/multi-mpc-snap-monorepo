@@ -1,31 +1,18 @@
-import {
-  createContext,
-  Dispatch,
-  ReactNode,
-  Reducer,
-  useEffect,
-  useReducer,
-} from 'react'
+import type { Dispatch, ReactNode, Reducer } from 'react'
+import React, { createContext, useEffect, useReducer } from 'react'
 
-import { detectSnaps, isFlask } from '@/utils/metamask'
+import { Snap } from '@/@types/snap'
 import { getSnap } from '@/utils/snap'
 
-export type Snap = {
-  permissionName: string
-  id: string
-  version: string
-  initialPermissions: Record<string, unknown>
-}
+import { isFlask } from '../utils/metamask'
 
 export type MetamaskState = {
-  snapsDetected: boolean
   isFlask: boolean
   installedSnap?: Snap
   error?: Error
 }
 
 const initialState: MetamaskState = {
-  snapsDetected: false,
   isFlask: false,
 }
 
@@ -42,9 +29,8 @@ export const MetaMaskContext = createContext<
 
 export enum MetamaskActions {
   SetInstalled = 'SetInstalled',
-  SetSnapsDetected = 'SetSnapsDetected',
+  SetFlaskDetected = 'SetFlaskDetected',
   SetError = 'SetError',
-  SetIsFlask = 'SetIsFlask',
 }
 
 const reducer: Reducer<MetamaskState, MetamaskDispatch> = (state, action) => {
@@ -55,28 +41,25 @@ const reducer: Reducer<MetamaskState, MetamaskDispatch> = (state, action) => {
         installedSnap: action.payload,
       }
 
-    case MetamaskActions.SetSnapsDetected:
-      return {
-        ...state,
-        snapsDetected: action.payload,
-      }
-    case MetamaskActions.SetIsFlask:
+    case MetamaskActions.SetFlaskDetected:
       return {
         ...state,
         isFlask: action.payload,
       }
+
     case MetamaskActions.SetError:
       return {
         ...state,
         error: action.payload,
       }
+
     default:
       return state
   }
 }
 
 /**
- * MetaMask Context Provider to handle MetaMask and snap status.
+ * MetaMask context provider to handle MetaMask and snap status.
  *
  * @param props - React Props.
  * @param props.children - React component to be wrapped by the Provider.
@@ -89,41 +72,40 @@ export const MetaMaskProvider = ({ children }: { children: ReactNode }) => {
 
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  // Find MetaMask Provider and search for Snaps
-  // Also checks if MetaMask version is Flask
   useEffect(() => {
-    const setSnapsCompatibility = async () => {
-      dispatch({
-        type: MetamaskActions.SetSnapsDetected,
-        payload: await detectSnaps(),
-      })
+    const detectInstallation = async () => {
+      /**
+       * Detect if MetaMask Flask is installed.
+       */
+      async function detectFlask() {
+        const isFlaskDetected = await isFlask()
+
+        dispatch({
+          type: MetamaskActions.SetFlaskDetected,
+          payload: isFlaskDetected,
+        })
+      }
+
+      /**
+       * Detect if the snap is installed.
+       */
+      async function detectSnapInstalled() {
+        const installedSnap = await getSnap()
+        dispatch({
+          type: MetamaskActions.SetInstalled,
+          payload: installedSnap,
+        })
+      }
+
+      await detectFlask()
+
+      if (state.isFlask) {
+        await detectSnapInstalled()
+      }
     }
 
-    setSnapsCompatibility()
-  }, [window.ethereum])
-
-  // Set installed snaps
-  useEffect(() => {
-    async function detectSnapInstalled() {
-      const installedSnap = await getSnap()
-      dispatch({
-        type: MetamaskActions.SetInstalled,
-        payload: installedSnap,
-      })
-    }
-
-    const checkIfFlask = async () => {
-      dispatch({
-        type: MetamaskActions.SetIsFlask,
-        payload: await isFlask(),
-      })
-    }
-
-    if (state.snapsDetected) {
-      detectSnapInstalled()
-      checkIfFlask()
-    }
-  }, [state.snapsDetected])
+    detectInstallation().catch(console.error)
+  }, [state.isFlask, window.ethereum])
 
   useEffect(() => {
     let timeoutId: number

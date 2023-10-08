@@ -10,9 +10,10 @@ const LOOP_GAP = 20_000
 class AccountModule {
   walletName = ''
   address = ''
+  backuped?: boolean
+  synced = false
 
   balance = '' // wei
-  backuped?: boolean
 
   private loopFlag = false
 
@@ -33,6 +34,7 @@ class AccountModule {
     this.address = account.address
     this.walletName = account.walletName
     this.backuped = account.backuped
+    this.synced = account.synced
     this.loopBalance(this.address)
   }
 

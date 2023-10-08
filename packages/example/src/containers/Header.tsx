@@ -5,7 +5,11 @@ import logo from '@/assets/logo.png'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/Header.module.less'
 
-const Header: FC<PropsWithChildren> = ({ children }) => {
+interface HeaderProps extends PropsWithChildren {
+  hideNetwork?: boolean
+}
+
+const Header: FC<HeaderProps> = ({ hideNetwork, children }) => {
   const { networkModule } = useStore()
   const { hexChainId, chainName, fetchChainListFailed } = networkModule
 
@@ -25,10 +29,16 @@ const Header: FC<PropsWithChildren> = ({ children }) => {
             <div className={styles.desc}>Enable MPC Wallet within MetaMask</div>
           </div>
         </div>
-        <div className={styles.network}>
-          {fetchChainListFailed && <span>ChainId: {parseInt(hexChainId)}</span>}
-          {chainName && <span>{chainName}</span>}
-        </div>
+        {hideNetwork ? (
+          <div></div>
+        ) : (
+          <div className={styles.network}>
+            {fetchChainListFailed && (
+              <span>ChainId: {parseInt(hexChainId)}</span>
+            )}
+            {chainName && <span>{chainName}</span>}
+          </div>
+        )}
         <div className={styles.rightContent}>{children}</div>
       </div>
     </div>

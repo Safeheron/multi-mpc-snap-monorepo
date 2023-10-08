@@ -19,6 +19,10 @@ class RecoveryModule {
   isSkip = false
   hasOtherShard = false
 
+  get localPartyHasMnemonic() {
+    return this.inputMnemonic || this.localKeyshareExist
+  }
+
   constructor() {
     makeAutoObservable(this)
   }

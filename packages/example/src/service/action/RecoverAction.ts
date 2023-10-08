@@ -50,6 +50,7 @@ class RecoverAction {
       !!store.accountModule.address
     ) {
       // If both side have key shards, don't needed recovery
+      // TODO close webrtc
       store.recoveryModule.setMnemonicFormType('noNeed')
       return
     }
@@ -90,9 +91,11 @@ class RecoverAction {
       store.interactive.setWalletName(walletName)
     }
     store.recoveryModule.setRecoverStep(4)
+
+    // all mnemonic are ready
     if (
       messageArray.every(v => v.messageContent.hasMnemonic) &&
-      store.recoveryModule.localKeyshareExist
+      store.recoveryModule.localPartyHasMnemonic
     ) {
       await this.recoverPrepare(() => {
         store.messageModule.rpcChannel?.next({
@@ -101,7 +104,10 @@ class RecoverAction {
         })
       })
     } else {
-      if (store.recoveryModule.localKeyshareExist) {
+      if (
+        store.recoveryModule.localKeyshareExist ||
+        store.recoveryModule.localPartyHasMnemonic
+      ) {
         const remoteParty = messageArray.find(v => v.messageContent.hasMnemonic)
 
         const lostParty = messageArray.find(v => !v.messageContent.hasMnemonic)
@@ -133,6 +139,7 @@ class RecoverAction {
       })
     }
   }
+
   async handleKeyPairReady(
     messageArray: MPCMessage<{ partyId: PartyId; pubKey: string }>[]
   ) {
@@ -171,6 +178,7 @@ class RecoverAction {
       })
     }
   }
+
   async handleRecoverRound(message: MPCMessage<ComputeMessage[]>) {
     const res = await recoverRound(
       store.interactive.sessionId,
@@ -216,6 +224,7 @@ class RecoverAction {
       })
     }
   }
+
   async handleRefreshReady(
     messageArray: MPCMessage<PubAndZkp & { partyId: PartyId }>[]
   ) {
@@ -240,6 +249,7 @@ class RecoverAction {
       })
     }
   }
+
   async handleRefreshRound(messageArray: MPCMessage<ComputeMessage[]>[]) {
     console.log('handleRefreshRound', messageArray)
 
@@ -268,6 +278,7 @@ class RecoverAction {
       }
     }
   }
+
   async handleRefreshSuccess() {
     const res = await refreshSuccess(store.interactive.sessionId)
     if (res.success) {
