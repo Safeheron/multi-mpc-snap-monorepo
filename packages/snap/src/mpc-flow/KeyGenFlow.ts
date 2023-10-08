@@ -91,7 +91,6 @@ class KeyGenFlow extends BaseFlow {
   ): Promise<SnapRpcResponse<AccountItem>> {
     this.verifySession(sessionId)
 
-    const backuped = false
     const address = ethers.utils.computeAddress(`0x${this.pubKey}`)
 
     const snapAccount: SnapAccount = newSnapAccount(
@@ -108,7 +107,8 @@ class KeyGenFlow extends BaseFlow {
     return succeed({
       walletName: this.walletName!,
       address,
-      backuped,
+      backuped: false,
+      synced: false,
     })
   }
 

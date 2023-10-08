@@ -36,7 +36,8 @@ export class MPCKeyring implements Keyring {
   async deleteAccount(id: string) {
     const account = this.stateManager.account
     if (account && account.id === id) {
-      await this.stateManager.deleteAccount(id)
+      account.synced = false
+      await this.stateManager.saveOrUpdateAccount(account)
       await this.stateManager.deleteAllRequests()
     }
   }

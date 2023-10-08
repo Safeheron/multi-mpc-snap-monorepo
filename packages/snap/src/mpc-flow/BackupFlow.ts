@@ -48,21 +48,24 @@ class BackupFlow extends BaseFlow {
     this.verifySession(sessionId)
 
     const wallet = this.getWalletWithError()
-    wallet.backuped = true
 
     // First add account to metamask
     const metamaskAccount: KeyringAccount =
       convertSnapAccountToKeyringAccount(wallet)
     await syncAccountToMetaMask(metamaskAccount)
+
     console.log('sync account to metamask result: ', metamaskAccount)
 
     // Update snap local state
+    wallet.backuped = true
+    wallet.synced = true
     await this.stateManager.saveOrUpdateAccount(wallet)
 
     return succeed({
       address: wallet.address,
       backuped: wallet.backuped,
       walletName: wallet.name,
+      synced: wallet.synced,
     })
   }
 }

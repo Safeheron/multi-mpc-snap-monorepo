@@ -111,6 +111,7 @@ export type SnapAccount = KeyringAccount & {
   backuped: boolean
   pubkey: string
   name: string
+  synced: boolean
 }
 
 export default StateManager

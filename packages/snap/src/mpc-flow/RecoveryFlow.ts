@@ -51,6 +51,8 @@ class RecoveryFlow extends BaseFlow {
 
   async recoverApproval(): Promise<SnapRpcResponse<RecoverApprovalResult>> {
     await requestConfirm(panel([heading('Confirm to recover an MPC wallet?')]))
+
+    this.backuped = false
     this.cleanup()
 
     this.sessionId = uuidV4()
@@ -252,9 +254,12 @@ class RecoveryFlow extends BaseFlow {
 
     await this.stateManager.saveOrUpdateAccount(newState)
 
-    if (this.backuped) {
+    if (this.backuped && !newState.synced) {
       const metamaskAccount = convertSnapAccountToKeyringAccount(newState)
       await syncAccountToMetaMask(metamaskAccount)
+
+      newState.synced = true
+      await this.stateManager.saveOrUpdateAccount(newState)
     }
 
     this.cleanup()
@@ -263,6 +268,7 @@ class RecoveryFlow extends BaseFlow {
       walletName,
       address,
       backuped: this.backuped,
+      synced: newState.synced,
     })
   }
 

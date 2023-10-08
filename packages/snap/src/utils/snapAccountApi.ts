@@ -43,5 +43,6 @@ export function newSnapAccount(
     backuped: false,
     pubkey: pubKey,
     signKey: signKey,
+    synced: false,
   }
 }

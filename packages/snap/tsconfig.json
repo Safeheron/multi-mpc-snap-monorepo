@@ -19,7 +19,7 @@
     "strictBindCallApply": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "isolatedModules": true,
+//    "isolatedModules": true,
     "resolveJsonModule": true,
     "paths": {
       "@/*": ["src/*"]

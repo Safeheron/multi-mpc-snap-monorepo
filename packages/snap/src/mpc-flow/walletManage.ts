@@ -24,6 +24,7 @@ export async function requestAccount(
       address,
       walletName,
       backuped,
+      synced: wallet.synced,
     }
     return succeed(data)
   } else {
@@ -31,15 +32,19 @@ export async function requestAccount(
       address: '',
       walletName: '',
       backuped: false,
+      synced: false,
     })
   }
 }
 
 export async function syncAccount(stateManager: StateManager) {
   const snapAccount = stateManager.account
-  if (snapAccount) {
+  if (snapAccount && !snapAccount.synced) {
     const metamaskAccount = convertSnapAccountToKeyringAccount(snapAccount)
     await syncAccountToMetaMask(metamaskAccount)
+
+    snapAccount.synced = true
+    await stateManager.saveOrUpdateAccount(snapAccount)
   }
   return succeed()
 }
