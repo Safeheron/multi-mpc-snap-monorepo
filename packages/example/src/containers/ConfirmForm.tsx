@@ -126,7 +126,14 @@ const ConfirmForm = () => {
             <span>Network Fee</span>
             <span>
               {wei2eth(fee)} {currentSymbol}{' '}
-              <small>({ethers.utils.formatUnits(fee, 'gwei')}Gwei)</small>
+              <small>
+                (
+                {ethers.utils.formatUnits(
+                  feeData.maxFeePerGas || feeData.gasPrice || '0',
+                  'gwei'
+                )}{' '}
+                Gwei)
+              </small>
             </span>
           </div>
         </div>

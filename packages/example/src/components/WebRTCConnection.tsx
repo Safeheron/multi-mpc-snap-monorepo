@@ -83,7 +83,7 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
       </div>
       <div className={styles.subTitle}>
         Step 2: Place the QR code of your mobile App in front of your desktop's
-        camera.
+        camera until the progress reaches 100%.
       </div>
 
       <div style={{ display: 'flex', marginTop: '20px', marginBottom: '30px' }}>

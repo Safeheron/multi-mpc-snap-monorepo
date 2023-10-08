@@ -23,7 +23,7 @@ export async function detectMediaAbility(): Promise<DetectMediaResponse> {
     return {
       support: false,
       message:
-        "Unable to access your device's camera, please make sure the camera is turned on, and the current web page has been allowed to access the camera.",
+        "Unable to access your device's camera, please make sure the camera is turned on, and the current page has been allowed to access the camera.",
     }
   }
 

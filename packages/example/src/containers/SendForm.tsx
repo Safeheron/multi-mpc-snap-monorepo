@@ -149,7 +149,7 @@ const SendForm = () => {
                     feeData.maxFeePerGas || feeData.gasPrice || '0',
                     'gwei'
                   )}
-                  Gwei)
+                  &nbsp;Gwei)
                 </small>
               </span>
             )}
