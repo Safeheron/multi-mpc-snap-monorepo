@@ -6,6 +6,7 @@ import { v4 as getUuid } from 'uuid'
 
 import StateManager from '@/StateManager'
 import {
+  convertPlainAccount,
   convertSnapAccountToKeyringAccount,
   syncAccountToMetaMask,
 } from '@/utils/snapAccountApi'
@@ -49,24 +50,25 @@ class BackupFlow extends BaseFlow {
 
     const wallet = this.getWalletWithError()
 
-    // First add account to metamask
-    const metamaskAccount: KeyringAccount =
-      convertSnapAccountToKeyringAccount(wallet)
-    await syncAccountToMetaMask(metamaskAccount)
-
-    console.log('sync account to metamask result: ', metamaskAccount)
-
-    // Update snap local state
+    // Set backup status true first and save
     wallet.backuped = true
-    wallet.synced = true
     await this.stateManager.saveOrUpdateAccount(wallet)
 
-    return succeed({
-      address: wallet.address,
-      backuped: wallet.backuped,
-      walletName: wallet.name,
-      synced: wallet.synced,
-    })
+    // Then add account to metamask
+    // In this action, if something went wrong, ignored.
+    // Since that user can sync account any time in website
+    try {
+      const metamaskAccount: KeyringAccount =
+        convertSnapAccountToKeyringAccount(wallet)
+      await syncAccountToMetaMask(metamaskAccount)
+      console.log('sync account to metamask result: ', metamaskAccount)
+      wallet.synced = true
+      await this.stateManager.saveOrUpdateAccount(wallet)
+    } catch (e) {
+      console.error('cannot sync account to MetaMask', e)
+    }
+
+    return succeed(convertPlainAccount(wallet))
   }
 }
 

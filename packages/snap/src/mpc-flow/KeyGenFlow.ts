@@ -10,7 +10,11 @@ import { ethers } from 'ethers'
 import { v4 as uuidV4 } from 'uuid'
 
 import StateManager, { SnapAccount } from '@/StateManager'
-import { newSnapAccount } from '@/utils/snapAccountApi'
+import {
+  convertPlainAccount,
+  genWalletId,
+  newSnapAccount,
+} from '@/utils/snapAccountApi'
 import { requestConfirm } from '@/utils/snapDialog'
 import { errored, succeed } from '@/utils/snapRpcUtil'
 
@@ -32,12 +36,12 @@ class KeyGenFlow extends BaseFlow {
     party: Party
   ): Promise<SnapRpcResponse<string>> {
     if (walletName.replace(/[^\x00-\xff]/g, 'aa').length > 60) {
-      return errored(`Wallet name must Within 60 characters.`)
+      return errored(`Wallet name must within 60 characters.`)
     }
 
     const existWallet = this.getWallet()
     if (existWallet) {
-      return errored('Wallet exist.can not create one more wallet.')
+      return errored('Wallet exist. Can not create one more wallet.')
     }
 
     await requestConfirm(
@@ -93,7 +97,9 @@ class KeyGenFlow extends BaseFlow {
 
     const address = ethers.utils.computeAddress(`0x${this.pubKey}`)
 
+    const walletId = genWalletId(this.sessionId!, address)
     const snapAccount: SnapAccount = newSnapAccount(
+      walletId,
       this.walletName!,
       address,
       this.pubKey!,
@@ -104,12 +110,7 @@ class KeyGenFlow extends BaseFlow {
 
     this.cleanup()
 
-    return succeed({
-      walletName: this.walletName!,
-      address,
-      backuped: false,
-      synced: false,
-    })
+    return succeed(convertPlainAccount(snapAccount))
   }
 
   private cleanup() {

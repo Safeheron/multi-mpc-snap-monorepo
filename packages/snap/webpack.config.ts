@@ -95,7 +95,7 @@ const config: Configuration = {
         terserOptions: {
           compress: {
             drop_debugger: true,
-            drop_console: true,
+            drop_console: isProd,
           },
         },
         minify: TerserPlugin.swcMinify,

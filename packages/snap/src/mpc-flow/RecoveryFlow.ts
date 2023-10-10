@@ -20,7 +20,9 @@ import { v4 as uuidV4 } from 'uuid'
 
 import StateManager, { SnapAccount } from '@/StateManager'
 import {
+  convertPlainAccount,
   convertSnapAccountToKeyringAccount,
+  genWalletId,
   newSnapAccount,
   syncAccountToMetaMask,
 } from '@/utils/snapAccountApi'
@@ -28,6 +30,10 @@ import { requestConfirm } from '@/utils/snapDialog'
 import { errored, succeed } from '@/utils/snapRpcUtil'
 
 import { BaseFlow } from './BaseFlow'
+
+function normalizeMnemonic(mnemonicString: string) {
+  return mnemonicString.trim().split(/\s+/).join(' ')
+}
 
 class RecoveryFlow extends BaseFlow {
   private keyRecovery?: KeyRecovery
@@ -89,7 +95,7 @@ class RecoveryFlow extends BaseFlow {
 
     this.walletName = walletName
     if (mnemonic) {
-      this.mnemonic = mnemonic
+      this.mnemonic = normalizeMnemonic(mnemonic)
       this.backuped = true
     }
     return succeed(true)
@@ -230,20 +236,22 @@ class RecoveryFlow extends BaseFlow {
   async refreshSuccess(sessionId: string) {
     this.verifySession(sessionId)
 
-    const { walletName } = this
     const address = ethers.utils.computeAddress(`0x${this.pubKey}`)
 
     const oldState = this.stateManager.account
 
+    const walletId = genWalletId(this.sessionId!, address)
     let newState: SnapAccount
     if (oldState) {
       newState = {
         ...oldState,
         signKey: this.newSignKey!,
         backuped: this.backuped,
+        walletId,
       }
     } else {
       newState = newSnapAccount(
+        walletId,
         this.walletName!,
         address,
         this.pubKey!,
@@ -264,12 +272,7 @@ class RecoveryFlow extends BaseFlow {
 
     this.cleanup()
 
-    return succeed({
-      walletName,
-      address,
-      backuped: this.backuped,
-      synced: newState.synced,
-    })
+    return succeed(convertPlainAccount(newState))
   }
 
   private async encrypt(plainText: string) {

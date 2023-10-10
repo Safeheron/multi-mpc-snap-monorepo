@@ -5,6 +5,7 @@ import { AccountItem, SnapRpcResponse } from '@safeheron/mpcsnap-types'
 import StateManager from '@/StateManager'
 import ErrorMessage from '@/utils/Errors'
 import {
+  convertPlainAccount,
   convertSnapAccountToKeyringAccount,
   syncAccountToMetaMask,
 } from '@/utils/snapAccountApi'
@@ -17,22 +18,14 @@ export async function requestAccount(
   const wallet = stateManager.account
 
   if (wallet) {
-    const address = wallet.address
-    const walletName = wallet.name
-    const backuped = wallet.backuped
-    const data = {
-      address,
-      walletName,
-      backuped,
-      synced: wallet.synced,
-    }
-    return succeed(data)
+    return succeed(convertPlainAccount(wallet))
   } else {
     return succeed({
       address: '',
       walletName: '',
       backuped: false,
       synced: false,
+      id: '',
     })
   }
 }

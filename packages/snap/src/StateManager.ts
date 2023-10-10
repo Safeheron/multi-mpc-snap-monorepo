@@ -112,6 +112,7 @@ export type SnapAccount = KeyringAccount & {
   pubkey: string
   name: string
   synced: boolean
+  walletId: string
 }
 
 export default StateManager
