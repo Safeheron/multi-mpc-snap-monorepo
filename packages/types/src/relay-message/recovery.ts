@@ -1,16 +1,16 @@
 import { ComputeMessage } from '../snap-rpc'
-import { BaseRelayMessage, OperationType, SendType } from './common'
+import { BaseRelayMessage, OperationType } from './common'
 
 export type RecoverPrepareMessage = BaseRelayMessage<
   OperationType.recoverPrepare,
   undefined,
-  { index: number }
+  { index: number; sessionId: string }
 >
 
 export type RoleReadyMessage = BaseRelayMessage<
   OperationType.roleReady,
   undefined,
-  { partyId: string; index: number }
+  { partyId: string; index: number; walletId?: string }
 >
 
 export type RecoverReadyMessage = BaseRelayMessage<
@@ -35,25 +35,25 @@ export type MnemonicReadyMessage = BaseRelayMessage<
   }
 >
 
-export type keypairReadyMessage = BaseRelayMessage<
+export type KeypairReadyMessage = BaseRelayMessage<
   OperationType.keyPairReady,
   undefined,
   { partyId: string; pubKey: string }
 >
 
-export type recoverSuccessMessage = BaseRelayMessage<
+export type RecoverSuccessMessage = BaseRelayMessage<
   OperationType.recoverSuccess,
   undefined,
   null
 >
 
-export type recoverRoundMessage = BaseRelayMessage<
+export type RecoverRoundMessage = BaseRelayMessage<
   OperationType.recoverRound,
   'p2p',
   ComputeMessage[]
 >
 
-export type partySecretKeyReadyMessage = BaseRelayMessage<
+export type PartySecretKeyReadyMessage = BaseRelayMessage<
   OperationType.partySecretKeyReady,
   'broadcast',
   {
@@ -63,7 +63,7 @@ export type partySecretKeyReadyMessage = BaseRelayMessage<
   }
 >
 
-export type refreshReadyMessage = BaseRelayMessage<
+export type RefreshReadyMessage = BaseRelayMessage<
   OperationType.refreshReady,
   undefined,
   {
@@ -73,13 +73,13 @@ export type refreshReadyMessage = BaseRelayMessage<
   }
 >
 
-export type refreshRoundMessage = BaseRelayMessage<
+export type RefreshRoundMessage = BaseRelayMessage<
   OperationType.refreshRound,
   undefined,
   ComputeMessage[]
 >
 
-export type refreshSuccessMessage = BaseRelayMessage<
+export type RefreshSuccessMessage = BaseRelayMessage<
   OperationType.refreshSuccess,
   undefined,
   '' | null

@@ -38,3 +38,11 @@ export type BaseRelayMessage<
   sendType?: P
   messageContent: Q
 }
+
+export type AbortType = 'create' | 'sign' | 'recover'
+
+export type AbortMessage = BaseRelayMessage<
+  OperationType.abort,
+  'broadcast',
+  AbortType | undefined
+>

@@ -1,4 +1,5 @@
 export interface AccountItem {
+  id: string
   walletName: string
   address: string
   synced: boolean
