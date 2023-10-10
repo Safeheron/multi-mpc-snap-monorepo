@@ -3,13 +3,12 @@ import { HashRouter as Router, Route, Routes } from 'react-router-dom'
 
 import Footer from '@/containers/Footer'
 import routes from '@/routes'
-import { stylesContainer } from '@/styles/app/app.module.less'
 
 const App: FC = () => (
   <>
     <Router>
       <Suspense fallback={<div />}>
-        <div className={stylesContainer}>
+        <div>
           <Routes>
             {routes.map((route: any) => (
               <Route

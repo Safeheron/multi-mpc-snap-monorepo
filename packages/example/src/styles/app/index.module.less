@@ -1,12 +1,23 @@
 @import '../variable.less';
+
+.indexWrap{
+  background-size: 1535px 1165px;
+  background-image: url(../../assets/bg.png);
+  background-position: top center;
+  background-repeat: no-repeat;
+  width: 100%;
+  margin: 0 auto;
+  padding-top: 73px;
+}
+
 .indexPage {
+  margin: 0 auto;
+  width: 1070px;
   padding-top: 130px;
-  background: url(../../assets/bg.png) top center no-repeat;
-  background-size: contain;
 
   .slogan {
     text-align: center;
-    margin-bottom: 140px;
+    margin-bottom: 212px;
 
     h1 {
       font-size: 26px;
@@ -26,6 +37,7 @@
       border: 2px solid @brand-color!important;
       height: 54px;
       width: 220px;
+      background-color: @bg-color;
 
       &:hover {
         background-color: @brand-color;
@@ -54,7 +66,7 @@
       background-position: center;
       background-repeat: no-repeat;
       background-size: cover;
-      box-shadow: 0 6px 20px rgba(2, 125, 239, 30);
+      //box-shadow: 0 6px 20px rgba(2, 125, 239, 30);
 
       h1 {
         font-size: 18px;
@@ -98,6 +110,7 @@
           letter-spacing: 1px;
           margin-top: 5px;
           line-height: 22px;
+          font-weight: 300;
         }
       }
     }

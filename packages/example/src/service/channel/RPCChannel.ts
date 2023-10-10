@@ -61,6 +61,7 @@ export class RPCChannel extends MessageChannel {
       // recover
       case MPCMessageType.roleReady:
         interactive.setProgress(4)
+        // @ts-ignore
         await RecoverAction.handleRoleReady(messageArray)
         interactive.setProgress(8)
         break

@@ -1,3 +1,4 @@
+import { OperationType, RecoverPrepareMessage } from '@safeheron/mpcsnap-types'
 import { Button, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
@@ -73,16 +74,15 @@ const RecoverDialog = () => {
       setWebrtcChannel1(channel1)
       channel1.on('channelOpen', () => {
         setTimeout(async () => {
-          await channel1.sendMessage(
-            JSON.stringify([
-              {
-                messageType: MPCMessageType.recoverPrepare,
-                messageContent: {
-                  index: 2,
-                },
-              },
-            ])
-          )
+          const recoverPrepareMessage: RecoverPrepareMessage = {
+            messageType: OperationType.recoverPrepare,
+            messageContent: {
+              index: 2,
+              sessionId: interactive.sessionId,
+            },
+          }
+
+          await channel1.sendMessage(JSON.stringify([recoverPrepareMessage]))
           messageModule.messageRelayer?.join(channel1)
           recoveryModule.setRecoverStep(step + 1)
         }, 1000)
@@ -92,16 +92,14 @@ const RecoverDialog = () => {
       setWebrtcChannel2(channel2)
       channel2.on('channelOpen', () => {
         setTimeout(async () => {
-          await channel2.sendMessage(
-            JSON.stringify([
-              {
-                messageType: MPCMessageType.recoverPrepare,
-                messageContent: {
-                  index: 3,
-                },
-              },
-            ])
-          )
+          const recoverPrepareMessage: RecoverPrepareMessage = {
+            messageType: OperationType.recoverPrepare,
+            messageContent: {
+              index: 3,
+              sessionId: interactive.sessionId,
+            },
+          }
+          await channel2.sendMessage(JSON.stringify([recoverPrepareMessage]))
           messageModule.messageRelayer?.join(channel2)
           recoveryModule.setRecoverStep(step + 1)
         }, 1000)

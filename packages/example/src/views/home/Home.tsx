@@ -1,12 +1,13 @@
 import { Button } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useContext, useEffect } from 'react'
+import styled from 'styled-components'
 
 import safeheron from '@/assets/safeheron.png'
 import Loading from '@/components/Loading'
-import { snap_origin } from '@/configs/snap'
 import AddressCard from '@/containers/AddressCard'
 import BackupDialog from '@/containers/BackupDialog'
+import BetaWarning from '@/containers/BetaWarning'
 import CheckShardDialog from '@/containers/CheckShardDialog'
 import CreateDialog from '@/containers/CreateDialog'
 import CreateOrImportGuide from '@/containers/CreateOrImportGuide'
@@ -20,7 +21,17 @@ import Welcome from '@/containers/Welcome'
 import { MetamaskActions, MetaMaskContext } from '@/hooks/MetamaskContext'
 import { useStore } from '@/store'
 import styles from '@/styles/app/index.module.less'
-import { connectSnap, getSnap, isLocalSnap } from '@/utils/snap'
+import { connectSnap, getSnap } from '@/utils/snap'
+
+const HomeWrap = styled.div`
+  width: 100%;
+  padding-top: 73px;
+`
+
+const HomeContainer = styled.div`
+  width: 1044px;
+  margin: 0 auto;
+`
 
 const Home = () => {
   const { accountModule, interactive, recoveryModule, backupModule } =
@@ -86,33 +97,37 @@ const Home = () => {
   }, [state.installedSnap])
 
   return (
-    <>
+    <HomeWrap>
       <Header>
         <Button
-          disabled={!state.isFlask || !!state.installedSnap}
+          disabled={!state.isFlask}
           color={'primary'}
           onClick={connectMetamask}>
           {state.installedSnap ? 'Connected' : 'Connect MetaMask'}
         </Button>
       </Header>
 
-      {renderContent()}
+      <BetaWarning />
 
-      <div className={styles.homePartner}>
-        <h1>MPC Wallet Solution Powered by</h1>
-        <img src={safeheron} width="120" />
-      </div>
+      <HomeContainer>
+        {renderContent()}
 
-      <Loading loading={loading} />
+        <div className={styles.homePartner}>
+          <h1>MPC Wallet Solution Powered by</h1>
+          <img src={safeheron} width="120" />
+        </div>
 
-      {walletNameDialogVisible && <WalletNameDialog />}
-      {createDialogVisible && <CreateDialog />}
-      {signTransactionDialogVisible && <SignTransactionDialog />}
-      {backupDialogVisible && <BackupDialog />}
-      {checkShardDialogVisible && <CheckShardDialog />}
-      {recoverPrepareDialogVisible && <RecoverPrepareDialog />}
-      {recoverDialogVisible && <RecoverDialog />}
-    </>
+        <Loading loading={loading} />
+
+        {walletNameDialogVisible && <WalletNameDialog />}
+        {createDialogVisible && <CreateDialog />}
+        {signTransactionDialogVisible && <SignTransactionDialog />}
+        {backupDialogVisible && <BackupDialog />}
+        {checkShardDialogVisible && <CheckShardDialog />}
+        {recoverPrepareDialogVisible && <RecoverPrepareDialog />}
+        {recoverDialogVisible && <RecoverDialog />}
+      </HomeContainer>
+    </HomeWrap>
   )
 }
 

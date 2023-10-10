@@ -1,3 +1,5 @@
+import { OperationType, SignPrepareParams } from '@safeheron/mpcsnap-types'
+import { SignPrepareMessage } from '@safeheron/mpcsnap-types/src/relay-message/sign'
 import { Button, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
@@ -49,7 +51,7 @@ const SignDialog = () => {
   } = useStore()
 
   const { currentChain } = networkModule
-  const { balanceEth } = accountModule
+  const { balanceEth, walletId } = accountModule
 
   const step = interactive.signStep
   const [webrtcChannel, setWebrtcChannel] = useState<WebRTCChannel>()
@@ -69,23 +71,23 @@ const SignDialog = () => {
         } = signModule.pendingRequest
         const thisChainName = networkModule.getChainName(thisChainId)
 
-        await rtcChannel.sendMessage(
-          JSON.stringify({
-            messageType: MPCMessageType.signPrepare,
-            messageContent: {
-              method: method,
-              params: params,
-              commonParams: {
-                chainName: thisChainName,
-                chainId: thisChainId,
-                balance: balanceEth,
-                nativeCurrency: currentChain?.nativeCurrency,
-                timestamp: createTime,
-                formatTime: formatToUSDateTime(createTime),
-              },
+        const signPrepareParams: SignPrepareMessage = {
+          messageType: OperationType.signPrepare,
+          messageContent: {
+            walletId,
+            method: method,
+            params: params,
+            commonParams: {
+              chainName: thisChainName,
+              chainId: thisChainId,
+              balance: balanceEth,
+              nativeCurrency: currentChain?.nativeCurrency,
+              timestamp: createTime,
+              formatTime: formatToUSDateTime(createTime),
             },
-          })
-        )
+          },
+        }
+        await rtcChannel.sendMessage(JSON.stringify(signPrepareParams))
 
         messageModule.rpcChannel?.next({
           messageType: MPCMessageType.signReady,

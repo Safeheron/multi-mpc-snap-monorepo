@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 import safeheron from '@/assets/safeheron.png'
 import { RouterEnum } from '@/configs/Enums'
+import BetaWarning from '@/containers/BetaWarning'
 import Header from '@/containers/Header'
 import styles from '@/styles/app/index.module.less'
 
@@ -16,11 +17,14 @@ const Index = () => {
   }
 
   return (
-    <>
+    <div className={styles.indexWrap}>
       <Header hideNetwork>
-        <Button onClick={goHome}>Launch Wallet</Button>
+        <Button style={{ background: '#F3F6FD' }} onClick={goHome}>
+          Launch Wallet
+        </Button>
       </Header>
 
+      <BetaWarning />
       <div className={styles.indexPage}>
         <div className={styles.slogan}>
           <h1>A Multi-Factor Auth Wallet for Everyone</h1>
@@ -63,7 +67,7 @@ const Index = () => {
           <img src={safeheron} width="200" />
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

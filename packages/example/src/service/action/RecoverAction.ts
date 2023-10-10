@@ -5,6 +5,8 @@ import type {
   PubAndZkp,
   PubKey,
 } from '@safeheron/mpcsnap-types'
+import { RoleReadyMessage } from '@safeheron/mpcsnap-types/src'
+import { message } from 'antd'
 
 import {
   createKeyPair,
@@ -17,10 +19,10 @@ import {
   refreshRound,
   refreshSuccess,
 } from '@/service/metamask'
-import { PartyId } from '@/service/types'
+import { MPCMessageType, PartyId } from '@/service/types'
 import { store } from '@/store'
 
-import { MPCMessage, MPCMessageType, PartyIndexMap } from '../types'
+import { MPCMessage, PartyIndexMap } from '../types'
 
 interface PartyInfo {
   partyId: PartyId
@@ -34,9 +36,32 @@ class RecoverAction {
   lostPartyInfo?: PartyInfo
   remotePubKeys: PubKey[] = []
 
-  async handleRoleReady(
-    messageArray: MPCMessage<{ partyId: PartyId; index: number }>[]
-  ) {
+  async handleRoleReady(messageArray: RoleReadyMessage[]) {
+    const walletIdArray = messageArray
+      .map(m => m.messageContent.walletId)
+      .filter(Boolean)
+    walletIdArray.push(store.accountModule.walletId)
+
+    if (walletIdArray && walletIdArray.length >= 2) {
+      const firstEle = walletIdArray[0]
+      const walletMatched = walletIdArray.every(wi => wi === firstEle)
+      if (!walletMatched) {
+        message.error(
+          `Wallet not matched, it seems that you used different wallet to recover, these wallet ids are ${walletIdArray.join(
+            ', '
+          )}`,
+          5
+        )
+        store.messageModule.rpcChannel?.next({
+          sendType: 'broadcast',
+          messageType: MPCMessageType.abort,
+          messageContent: 'recover',
+        })
+        store.recoveryModule.setRecoverDialogVisible(false)
+        return
+      }
+    }
+
     store.messageModule.rpcChannel?.next({
       messageType: MPCMessageType.recoverReady,
       messageContent: store.recoveryModule.localKeyshareExist,
@@ -50,7 +75,6 @@ class RecoverAction {
       !!store.accountModule.address
     ) {
       // If both side have key shards, don't needed recovery
-      // TODO close webrtc
       store.recoveryModule.setMnemonicFormType('noNeed')
       return
     }
@@ -143,7 +167,7 @@ class RecoverAction {
   async handleKeyPairReady(
     messageArray: MPCMessage<{ partyId: PartyId; pubKey: string }>[]
   ) {
-    if (store.recoveryModule.localKeyshareExist) {
+    if (store.recoveryModule.localPartyHasMnemonic) {
       const remotePub = messageArray.find(
         v => v.messageContent.partyId === this.lostPartyInfo?.partyId
       )?.messageContent.pubKey
@@ -179,6 +203,7 @@ class RecoverAction {
     }
   }
 
+  // @ts-ignore
   async handleRecoverRound(message: MPCMessage<ComputeMessage[]>) {
     const res = await recoverRound(
       store.interactive.sessionId,

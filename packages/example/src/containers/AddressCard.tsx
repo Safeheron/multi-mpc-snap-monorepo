@@ -194,7 +194,9 @@ const AddressCard = () => {
           <Popover
             content={
               <div className={styles.dashboardContent}>
-                <div>You can track your assets through these dashboards:</div>
+                <div className={styles.dashboardTitle}>
+                  You can track your assets through these dashboards:
+                </div>
                 {filledDashboardList.map(d => (
                   <div key={d.name} className={styles.dashboardWrapper}>
                     <img className={styles.dashboardLogo} src={d.logo} alt="" />

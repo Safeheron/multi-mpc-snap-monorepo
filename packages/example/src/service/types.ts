@@ -10,6 +10,7 @@ export const PartyIndexMap = {
   [PartyId.C]: '3',
 }
 
+// TODO replace with mpcsnap-types declarations
 export enum MPCMessageType {
   partyPrepare = 'partyPrepare',
   partyReady = 'partyReady',

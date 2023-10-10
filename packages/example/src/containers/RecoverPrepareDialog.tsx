@@ -1,3 +1,4 @@
+import { OperationType, RoleReadyMessage } from '@safeheron/mpcsnap-types'
 import { Button, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
 
@@ -6,7 +7,6 @@ import { RPCChannel } from '@/service/channel/RPCChannel'
 import { recoverApproval } from '@/service/metamask'
 import MessageRelayer from '@/service/relayer/MessageRelayer'
 import { PartyId } from '@/service/types'
-import { MPCMessageType } from '@/service/types'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/RecoverPrepareDialog.module.less'
 
@@ -34,13 +34,17 @@ const RecoverPrepareDialog = () => {
     messageModule.setMessageRelayer(messageRelayer)
     messageRelayer.join(rpcChannel)
 
-    rpcChannel.next({
-      messageType: MPCMessageType.roleReady,
+    const roleReadyMessage: RoleReadyMessage = {
+      messageType: OperationType.roleReady,
       messageContent: {
         partyId: PartyId.A,
         index: 1,
+        walletId: accountModule.walletId,
       },
-    })
+    }
+
+    // @ts-ignore
+    rpcChannel.next(roleReadyMessage)
     recoveryModule.setRecoverStep(1)
     recoveryModule.setRecoverDialogVisible(true)
   }

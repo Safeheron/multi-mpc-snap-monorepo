@@ -1,3 +1,4 @@
+import { OperationType, PartyPrepareMessage } from '@safeheron/mpcsnap-types'
 import { Button, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
@@ -62,15 +63,15 @@ const CreateDialog = () => {
       setWebrtcChannel1(rtcChannel1)
       rtcChannel1.once('channelOpen', () => {
         setTimeout(async () => {
-          await rtcChannel1.sendMessage(
-            JSON.stringify({
-              messageType: MPCMessageType.partyPrepare,
-              messageContent: {
-                walletName: interactive.walletName,
-                partyId: PartyId.B,
-              },
-            })
-          )
+          const message: PartyPrepareMessage = {
+            messageType: OperationType.partyPrepare,
+            messageContent: {
+              walletName: interactive.walletName,
+              partyId: PartyId.B,
+              sessionId: interactive.sessionId,
+            },
+          }
+          await rtcChannel1.sendMessage(JSON.stringify(message))
           interactive.setCreateStep(step + 1)
         }, 1000)
       })
@@ -80,15 +81,16 @@ const CreateDialog = () => {
       setWebrtcChannel2(rtcChannel2)
       rtcChannel2.once('channelOpen', () => {
         setTimeout(async () => {
-          await rtcChannel2.sendMessage(
-            JSON.stringify({
-              messageType: MPCMessageType.partyPrepare,
-              messageContent: {
-                walletName: interactive.walletName,
-                partyId: PartyId.C,
-              },
-            })
-          )
+          const message: PartyPrepareMessage = {
+            messageType: OperationType.partyPrepare,
+            messageContent: {
+              walletName: interactive.walletName,
+              partyId: PartyId.C,
+              sessionId: interactive.sessionId,
+            },
+          }
+
+          await rtcChannel2.sendMessage(JSON.stringify(message))
           interactive.setCreateStep(step + 1)
         }, 1000)
       })

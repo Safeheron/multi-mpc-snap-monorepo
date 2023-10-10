@@ -54,11 +54,16 @@ const BackupDialog = () => {
       setStep(2)
     } else if (step === 2) {
       setBackupLoading(true)
-      const res = await backupUpdate(interactive.sessionId)
-      setBackupLoading(false)
-      if (!res.success) return
-      accountModule.setAccount(res.data)
-      setStep(3)
+      try {
+        const res = await backupUpdate(interactive.sessionId)
+        if (!res.success) return
+        accountModule.setAccount(res.data)
+        setStep(3)
+      } catch (e) {
+        /* no op */
+      } finally {
+        setBackupLoading(false)
+      }
     }
   }
 

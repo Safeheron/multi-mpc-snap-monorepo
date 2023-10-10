@@ -16,10 +16,10 @@ export async function detectMediaAbility(): Promise<DetectMediaResponse> {
 
   try {
     const devices = await navigator.mediaDevices.getUserMedia({
-      audio: false,
       video: true,
     })
   } catch (e) {
+    console.error('cannot access user media, error: ', e)
     return {
       support: false,
       message:

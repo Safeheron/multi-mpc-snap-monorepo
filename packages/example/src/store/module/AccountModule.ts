@@ -8,6 +8,7 @@ import { provider } from '@/utils'
 const LOOP_GAP = 20_000
 
 class AccountModule {
+  walletId = ''
   walletName = ''
   address = ''
   backuped?: boolean
@@ -35,6 +36,7 @@ class AccountModule {
     this.walletName = account.walletName
     this.backuped = account.backuped
     this.synced = account.synced
+    this.walletId = account.id
     this.loopBalance(this.address)
   }
 

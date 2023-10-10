@@ -5,6 +5,7 @@ declare namespace IndexModuleLessNamespace {
     featList: string
     homePartner: string
     indexPage: string
+    indexWrap: string
     left: string
     narrowerFeatWrap: string
     partner: string
