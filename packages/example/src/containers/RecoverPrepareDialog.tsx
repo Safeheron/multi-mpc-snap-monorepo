@@ -56,8 +56,8 @@ const RecoverPrepareDialog = () => {
           title={'Recover an MPC Wallet'}
           desc={
             <p>
-              To recover an MPC Wallet, please make sure you have MetaMask Flask
-              on your Google Chrome and the Safeheron Snap App on two separate
+              To recover an MPC Wallet, please make sure you have MetaMask on
+              your Google Chrome and the Safeheron Snap App on two separate
               phones.
               <br /> <br />
               For wallet recovery, you'll need at least two out of the three

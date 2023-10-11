@@ -23,9 +23,7 @@ const CreateOrImportGuide = () => {
         </div>
 
         <div className={styles.box} onClick={handleRecover}>
-          <span>
-            I already have an MPC wallet. <br /> Recover the wallet.
-          </span>
+          <div>Recover My MPC Wallet.</div>
         </div>
       </section>
       <div className={styles.line}></div>

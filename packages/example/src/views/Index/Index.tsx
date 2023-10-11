@@ -29,11 +29,11 @@ const Index = () => {
           <h1>A Multi-Factor Auth Wallet for Everyone</h1>
           <p>
             A fully decentralized MPC wallet with 3 key shards distributedly
-            stored on MetaMask Snap,
+            stored on MetaMask Extension
           </p>
           <p>
-            Safeheron Snap App 1, and Safeheron Snap App 2. Two devices are used
-            to sign a transaction.
+            and 2 mobile phones with Safeheron Snap App installed. Two devices
+            are used to sign a transaction.
           </p>
           <Button onClick={goHome}>Launch Wallet</Button>
         </div>

@@ -17,12 +17,12 @@ const NotBackupDialog = ({ onSubmit }) => {
     interactive.setLoading(true)
     const res = await backupApproval(accountModule.walletName)
     interactive.setLoading(false)
-    console.log(res)
 
     if (res.success) {
       interactive.setSessionId(res.data.sessionId)
       backupModule.setMnemonic(res.data.mnemonic)
       backupModule.setBackupDialogVisible(true)
+      backupModule.setNotBackupDialogVisible(false)
     }
   }
 

@@ -1,10 +1,9 @@
 import styles from '@/styles/components/InstallReminder.module.less'
 
-// TODO change below url when released
-const flaskLinkUrl = 'https://metamask.io/flask/'
 const appDownload = ''
 
 import arrow from '@/assets/arrow.png'
+import { METAMASK_EXTENSION_URL } from '@/configs/Configs'
 
 const InstallReminder = () => {
   return (
@@ -14,7 +13,10 @@ const InstallReminder = () => {
         Safeheron Snap App on your two mobile phones.
       </p>
       <div className={styles.btns}>
-        <a className={styles.link} target="'_blank'" href={flaskLinkUrl}>
+        <a
+          className={styles.link}
+          target="'_blank'"
+          href={METAMASK_EXTENSION_URL}>
           <span>Download MetaMask</span>
           <img src={arrow} />
         </a>
