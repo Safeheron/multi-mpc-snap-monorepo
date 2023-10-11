@@ -24,7 +24,6 @@ const Index = () => {
         </Button>
       </Header>
 
-      <BetaWarning />
       <div className={styles.indexPage}>
         <div className={styles.slogan}>
           <h1>A Multi-Factor Auth Wallet for Everyone</h1>

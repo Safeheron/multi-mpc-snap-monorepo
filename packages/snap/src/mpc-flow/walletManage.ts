@@ -39,7 +39,7 @@ export async function syncAccount(stateManager: StateManager) {
     snapAccount.synced = true
     await stateManager.saveOrUpdateAccount(snapAccount)
   }
-  return succeed()
+  return succeed('')
 }
 
 export async function checkMnemonic(
