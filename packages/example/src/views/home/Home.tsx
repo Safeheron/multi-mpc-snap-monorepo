@@ -1,6 +1,6 @@
 import { Button } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
 
 import safeheron from '@/assets/safeheron.png'
@@ -21,7 +21,7 @@ import Welcome from '@/containers/Welcome'
 import { MetamaskActions, MetaMaskContext } from '@/hooks/MetamaskContext'
 import { useStore } from '@/store'
 import styles from '@/styles/app/index.module.less'
-import { connectSnap, getSnap } from '@/utils/snap'
+import { connectSnap, getSnap, isLocalSnap } from '@/utils/snap'
 
 const HomeWrap = styled.div`
   width: 100%;
@@ -48,6 +48,11 @@ const Home = () => {
   const { address, requestAccountLoading } = accountModule
 
   const [state, dispatch] = useContext(MetaMaskContext)
+
+  const isLocal = useMemo(
+    () => isLocalSnap(state.installedSnap?.id ?? ''),
+    [state.installedSnap]
+  )
 
   const connectMetamask = async () => {
     try {
@@ -100,10 +105,14 @@ const Home = () => {
     <HomeWrap>
       <Header>
         <Button
-          disabled={!state.isFlask}
+          disabled={!isLocal && (!state.isFlask || !!state.installedSnap)}
           color={'primary'}
           onClick={connectMetamask}>
-          {state.installedSnap ? 'Connected' : 'Connect MetaMask'}
+          {state.installedSnap
+            ? isLocal
+              ? 'Reconnect'
+              : 'Connected'
+            : 'Connect MetaMask'}
         </Button>
       </Header>
 
