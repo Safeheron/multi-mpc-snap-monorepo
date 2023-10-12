@@ -1,6 +1,6 @@
 {
   "name": "@safeheron/mpcsnap-types",
-  "version": "2.1.0-rc.0",
+  "version": "2.1.0-rc.1",
   "description": "Types for MPCSnap",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
