@@ -40,7 +40,9 @@ class RecoverAction {
     const walletIdArray = messageArray
       .map(m => m.messageContent.walletId)
       .filter(Boolean)
-    walletIdArray.push(store.accountModule.walletId)
+    if (store.accountModule.walletId) {
+      walletIdArray.push(store.accountModule.walletId)
+    }
 
     if (walletIdArray && walletIdArray.length >= 2) {
       const firstEle = walletIdArray[0]
