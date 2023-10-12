@@ -74,6 +74,8 @@ export class MPCKeyring implements Keyring {
   async submitRequest(request: KeyringRequest): Promise<SubmitRequestResponse> {
     const requestId = request.id
     await this.stateManager.addRequest(requestId, request)
+
+    // TODO: delete this alert while MetaMask support redirect field!
     await requestAlert(
       panel([
         text(

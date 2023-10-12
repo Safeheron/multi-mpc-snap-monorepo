@@ -1,7 +1,8 @@
 import CopyPlugin from 'copy-webpack-plugin'
 import path from 'path'
 import TerserPlugin from 'terser-webpack-plugin'
-import webpack, { Configuration } from 'webpack'
+import type { Configuration } from 'webpack'
+import webpack from 'webpack'
 
 import SnapsWebpackPlugin from './customSnapPlugin'
 

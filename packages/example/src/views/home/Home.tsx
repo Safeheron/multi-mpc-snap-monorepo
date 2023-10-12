@@ -105,7 +105,7 @@ const Home = () => {
     <HomeWrap>
       <Header>
         <Button
-          disabled={!isLocal && (!state.isFlask || !!state.installedSnap)}
+          disabled={!isLocal && (!state.supportedSnap || !!state.installedSnap)}
           color={'primary'}
           onClick={connectMetamask}>
           {state.installedSnap

@@ -1,21 +1,18 @@
 import { getSnaps } from './snap'
 
 /**
- * Detect if the wallet injecting the ethereum object is MetaMask Flask.
  *
  * @returns True if the MetaMask version is Flask, false otherwise.
  */
-export const isFlask = async () => {
+export const isSupportSnap = async () => {
   const provider = window.ethereum
 
   try {
-    const clientVersion = await provider?.request({
-      method: 'web3_clientVersion',
+    await provider?.request({
+      method: 'wallet_getSnaps',
     })
 
-    const isFlaskDetected = (clientVersion as string[])?.includes('flask')
-
-    return Boolean(provider && isFlaskDetected)
+    return true
   } catch {
     return false
   }

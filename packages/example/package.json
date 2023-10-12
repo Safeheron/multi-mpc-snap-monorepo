@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
-    "@metamask/keyring-api": "^0.2.7",
+    "@metamask/keyring-api": "^1.0.0",
     "@metamask/providers": "^13.0.0",
     "@metamask/utils": "^8.1.0",
     "@ngraveio/bc-ur": "^1.1.6",

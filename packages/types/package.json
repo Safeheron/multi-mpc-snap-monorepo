@@ -25,7 +25,7 @@
     "build:types": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "@metamask/keyring-api": "^0.2.7",
+    "@metamask/keyring-api": "^1.0.0",
     "superstruct": "^1.0.3"
   },
   "devDependencies": {
@@ -36,8 +36,6 @@
     "rollup-plugin-clear": "^2.0.7",
     "rollup-plugin-progress": "^1.1.2",
     "ts-loader": "^9.4.4",
-    "typescript": "^4.7.3",
-    "webpack": "^5.88.2",
-    "webpack-cli": "^5.1.4"
+    "typescript": "^4.7.3"
   }
 }

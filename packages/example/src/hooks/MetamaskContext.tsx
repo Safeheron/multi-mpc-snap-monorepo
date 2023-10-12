@@ -4,16 +4,16 @@ import React, { createContext, useEffect, useReducer } from 'react'
 import { Snap } from '@/@types/snap'
 import { getSnap } from '@/utils/snap'
 
-import { isFlask } from '../utils/metamask'
+import { isSupportSnap } from '../utils/metamask'
 
 export type MetamaskState = {
-  isFlask: boolean
+  supportedSnap: boolean
   installedSnap?: Snap
   error?: Error
 }
 
 const initialState: MetamaskState = {
-  isFlask: false,
+  supportedSnap: false,
 }
 
 type MetamaskDispatch = { type: MetamaskActions; payload: any }
@@ -44,7 +44,7 @@ const reducer: Reducer<MetamaskState, MetamaskDispatch> = (state, action) => {
     case MetamaskActions.SetFlaskDetected:
       return {
         ...state,
-        isFlask: action.payload,
+        supportedSnap: action.payload,
       }
 
     case MetamaskActions.SetError:
@@ -77,8 +77,8 @@ export const MetaMaskProvider = ({ children }: { children: ReactNode }) => {
       /**
        * Detect if MetaMask Flask is installed.
        */
-      async function detectFlask() {
-        const isFlaskDetected = await isFlask()
+      async function detectSupportSnap() {
+        const isFlaskDetected = await isSupportSnap()
 
         dispatch({
           type: MetamaskActions.SetFlaskDetected,
@@ -97,15 +97,15 @@ export const MetaMaskProvider = ({ children }: { children: ReactNode }) => {
         })
       }
 
-      await detectFlask()
+      await detectSupportSnap()
 
-      if (state.isFlask) {
+      if (state.supportedSnap) {
         await detectSnapInstalled()
       }
     }
 
     detectInstallation().catch(console.error)
-  }, [state.isFlask, window.ethereum])
+  }, [state.supportedSnap, window.ethereum])
 
   useEffect(() => {
     let timeoutId: number

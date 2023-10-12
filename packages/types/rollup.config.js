@@ -3,6 +3,7 @@ const commonJs = require('@rollup/plugin-commonjs')
 const resolve = require('@rollup/plugin-node-resolve')
 const progress = require('rollup-plugin-progress')
 const clear = require('rollup-plugin-clear')
+const path = require('path')
 
 /**
  * @type {import('rollup').RollupOptions}
@@ -10,10 +11,18 @@ const clear = require('rollup-plugin-clear')
 const config = {
   input: 'src/index.ts',
   output: [
-    { file: './dist/esm/index.js', format: 'esm' },
-    { file: './dist/cjs/index.js', format: 'cjs' },
+    { dir: './dist/esm', format: 'esm' },
+    { dir: './dist/cjs', format: 'cjs' },
   ],
-  plugins: [commonJs(), resolve(), typescript(), progress()],
+  plugins: [
+    clear({
+      targets: [path.resolve(__dirname, 'dist')],
+    }),
+    commonJs(),
+    resolve(),
+    typescript(),
+    progress(),
+  ],
 }
 
 module.exports = config

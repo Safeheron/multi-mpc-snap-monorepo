@@ -85,8 +85,7 @@ const website_permissions = [
   ...Object.values(InternalMPCSignMethods),
   ...Object.values(InternalMPCOtherMethods),
   ...Object.values(InternalSnapCommonMethods),
-  ...Object.values(SnapKeyringAccountMethods),
-  ...Object.values(SnapKeyringRequestMethods),
+  SnapKeyringRequestMethods.RejectRequest,
 ]
 
 websites.forEach(lw => {

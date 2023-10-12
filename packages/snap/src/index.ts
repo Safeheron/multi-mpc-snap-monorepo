@@ -1,4 +1,7 @@
-import type { OnRpcRequestHandler } from '@metamask/snaps-types'
+import type {
+  OnKeyringRequestHandler,
+  OnRpcRequestHandler,
+} from '@metamask/snaps-types'
 
 import {
   backupHandler,
@@ -34,7 +37,7 @@ const onRpcRequest: OnRpcRequestHandler = async snapRequest => {
 
     // Handle keyring methods.
     if (isKeyringRpcMethod(method)) {
-      return keyringHandler(snapRequest)
+      return keyringHandler({ origin, request })
     }
 
     if (isMPCKeygenMethod(method)) {
@@ -65,4 +68,18 @@ const onRpcRequest: OnRpcRequestHandler = async snapRequest => {
   }
 }
 
-export { onRpcRequest }
+const onKeyringRequest: OnKeyringRequestHandler = async ({
+  origin,
+  request,
+}) => {
+  await permissionsDetect({ origin, request })
+  await setup()
+  const method = request.method
+
+  // Handle keyring methods.
+  if (isKeyringRpcMethod(method)) {
+    return keyringHandler({ origin, request })
+  }
+}
+
+export { onKeyringRequest, onRpcRequest }
