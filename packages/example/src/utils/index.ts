@@ -5,6 +5,10 @@ import { formatUnits } from 'ethers/lib/utils'
 
 export { ethers }
 
+/**
+ * This provider may init fail and cannot resume
+ * @deprecated
+ */
 export const provider = window.ethereum
   ? // @ts-ignore
     new ethers.providers.Web3Provider(window.ethereum)

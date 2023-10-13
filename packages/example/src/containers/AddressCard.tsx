@@ -228,7 +228,7 @@ const AddressCard = () => {
               {backuped && (
                 <>
                   <a onClick={handleCheckShard}>View Key Shard A</a>
-                  <a onClick={handleRecover}>Recover for Other Device</a>
+                  <a onClick={handleRecover}>Recover Other Device</a>
                 </>
               )}
 
