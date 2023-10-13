@@ -6,15 +6,39 @@ import webpack from 'webpack'
 
 import SnapsWebpackPlugin from './customSnapPlugin'
 
-const isProd = process.env.NODE_ENV === 'production'
+type RunEnvType = 'dev' | 'test' | 'prod'
 
-const ALLOW_SITES = [
-  'https://test-mpcsnap.safeheron.com',
-  'https://mpcsnap.safeheron.com',
-]
-if (!isProd) {
-  ALLOW_SITES.push('http://localhost:8080')
+// @ts-ignore
+const RUN_ENV: RunEnvType = process.env.RUN_ENV || 'dev'
+// @ts-ignore
+const NODE_ENV: 'development' | 'production' =
+  process.env.NODE_ENV || 'development'
+
+const DAPP_SITE_ORIGIN_MAP: Record<RunEnvType, string> = {
+  dev: 'http://localhost:8080',
+  test: 'https://test-mpcsnap.safeheron.com',
+  prod: 'https://mpcsnap.safeheron.com',
 }
+
+const addRedirectUrlSuffix = origin => origin + '/#/home'
+
+const REDIRECT_URL_MAP: Record<RunEnvType, string> = {
+  dev: addRedirectUrlSuffix(DAPP_SITE_ORIGIN_MAP.dev),
+  test: addRedirectUrlSuffix(DAPP_SITE_ORIGIN_MAP.test),
+  prod: addRedirectUrlSuffix(DAPP_SITE_ORIGIN_MAP.prod),
+}
+
+const isProd = NODE_ENV === 'production'
+
+const ALLOW_SITES = [DAPP_SITE_ORIGIN_MAP[RUN_ENV]]
+const REDIRECT_URL = REDIRECT_URL_MAP[RUN_ENV]
+
+console.log(
+  `Build snap code use NODE_ENV: ${NODE_ENV}, RUN_ENV: ${RUN_ENV}\n
+  ALLOW_SITES: ${ALLOW_SITES}\n
+  REDIRECT_URL: ${REDIRECT_URL}\n
+  `
+)
 
 const config: Configuration = {
   entry: './src/index.ts',
@@ -80,6 +104,7 @@ const config: Configuration = {
     }),
     new webpack.DefinePlugin({
       ALLOW_SITES: JSON.stringify(ALLOW_SITES),
+      REDIRECT_URL: JSON.stringify(REDIRECT_URL),
     }),
   ],
   stats: 'minimal',

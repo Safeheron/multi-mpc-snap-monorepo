@@ -98,7 +98,9 @@ function hasPermission(origin: string, method: string): boolean {
 
 export const permissionsDetect = async ({ origin, request }): Promise<void> => {
   if (!hasPermission(origin, request.method)) {
-    throw new Error(`origin ${origin} cannot call method ${request.method}`)
+    throw new Error(
+      `origin ${origin} not allowed to call method ${request.method}`
+    )
   }
 }
 

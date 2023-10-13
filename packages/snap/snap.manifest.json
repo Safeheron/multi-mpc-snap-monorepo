@@ -1,5 +1,5 @@
 {
-  "version": "2.2.0-beta.7",
+  "version": "2.2.0-beta.8",
   "description": "The Safeheron MPC Snap.",
   "proposedName": "Safeheron Snap",
   "repository": {
@@ -7,7 +7,7 @@
     "type": "github"
   },
   "source": {
-    "shasum": "2KQBAOHwiLd4e4F3tuBxEvtDSZfBnEEXndfMOQBY7dc=",
+    "shasum": "12QjLGN2vxQZLZIHNZcoejTIT9PnD20csLM6wIb2S/A=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -21,7 +21,9 @@
     "snap_dialog": {},
     "endowment:keyring": {
       "allowedOrigins": [
-        "https://mpcsnap.safeheron.com"
+        "http://localhost:8080",
+        "https://mpcsnap.safeheron.com",
+        "https://test-mpcsnap.safeheron.com"
       ]
     },
     "snap_manageState": {},

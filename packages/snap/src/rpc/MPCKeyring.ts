@@ -75,20 +75,12 @@ export class MPCKeyring implements Keyring {
     const requestId = request.id
     await this.stateManager.addRequest(requestId, request)
 
-    // TODO: delete this alert while MetaMask support redirect field!
-    await requestAlert(
-      panel([
-        text(
-          'Please go to the Safeheron Snap Website to continue with the transaction. URL: https://mpcsnap.safeheron.com'
-        ),
-      ])
-    )
     return {
       pending: true,
       redirect: {
         message:
           'Please go to the Safeheron Snap Website to continue with the transaction.',
-        url: 'https://mpcsnap.safeheron.com',
+        url: REDIRECT_URL,
       },
     }
   }
