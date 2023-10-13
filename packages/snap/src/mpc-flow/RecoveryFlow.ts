@@ -209,7 +209,8 @@ class RecoveryFlow extends BaseFlow {
     // Don't delete below line, this will create a minimal key for key refresh
     await this.keyRefresh!.generateMinimalKey(localParty, remoteParties)
 
-    const res = await this.keyRefresh!.createContext()
+    // Currently, We assign the key shard in Snap to A, so the remote parties index are determined
+    const res = await this.keyRefresh!.createContext(['2', '3'])
     return succeed(res)
   }
 
