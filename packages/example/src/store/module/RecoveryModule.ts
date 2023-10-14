@@ -16,7 +16,10 @@ class RecoveryModule {
 
   mnemonicFormType = ''
 
+  // other party skip input mnemonic
   isSkip = false
+
+  // at least one another party have key shard
   hasOtherShard = false
 
   get localPartyHasMnemonic() {
