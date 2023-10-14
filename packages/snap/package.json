@@ -1,6 +1,6 @@
 {
   "name": "@safeheron/mpcsnap",
-  "version": "2.2.0-beta.9",
+  "version": "2.3.0-beta.0",
   "description": "MetaMask MPCSnap",
   "main": "dist/index.ts",
   "keywords": [
