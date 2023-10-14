@@ -18,6 +18,7 @@ type ReceivedSignaling = RTCSignaling & {
   name: string
   partyId?: string
   businessType: BusinessType
+  version: string
 }
 
 const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
