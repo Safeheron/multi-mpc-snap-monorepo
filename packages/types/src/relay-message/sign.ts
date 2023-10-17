@@ -20,6 +20,9 @@ export type SignPrepareParams = {
   }
 }
 
+/**
+ * this message is what website send to app, to tell app that which message will be signed
+ */
 export type SignPrepareMessage = BaseRelayMessage<
   OperationType.signPrepare,
   undefined,
@@ -29,7 +32,10 @@ export type SignPrepareMessage = BaseRelayMessage<
 export type SignReadyMessage = BaseRelayMessage<
   OperationType.signReady,
   undefined,
-  string[]
+  {
+    participants: string[]
+    pub: string
+  }
 >
 
 export type SignRoundMessage = BaseRelayMessage<
