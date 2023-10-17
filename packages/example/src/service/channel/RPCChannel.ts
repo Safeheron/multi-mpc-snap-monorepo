@@ -1,3 +1,8 @@
+import {
+  BaseRelayMessage,
+  OperationType,
+  SendType,
+} from '@safeheron/mpcsnap-types'
 import { message } from 'antd'
 
 import { MessageChannel } from '@/service/channel/MessageChannel'
@@ -34,7 +39,7 @@ export class RPCChannel extends MessageChannel {
       case MPCMessageType.partyReady:
         interactive.setProgress(15)
         await KenGenAction.handlePartyReady(messageArray)
-        interactive.setProgress(51)
+        interactive.setProgress(41)
         break
       case MPCMessageType.keyGenRound:
         interactive.setProgressAdd(6)
@@ -121,7 +126,11 @@ export class RPCChannel extends MessageChannel {
     }
   }
 
-  next(msg: Omit<MPCMessage, 'from'>) {
+  next(
+    msg:
+      | Omit<MPCMessage, 'from'>
+      | Omit<BaseRelayMessage<OperationType, SendType, any>, 'from'>
+  ) {
     this.receiveExternal(
       JSON.stringify({
         from: this.name,

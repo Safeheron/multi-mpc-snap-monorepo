@@ -3,6 +3,7 @@ import { MPC, Signer } from '@safeheron/mpc-wasm-sdk'
 import {
   ComputeMessage,
   KeyringAccountSupportedMethods,
+  SignApprovalResult,
   SnapRpcResponse,
   TransactionObject,
 } from '@safeheron/mpcsnap-types'
@@ -44,7 +45,7 @@ class KeyGenFlow extends BaseFlow {
     method: KeyringAccountSupportedMethods,
     params: Record<string, any> | string,
     requestId?: string
-  ): Promise<SnapRpcResponse<string>> {
+  ): Promise<SnapRpcResponse<SignApprovalResult>> {
     const wallet = this.getWalletWithError()
 
     if (requestId) {
@@ -65,22 +66,28 @@ class KeyGenFlow extends BaseFlow {
     this.signKey = wallet.signKey
 
     this.signer = this.mpcInstance.Signer.getCoSigner()
+    await this.signer.setupLocalCpkp()
 
-    return succeed(this.sessionId)
+    return succeed({
+      sessionId: this.sessionId,
+      pub: this.signer.localCommunicationPub,
+    })
   }
 
   async createContext(
     sessionId: string,
-    participantsPartyIds: string[]
+    participantsPartyIds: string[],
+    remotePub: { partyId: string; pub: string }
   ): Promise<SnapRpcResponse<ComputeMessage[]>> {
     this.verifySession(sessionId)
 
     const hash = this.serialized()
-    console.log('serialize hash >>', hash)
+
     const res = await this.signer!.createContext(
       hash,
       this.signKey!,
-      participantsPartyIds
+      participantsPartyIds,
+      remotePub
     )
     return succeed(res)
   }

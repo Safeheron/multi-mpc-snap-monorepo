@@ -2,6 +2,7 @@ import { KeyringSnapRpcClient } from '@metamask/keyring-api'
 import type {
   AccountItem,
   ComputeMessage,
+  CreateApprovalResult,
   CreateResult,
   PartialShard,
   Party,
@@ -9,9 +10,12 @@ import type {
   PubAndZkp,
   PubKey,
   RecoverApprovalResult,
+  RecoverContext,
   RecoverResult,
+  RecoverSetRemoteCommunicationPubs,
   RunRoundResponse,
   SignApproval,
+  SignApprovalResult,
   SignResult,
   SnapRpcResponse,
   WrappedKeyringRequest,
@@ -122,7 +126,7 @@ export async function backupUpdate(
 export async function createApproval(
   walletName: string,
   party: Party
-): Promise<SnapRpcResponse<string>> {
+): Promise<SnapRpcResponse<CreateApprovalResult>> {
   return walletInvokeSnap({
     method: SnapInvokeMethods.createApproval,
     params: { walletName, party },
@@ -162,7 +166,7 @@ export async function signApproval(
   method: SignApproval['params']['method'],
   params: Record<string, unknown>,
   requestId?: string
-): Promise<SnapRpcResponse<any>> {
+): Promise<SnapRpcResponse<SignApprovalResult>> {
   return walletInvokeSnap({
     method: SnapInvokeMethods.signApproval,
     params: { method, params, requestId },
@@ -171,11 +175,12 @@ export async function signApproval(
 
 export async function signContext(
   sessionId: string,
-  partyIds: string[]
+  partyIds: string[],
+  remotePub: { partyId: string; pub: string }
 ): Promise<SnapRpcResponse<ComputeMessage[]>> {
   return walletInvokeSnap({
     method: SnapInvokeMethods.signContext,
-    params: { sessionId, partyIds },
+    params: { sessionId, partyIds, remotePub },
   })
 }
 
@@ -226,22 +231,30 @@ export async function createKeyPair(
   })
 }
 
+export async function recoverSetCommunicationPub(
+  remotePubs: RecoverSetRemoteCommunicationPubs['params']
+) {
+  return walletInvokeSnap({
+    method: SnapInvokeMethods.setCommunicationPubs,
+    params: remotePubs,
+  })
+}
+
 export async function recoverContext(
   sessionId: string,
-  partyInfo: {
-    localPartyIndex: string
-    remotePartyIndex: string
-    lostPartyIndex: string
-  },
-  remotePub: string
+  localParty: RecoverContext['params']['localParty'],
+  remoteParty: RecoverContext['params']['remoteParty'],
+  lostParty: RecoverContext['params']['lostParty']
 ): Promise<SnapRpcResponse<ComputeMessage[]>> {
+  const params: RecoverContext['params'] = {
+    sessionId,
+    localParty,
+    remoteParty,
+    lostParty,
+  }
   return walletInvokeSnap({
     method: SnapInvokeMethods.recoverContext,
-    params: {
-      sessionId,
-      partyInfo,
-      remotePub,
-    },
+    params,
   })
 }
 

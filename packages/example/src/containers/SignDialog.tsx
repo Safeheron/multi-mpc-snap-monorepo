@@ -1,4 +1,8 @@
-import { OperationType, SignPrepareParams } from '@safeheron/mpcsnap-types'
+import {
+  OperationType,
+  SignPrepareParams,
+  SignReadyMessage,
+} from '@safeheron/mpcsnap-types'
 import { SignPrepareMessage } from '@safeheron/mpcsnap-types/src/relay-message/sign'
 import { Button, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
@@ -89,10 +93,14 @@ const SignDialog = () => {
         }
         await rtcChannel.sendMessage(JSON.stringify(signPrepareParams))
 
-        messageModule.rpcChannel?.next({
-          messageType: MPCMessageType.signReady,
-          messageContent: [PartyId.A, rtcChannel.getPartyId()],
-        })
+        const signReadyMessage: SignReadyMessage = {
+          messageType: OperationType.signReady,
+          messageContent: {
+            participants: [PartyId.A, rtcChannel.getPartyId()],
+            pub: signModule.communicationPub,
+          },
+        }
+        messageModule.rpcChannel?.next(signReadyMessage)
 
         interactive.setSignStep(2)
       }, 1000)

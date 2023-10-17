@@ -90,7 +90,8 @@ const PendingRequestList: React.FC = () => {
     const ret = await signApproval(requestMethod, originalParams, requestId)
 
     if (ret.success) {
-      interactive.setSessionId(ret.data)
+      interactive.setSessionId(ret.data.sessionId)
+      signModule.setCommunicationPub(ret.data.pub)
 
       // setup message channel
       const messageRelayer = new MessageRelayer(2)

@@ -1,18 +1,27 @@
+import { SignReadyMessage } from '@safeheron/mpcsnap-types'
 import { message } from 'antd'
 
 import { PartyId } from '@/service/types'
 import { store } from '@/store'
-import { ethers, provider } from '@/utils'
+import { provider } from '@/utils'
 
 import { signContext, signRound } from '../metamask'
 import { MPCMessage, MPCMessageType } from '../types'
 
 const SignAction = {
-  async handleSignReady(messageArray: MPCMessage[]) {
+  async handleSignReady(messageArray: SignReadyMessage[]) {
     store.interactive.setSignStep(3)
+
+    const { participants, pub } = messageArray[0].messageContent
+    const remotePub = {
+      partyId: participants.find(p => p !== PartyId.A)!,
+      pub,
+    }
+
     const res = await signContext(
       store.interactive.sessionId,
-      messageArray[0].messageContent
+      participants,
+      remotePub
     )
 
     if (res.success) {

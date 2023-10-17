@@ -8,6 +8,7 @@ import { PartyId } from '@/service/types'
 import { MPCMessageType, PartyIndexMap } from '@/service/types'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/WalletNameDialog.module.less'
+import { OperationType, PartyReadyMessage } from '@safeheron/mpcsnap-types';
 
 const WalletNameDialog = () => {
   const { interactive, messageModule } = useStore()
@@ -38,7 +39,7 @@ const WalletNameDialog = () => {
     interactive.setLoading(false)
 
     if (res.success) {
-      interactive.setSessionId(res.data)
+      interactive.setSessionId(res.data.sessionId)
 
       const rpcChannel = new RPCChannel()
       messageModule.setRPCChannel(rpcChannel)
@@ -46,10 +47,12 @@ const WalletNameDialog = () => {
       messageModule.setMessageRelayer(messageRelayer)
       messageRelayer.join(rpcChannel)
 
-      rpcChannel.next({
-        messageType: MPCMessageType.partyReady,
-        messageContent: party,
-      })
+      const partyReadyMessage: PartyReadyMessage = {
+        messageType: OperationType.partyReady,
+        messageContent: { ...party, pub: res.data.pub },
+      }
+
+      rpcChannel.next(partyReadyMessage)
       interactive.setProgress(5)
       interactive.setCreateStep(1)
       interactive.setCreateDialogVisible(true)

@@ -17,6 +17,7 @@ import {
   RecoverMnemonicStruct,
   RecoverPrepareStruct,
   RecoverRoundStruct,
+  RecoverSetRemoteCommunicationPubsStruct,
   RefreshContextStruct,
   RefreshPrepareStruct,
   RefreshRoundStruct,
@@ -38,6 +39,7 @@ import {
 } from '@/mpc-flow/walletManage'
 import { listPendingRequests } from '@/rpc/internalKeyringHandler'
 import { MPCKeyring } from '@/rpc/MPCKeyring'
+import { InternalMPCRecoveryMethods } from '@/rpc/permissions'
 import StateManager from '@/StateManager'
 
 let stateManager: StateManager
@@ -143,7 +145,8 @@ export const signHandler: OnRpcRequestHandler = async ({ request }) => {
       assert(request, SignContextStruct)
       return signFlow.createContext(
         request.params.sessionId,
-        request.params.partyIds
+        request.params.partyIds,
+        request.params.remotePub
       )
 
     case 'mpc_signRound':
@@ -181,12 +184,17 @@ export const recoverHandler: OnRpcRequestHandler = async ({ request }) => {
       assert(request, RecoverKeyPairStruct)
       return recoveryFlow.recoverKeyPair(request.params.sessionId)
 
+    case InternalMPCRecoveryMethods.RecoverSetCommunicationPubs:
+      assert(request, RecoverSetRemoteCommunicationPubsStruct)
+      return recoveryFlow.setCommunicationPubs(request.params)
+
     case 'mpc_recoverContext':
       assert(request, RecoverContextStruct)
       return recoveryFlow.recoverContext(
         request.params.sessionId,
-        request.params.partyInfo,
-        request.params.remotePub
+        request.params.localParty,
+        request.params.remoteParty,
+        request.params.lostParty
       )
 
     case 'mpc_recoverRound':

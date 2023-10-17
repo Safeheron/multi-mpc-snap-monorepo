@@ -3,7 +3,9 @@ import { KeyGen, MPC } from '@safeheron/mpc-wasm-sdk'
 import {
   AccountItem,
   ComputeMessage,
+  CreateApprovalResult,
   Party,
+  PartyWithPub,
   SnapRpcResponse,
 } from '@safeheron/mpcsnap-types'
 import { ethers } from 'ethers'
@@ -34,7 +36,7 @@ class KeyGenFlow extends BaseFlow {
   async keyGenApproval(
     walletName: string,
     party: Party
-  ): Promise<SnapRpcResponse<string>> {
+  ): Promise<SnapRpcResponse<CreateApprovalResult>> {
     if (walletName.replace(/[^\x00-\xff]/g, 'aa').length > 60) {
       return errored(`Wallet name must within 60 characters.`)
     }
@@ -53,16 +55,21 @@ class KeyGenFlow extends BaseFlow {
 
     this.keyGen = this.mpcInstance.KeyGen.getCoSigner()
 
+    await this.keyGen.setupLocalCpkp()
+
     this.walletName = walletName
     this.sessionId = uuidV4()
     this.keyGen!.setLocalParty(party.party_id, party.index)
 
-    return succeed(this.sessionId)
+    return succeed({
+      sessionId: this.sessionId,
+      pub: this.keyGen.localCommunicationPub,
+    })
   }
 
   async createContext(
     sessionId: string,
-    remoteParties: Party[]
+    remoteParties: PartyWithPub[]
   ): Promise<SnapRpcResponse<ComputeMessage[]>> {
     this.verifySession(sessionId)
     const res = await this.keyGen!.createContext(remoteParties)

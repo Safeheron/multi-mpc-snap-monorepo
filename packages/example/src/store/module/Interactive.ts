@@ -29,7 +29,7 @@ class Interactive {
     this.loading = value
   }
 
-  setSessionId(value) {
+  setSessionId(value: string) {
     this.sessionId = value
   }
 

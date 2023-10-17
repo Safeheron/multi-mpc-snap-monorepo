@@ -14,6 +14,7 @@ import {
   recoverMnemonic,
   recoverPrepare,
   recoverRound,
+  recoverSetCommunicationPub,
   refreshContext,
   refreshPrepare,
   refreshRound,
@@ -63,6 +64,13 @@ class RecoverAction {
         return
       }
     }
+
+    await recoverSetCommunicationPub(
+      messageArray.map(ma => ({
+        partyId: ma.messageContent.partyId,
+        pub: ma.messageContent.pub,
+      }))
+    )
 
     store.messageModule.rpcChannel?.next({
       messageType: MPCMessageType.recoverReady,
@@ -169,24 +177,48 @@ class RecoverAction {
   async handleKeyPairReady(
     messageArray: MPCMessage<{ partyId: PartyId; pubKey: string }>[]
   ) {
+    await recoverSetCommunicationPub(
+      messageArray.map(ma => ({
+        partyId: ma.messageContent.partyId,
+        pub: ma.messageContent.pubKey,
+      }))
+    )
+
     if (store.recoveryModule.localPartyHasMnemonic) {
-      const remotePub = messageArray.find(
+      const lostPub = messageArray.find(
         v => v.messageContent.partyId === this.lostPartyInfo?.partyId
       )?.messageContent.pubKey
+      const remotePub = messageArray.find(
+        v => v.messageContent.partyId === this.remotePartyInfo?.partyId
+      )?.messageContent.pubKey
 
-      if (!remotePub) return
+      // no party lost
+      if (!lostPub) {
+        return
+      }
 
       if (!this.remotePartyInfo || !this.lostPartyInfo) return
 
-      const partyInfo = {
-        localPartyIndex: PartyIndexMap[PartyId.A],
-        remotePartyIndex: PartyIndexMap[this.remotePartyInfo.partyId],
-        lostPartyIndex: PartyIndexMap[this.lostPartyInfo.partyId],
+      const localParty = {
+        partyId: PartyId.A,
+        index: PartyIndexMap[PartyId.A],
       }
+      const remoteParty = {
+        partyId: this.remotePartyInfo.partyId,
+        index: PartyIndexMap[this.remotePartyInfo.partyId],
+        pub: remotePub!,
+      }
+      const lostParty = {
+        partyId: this.lostPartyInfo.partyId,
+        index: PartyIndexMap[this.lostPartyInfo.partyId],
+        pub: lostPub,
+      }
+
       const res = await recoverContext(
         store.interactive.sessionId,
-        partyInfo,
-        remotePub
+        localParty,
+        remoteParty,
+        lostParty
       )
       if (res.success) {
         store.messageModule.rpcChannel?.next({

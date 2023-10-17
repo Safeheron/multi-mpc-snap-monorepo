@@ -13,8 +13,10 @@ import {
   PartyWithZkp,
   PubKey,
   RecoverApprovalResult,
+  RecoverContext,
   SnapRpcResponse,
 } from '@safeheron/mpcsnap-types'
+import { RecoverSetRemoteCommunicationPubs } from '@safeheron/mpcsnap-types/src'
 import { ethers } from 'ethers'
 import { v4 as uuidV4 } from 'uuid'
 
@@ -44,8 +46,15 @@ class RecoveryFlow extends BaseFlow {
   private walletName = ''
   private mnemonic = ''
   private pubKey = ''
+
   private privKey?: string
+
+  // communication pub
   private remotePub?: string
+  private lostPub?: string
+
+  private communicationPubs?: RecoverSetRemoteCommunicationPubs['params']
+
   private newSignKey?: string
 
   private backuped = false
@@ -74,8 +83,20 @@ class RecoveryFlow extends BaseFlow {
     }
 
     this.keyRecovery = this.mpcInstance.KeyRecovery.getCoSigner()
+    await this.keyRecovery.setupLocalCpkp()
 
-    return succeed({ sessionId: this.sessionId, keyshareExist: !!this.signKey })
+    return succeed({
+      sessionId: this.sessionId,
+      keyshareExist: !!this.signKey,
+      pub: this.keyRecovery.localCommunicationPub,
+    })
+  }
+
+  async setCommunicationPubs(
+    pubs: RecoverSetRemoteCommunicationPubs['params']
+  ) {
+    this.communicationPubs = pubs
+    return succeed(true)
   }
 
   async recoverPrepare(
@@ -103,32 +124,30 @@ class RecoveryFlow extends BaseFlow {
 
   async recoverKeyPair(sessionId: string): Promise<SnapRpcResponse<string>> {
     this.verifySession(sessionId)
-    const keypair = await this.mpcHelper.createKeyPair()
-    this.privKey = keypair.priv
-    if (keypair.err) {
-      throw errored(keypair.err.err_msg)
+    if (!this.keyRecovery!.localCommunicationPriv) {
+      await this.keyRecovery?.setupLocalCpkp()
     }
-    return succeed(keypair.pub)
+    this.privKey = this.keyRecovery!.localCommunicationPriv
+    return succeed(this.keyRecovery!.localCommunicationPub)
   }
 
   async recoverContext(
     sessionId: string,
-    partyInfo: {
-      localPartyIndex: string
-      remotePartyIndex: string
-      lostPartyIndex: string
-    },
-    remotePub: string
+    localParty: RecoverContext['params']['localParty'],
+    remoteParty: RecoverContext['params']['remoteParty'],
+    lostParty: RecoverContext['params']['lostParty']
   ): Promise<SnapRpcResponse<ComputeMessage[]>> {
     this.verifySession(sessionId)
 
-    this.remotePub = remotePub
-    const res = await this.keyRecovery!.createContext(
-      this.mnemonic!,
-      partyInfo.localPartyIndex,
-      partyInfo.remotePartyIndex,
-      partyInfo.lostPartyIndex
-    )
+    this.lostPub = lostParty.pub
+    this.remotePub = remoteParty.pub
+
+    const res = await this.keyRecovery!.createContext({
+      localMnemonic: this.mnemonic,
+      localParty,
+      remoteParty,
+      lostParty,
+    })
     return succeed(res)
   }
 
@@ -144,12 +163,13 @@ class RecoveryFlow extends BaseFlow {
       if (!this.remotePub) {
         throw new Error('no remotePub')
       }
-      const encryptedPartySecretKey = await this.encrypt(
-        this.keyRecovery!.partySecretKey
-      )
+
+      const partySecretKey =
+        await this.keyRecovery!.getEncryptedPartySecretKey()
+
       return succeed({
         isComplete: this.keyRecovery!.isComplete,
-        partySecretKey: encryptedPartySecretKey,
+        partySecretKey,
         pubKeyOfThreeParty: this.keyRecovery!.pubKeyOfThreeParty,
       })
     }
@@ -191,6 +211,12 @@ class RecoveryFlow extends BaseFlow {
     sessionId: string
   ): Promise<SnapRpcResponse<GeneratePubAndZkpResult>> {
     this.keyRefresh = this.mpcInstance.KeyRefresh.getCoSigner()
+
+    await this.keyRefresh.setupLocalCpkp({
+      priv: this.keyRecovery!.localCommunicationPriv,
+      pub: this.keyRecovery!.localCommunicationPub,
+    })
+
     this.verifySession(sessionId)
     const res = await this.keyRefresh.generatePubAndZkp(this.mnemonic!)
     if (res.err) {
@@ -207,10 +233,24 @@ class RecoveryFlow extends BaseFlow {
     this.verifySession(sessionId)
 
     // Don't delete below line, this will create a minimal key for key refresh
-    await this.keyRefresh!.generateMinimalKey(localParty, remoteParties)
+    await this.keyRefresh!.generateMinimalKey(
+      localParty,
+      remoteParties,
+      this.communicationPubs!
+    )
+
+    const totalIndexArray = [
+      localParty.index,
+      ...remoteParties.map(rp => rp.index),
+    ]
+    await this.keyRefresh?.prepareKeyGenParams(
+      localParty.party_id,
+      totalIndexArray
+    )
 
     // Currently, We assign the key shard in Snap to A, so the remote parties index are determined
-    const res = await this.keyRefresh!.createContext(['2', '3'])
+    const res = await this.keyRefresh!.createContext()
+
     return succeed(res)
   }
 
@@ -274,18 +314,6 @@ class RecoveryFlow extends BaseFlow {
     this.cleanup()
 
     return succeed(convertPlainAccount(newState))
-  }
-
-  private async encrypt(plainText: string) {
-    if (!this.privKey || !this.remotePub) {
-      throw new Error('encrypt failed')
-    }
-    const res = await this.mpcHelper.encrypt(
-      this.privKey,
-      this.remotePub,
-      plainText
-    )
-    return res.cypher
   }
 
   private async decrypt(cypher: string, remotePub?: string) {

@@ -4,8 +4,14 @@ import { makeAutoObservable } from 'mobx'
 export default class SignModule {
   pendingRequest: PendingRequest
 
+  communicationPub = ''
+
   constructor() {
     makeAutoObservable(this)
+  }
+
+  setCommunicationPub(pub: string) {
+    this.communicationPub = pub
   }
 
   setPendingRequest(pr: PendingRequest) {

@@ -14,6 +14,8 @@ class RecoveryModule {
   recoverDialogVisible = false
   recoverStep = 1
 
+  localCommunicationPub = ''
+
   mnemonicFormType = ''
 
   // other party skip input mnemonic
@@ -58,6 +60,10 @@ class RecoveryModule {
 
   setInputMnemonic(mnemonic: string) {
     this.inputMnemonic = mnemonic
+  }
+
+  setLocalCommunicationPub(pub: string) {
+    this.localCommunicationPub = pub
   }
 }
 

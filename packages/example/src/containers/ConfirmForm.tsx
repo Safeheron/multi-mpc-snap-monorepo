@@ -62,7 +62,9 @@ const ConfirmForm = () => {
       interactive.setLoading(false)
 
       if (res.success) {
-        interactive.setSessionId(res.data)
+        interactive.setSessionId(res.data.sessionId)
+        signModule.setCommunicationPub(res.data.pub)
+
         const messageRelayer = new MessageRelayer(2)
         messageModule.setMessageRelayer(messageRelayer)
         interactive.setSendDialogVisible(false)

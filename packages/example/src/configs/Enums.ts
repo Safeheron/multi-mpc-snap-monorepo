@@ -30,6 +30,7 @@ export enum SnapInvokeMethods {
   recoverPrepare = 'mpc_recoverPrepare',
   recoverKeyPair = 'mpc_recoverKeyPair',
   recoverContext = 'mpc_recoverContext',
+  setCommunicationPubs = 'mpc_recoverSetCommuPubs',
   recoverRound = 'mpc_recoverRound',
   recoverMnemonic = 'mpc_recoverMnemonic',
   refreshPrepare = 'mpc_refreshPrepare',

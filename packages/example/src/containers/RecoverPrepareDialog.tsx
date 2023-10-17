@@ -23,6 +23,7 @@ const RecoverPrepareDialog = () => {
     if (res.success) {
       interactive.setSessionId(res.data.sessionId)
       recoveryModule.setLocalKeyshareExist(res.data.keyshareExist)
+      recoveryModule.setLocalCommunicationPub(res.data.pub)
       await startRecover()
     }
   }
@@ -40,6 +41,7 @@ const RecoverPrepareDialog = () => {
         partyId: PartyId.A,
         index: 1,
         walletId: accountModule.walletId,
+        pub: recoveryModule.localCommunicationPub,
       },
     }
 
