@@ -16,6 +16,7 @@ export interface RecoverApproval {
 export type RecoverApprovalResult = {
   sessionId: string
   keyshareExist: boolean
+  pub: string
 }
 
 export const RecoverPrepareStruct = object({
@@ -38,17 +39,39 @@ export const RecoverKeyPairStruct = object({
 })
 export type RecoverKeyPair = Infer<typeof RecoverKeyPairStruct>
 
+export const RecoverSetRemoteCommunicationPubsStruct = object({
+  ...CommonHeader,
+  method: literal('mpc_recoverSetCommuPubs'),
+  params: array(
+    object({
+      partyId: string(),
+      pub: string(),
+    })
+  ),
+})
+export type RecoverSetRemoteCommunicationPubs = Infer<
+  typeof RecoverSetRemoteCommunicationPubsStruct
+>
+
 export const RecoverContextStruct = object({
   ...CommonHeader,
   method: literal('mpc_recoverContext'),
   params: object({
     sessionId: string(),
-    partyInfo: object({
-      localPartyIndex: string(),
-      remotePartyIndex: string(),
-      lostPartyIndex: string(),
+    localParty: object({
+      partyId: string(),
+      index: string(),
     }),
-    remotePub: string(),
+    remoteParty: object({
+      partyId: string(),
+      index: string(),
+      pub: string(),
+    }),
+    lostParty: object({
+      partyId: string(),
+      index: string(),
+      pub: string(),
+    }),
   }),
 })
 export type RecoverContext = Infer<typeof RecoverContextStruct>

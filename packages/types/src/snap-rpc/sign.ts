@@ -25,12 +25,22 @@ export const SignApprovalStruct = object({
 })
 export type SignApproval = Infer<typeof SignApprovalStruct>
 
+export const SignApprovalResultStruct = object({
+  sessionId: string(),
+  pub: string(),
+})
+export type SignApprovalResult = Infer<typeof SignApprovalResultStruct>
+
 export const SignContextStruct = object({
   ...CommonHeader,
   method: literal('mpc_signContext'),
   params: object({
     sessionId: string(),
     partyIds: array(string()),
+    remotePub: object({
+      partyId: string(),
+      pub: string(),
+    }),
   }),
 })
 export type SignContext = Infer<typeof SignContextStruct>

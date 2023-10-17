@@ -1,6 +1,12 @@
 import { array, Infer, literal, object, string } from 'superstruct'
 
-import { CommonHeader, ComputeMessageStruct, PartyStruct } from './common'
+import {
+  CommonHeader,
+  ComputeMessageStruct,
+  PartyStruct,
+  PartyWithPub,
+  PartyWithPubStruct,
+} from './common'
 
 export const CreateApprovalStruct = object({
   ...CommonHeader,
@@ -12,12 +18,18 @@ export const CreateApprovalStruct = object({
 })
 export type CreateApproval = Infer<typeof CreateApprovalStruct>
 
+export const CreateApprovalResultStruct = object({
+  sessionId: string(),
+  pub: string(),
+})
+export type CreateApprovalResult = Infer<typeof CreateApprovalResultStruct>
+
 export const CreateContextStruct = object({
   ...CommonHeader,
   method: literal('mpc_createContext'),
   params: object({
     sessionId: string(),
-    remoteParties: array(PartyStruct),
+    remoteParties: array(PartyWithPubStruct),
   }),
 })
 export type CreateContext = Infer<typeof CreateContextStruct>

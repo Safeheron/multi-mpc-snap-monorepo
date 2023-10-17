@@ -43,6 +43,14 @@ export const PartyStruct = object({
 })
 export type Party = Infer<typeof PartyStruct>
 
+export const PartyWithPubStruct = assign(
+  PartyStruct,
+  object({
+    pub: string(),
+  })
+)
+export type PartyWithPub = Infer<typeof PartyWithPubStruct>
+
 export const PubAndZkpStruct = object({
   X: string(),
   dlog_zkp: string(),
