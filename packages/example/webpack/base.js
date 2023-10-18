@@ -55,10 +55,10 @@ export default {
     plugins.htmlWebpackPlugin,
     plugins.providePlugin,
     plugins.definePlugin,
-    plugins.miniCssExtractPlugin
+    plugins.miniCssExtractPlugin,
+    plugins.copyPlugin,
     // plugins.forkTsCheckerWebpackPlugin,
     // plugins.esLintPlugin,
-    // plugins.copyPlugin,
   ]),
   resolve: {
     alias: aliasItems,
