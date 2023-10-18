@@ -19,7 +19,7 @@ import styles from '@/styles/containers/RecoverDialog.module.less'
 const steps = [
   {
     title: 'Step 1: Connect to Safeheron Snap App on your first phone',
-    desc: `Participate in recovering an MPC wallet via Safeheron Snap App and then place the QR code generated in front of the desktop's camera.`,
+    desc: `Participate in recovering an MPC wallet using the Safeheron Snap App. Place the QR code generated in front of the desktop’s camera.`,
     successText: 'Connected',
   },
   {
@@ -29,14 +29,14 @@ const steps = [
   },
   {
     title:
-      'Step 3: Enter the recovery phrase for each private key shard separately as prompted and submit them for confirmation',
+      'Step 3: Enter the mnemonic phrase for each private key shard separately as prompted and submit them for confirmation',
     successText: 'Filled',
   },
   {
     title: 'Step 4: Wait for recovery to complete successfully',
     successText: 'The MPC wallet is recovered successfully',
     loadingText:
-      'Waiting for the three parties to compute and recover the MPC Wallet.',
+      'Waiting for the three devices to compute and recover the MPC wallet.',
   },
 ]
 const RecoverDialog = () => {
@@ -160,12 +160,12 @@ const RecoverDialog = () => {
                 </>
               ) : (
                 <Button type="primary" onClick={handleBack}>
-                  Back to the MPC Wallet
+                  Use my MPC Wallet
                 </Button>
               )
             ) : step === 3 && recoveryModule.mnemonicFormType === 'noNeed' ? (
               <Button type="primary" onClick={handleBack}>
-                Back to the MPC Wallet
+                Back to my MPC Wallet
               </Button>
             ) : (
               <Button onClick={handleCancel}>Cancel</Button>

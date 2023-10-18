@@ -26,7 +26,7 @@ import { formatToUSDateTime } from '@/utils/dateUtil'
 const steps = [
   {
     title: 'Step 1: Connect to Safeheron Snap App on one phone',
-    desc: `Open Safeheron Snap App and choose the sending wallet. Click on "MPC Sign" and then place the QR code in front of your desktop's camera.`,
+    desc: `Open Safeheron Snap App and click on “MPC Sign”. Place the QR code in front of your desktop’s camera.`,
     successText: 'Connected',
   },
   {
@@ -39,7 +39,7 @@ const steps = [
       'Step 3: Keep the Safeheron Snap App open and do not switch to other pages. Wait for transaction success',
     successText: 'Success',
     loadingText:
-      'Waiting for the two parties to compute and then sign the transaction.',
+      'Waiting for the two devices to compute and sign the transaction.',
   },
 ]
 

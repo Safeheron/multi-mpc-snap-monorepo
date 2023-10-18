@@ -77,10 +77,10 @@ const CheckShardDialog = () => {
               <img src={backup} alt="" />
               <p>
                 The MPC wallet created in Safeheron Snap has three private key
-                shards, A, B, and C which are distributed across MetaMask Snap,
-                Safeheron Snap App 1, and Safeheron Snap App 2. Please complete
-                the backup of the three private key shards before using the
-                wallet.
+                shards, A, B, and C which are distributed across MetaMask
+                Extension and 2 mobile phones with the Safeheron Snap App
+                installed. Please complete the backup of the three key shards
+                before using the wallet.
               </p>
               <ul className={styles.warnList}>
                 <li>Stay clear of cameras devices.</li>

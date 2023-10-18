@@ -19,12 +19,12 @@ import styles from '@/styles/containers/CreateDialog.module.less'
 const steps = [
   {
     title: 'Step 1: Connect to Safeheron Snap App on your first phone',
-    desc: `Participate in creating an MPC wallet through Safeheron Snap App, and then follow the steps on the right side.`,
+    desc: `Participate in creating an MPC wallet using the Safeheron Snap App by following the steps on the right.`,
     successText: 'Connected',
   },
   {
     title: 'Step 2: Connect to Safeheron Snap App on your second phone',
-    desc: `Participate in creating an MPC wallet through Safeheron Snap App, and then follow the steps on the right side.`,
+    desc: `Participate in creating an MPC wallet using the Safeheron Snap App by following the steps on the right.`,
     successText: 'Connected',
   },
   {
@@ -32,7 +32,7 @@ const steps = [
       'Step 3: Keep this window open for creating your wallet successfully',
     successText: 'The MPC wallet is created successfully',
     loadingText:
-      'Waiting for the three parties to compute and create the MPC Wallet.',
+      'Waiting for the three devices to compute and create the MPC wallet.',
   },
 ]
 const CreateDialog = () => {

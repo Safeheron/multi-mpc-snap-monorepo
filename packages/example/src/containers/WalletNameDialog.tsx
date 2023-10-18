@@ -1,3 +1,4 @@
+import { OperationType, PartyReadyMessage } from '@safeheron/mpcsnap-types'
 import { Button, Checkbox, Form, Input, Modal } from 'antd'
 import { useEffect, useState } from 'react'
 
@@ -8,7 +9,6 @@ import { PartyId } from '@/service/types'
 import { MPCMessageType, PartyIndexMap } from '@/service/types'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/WalletNameDialog.module.less'
-import { OperationType, PartyReadyMessage } from '@safeheron/mpcsnap-types';
 
 const WalletNameDialog = () => {
   const { interactive, messageModule } = useStore()
@@ -74,7 +74,7 @@ const WalletNameDialog = () => {
               {
                 async validator(rule, value) {
                   if (!value) {
-                    return Promise.reject('Please enter the wallet name')
+                    return Promise.reject('Please enter the wallet name.')
                   }
                   if (value.replace(/[^\x00-\xff]/g, 'aa').length > 60) {
                     return Promise.reject('Within 60 characters')

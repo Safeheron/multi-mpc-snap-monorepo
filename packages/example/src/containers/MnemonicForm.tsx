@@ -85,7 +85,7 @@ const MnemonicForm = () => {
               label="Wallet name"
               name="walletName"
               rules={[
-                { required: true, message: 'Please enter the wallet name' },
+                { required: true, message: 'Please enter the wallet name.' },
               ]}>
               <Input />
             </Form.Item>
