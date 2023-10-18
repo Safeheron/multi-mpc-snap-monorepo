@@ -1,5 +1,5 @@
 {
-  "version": "2.4.0-beta.1",
+  "version": "2.4.0-rc.0",
   "description": "The Safeheron MPC Snap.",
   "proposedName": "Safeheron Snap",
   "repository": {
@@ -7,7 +7,7 @@
     "type": "github"
   },
   "source": {
-    "shasum": "CdLJpCviekkGvzXvd/lQhdm7i+wgo3/8aP/5Kza/8eU=",
+    "shasum": "vHiD6YzBHdduufP6PJ97oBz67FXcrb5h/uF2A13+8Zg=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
