@@ -39,7 +39,7 @@ export class RPCChannel extends MessageChannel {
       case MPCMessageType.partyReady:
         interactive.setProgress(15)
         await KenGenAction.handlePartyReady(messageArray)
-        interactive.setProgress(41)
+        interactive.setProgress(31)
         break
       case MPCMessageType.keyGenRound:
         interactive.setProgressAdd(6)
@@ -54,6 +54,7 @@ export class RPCChannel extends MessageChannel {
       // sign
       case MPCMessageType.signReady:
         interactive.setProgress(6)
+        // @ts-ignore
         await SignAction.handleSignReady(messageArray)
         interactive.setProgress(12)
         break
