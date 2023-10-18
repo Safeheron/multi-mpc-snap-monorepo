@@ -2,14 +2,14 @@ import dotenv from 'dotenv'
 import DotenvWebpack from 'dotenv-webpack'
 import path from 'path'
 
-import pkg from '../package.json'
 import { aliasItems } from './config'
 import entry from './entry'
 import optimization from './optimization'
 import * as plugins from './plugins'
 import * as rules from './rules'
-import { isDevServer, isProd, rootDir } from './utils/env'
+import {isDevServer, isProd, rootDir, VERSION} from './utils/env'
 import { arrayFilterEmpty } from './utils/helpers'
+
 
 const envPath = path.resolve(rootDir, `.env.${process.env.NODE_ENV}`)
 dotenv.config({
@@ -19,8 +19,7 @@ dotenv.config({
 const publicPath =
   isDevServer || isProd
     ? '/'
-    : `${process.env.ASSETS_URL}${process.env.ROUTER_PATH}${pkg.version}/`
-console.log(publicPath)
+    : `${process.env.ASSETS_URL}${process.env.ROUTER_PATH}${VERSION}/`
 
 export default {
   context: __dirname,
@@ -29,14 +28,15 @@ export default {
   entry,
   output: {
     path: path.join(__dirname, '../dist'),
-    publicPath,
-    filename: isDevServer ? '[name].[fullhash].js' : '[name].[contenthash].js',
-    assetModuleFilename: 'assets/[name].[hash][ext]',
+    publicPath: '/',
+    filename: isDevServer ? `${VERSION}/js/[name].[fullhash].js` : `${VERSION}/js/[name].[contenthash].js`,
+    assetModuleFilename: 'assets/[name][ext]',
+    chunkFilename: `${VERSION}/js/[name].js`
   },
   module: {
     generator: {
       'asset/resource': {
-        publicPath,
+        publicPath: '/',
       },
     },
     rules: arrayFilterEmpty([
@@ -55,6 +55,7 @@ export default {
     plugins.htmlWebpackPlugin,
     plugins.providePlugin,
     plugins.definePlugin,
+    plugins.miniCssExtractPlugin
     // plugins.forkTsCheckerWebpackPlugin,
     // plugins.esLintPlugin,
     // plugins.copyPlugin,
