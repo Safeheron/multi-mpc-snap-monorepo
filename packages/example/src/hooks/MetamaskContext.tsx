@@ -75,7 +75,7 @@ export const MetaMaskProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const detectInstallation = async () => {
       /**
-       * Detect if MetaMask Flask is installed.
+       * Detect if MetaMask support snap
        */
       async function detectSupportSnap() {
         const isFlaskDetected = await isSupportSnap()
