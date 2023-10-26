@@ -37,7 +37,7 @@ const DynamicQrCode: FC<Props> = ({ message }) => {
     setCode(part)
   }
 
-  return <QRCodeSVG value={`${code}`} size={150} />
+  return <QRCodeSVG value={`${code}`} size={200} />
 }
 
 export default DynamicQrCode

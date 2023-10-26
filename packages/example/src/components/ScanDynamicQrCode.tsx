@@ -95,15 +95,15 @@ const ScanDynamicQrCode: FC<Props> = ({ onComplete }) => {
           background: 'black',
           border: '1px solid rgba(0, 0, 0, 0.12)',
           overflow: 'hidden',
-          width: 150,
-          height: 150,
+          width: 200,
+          height: 200,
         }}>
         <video
           ref={previewEle}
           id="videoRef"
-          width="150"
-          height="150"
-          style={{ transform: 'rotateY(180deg)' }}
+          width="200"
+          height="200"
+          style={{ transform: 'rotateY(180deg)', filter: 'blur(4px)' }}
           // style={{ filter: 'blur(12px)' }}
         />
       </div>
