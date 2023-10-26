@@ -7,10 +7,11 @@ import App from '@/App'
 import { MetaMaskProvider } from '@/hooks/MetamaskContext'
 import { SnapKeepAliveProvider } from '@/hooks/SnapKeepAliveContext'
 import { store, StoreContext } from '@/store'
+import { IS_PROD } from '@/utils'
 import { logger } from '@/utils/Log'
 import metrics from '@/utils/Metrics'
 
-logger.setLevel('trace')
+logger.setLevel(IS_PROD ? 'error' : 'debug')
 metrics.setup()
 
 const root = document.getElementById('root') as HTMLElement
