@@ -183,9 +183,9 @@ const PendingRequestList: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.title}>Pending Signature</div>
+      <div className={styles.title}>Your Safeheron Snap is ready to use.</div>
       <div className={styles.subTitle}>
-        Submit your signature requests on MetaMask to proceed with signing.
+        Any pending signature requests will appear below.
       </div>
       <div className={styles.record}>
         {requests.length > 0 ? (
