@@ -109,7 +109,10 @@ const MnemonicForm = () => {
                 },
               },
             ]}>
-            <Input.TextArea rows={6} />
+            <Input.TextArea
+              rows={6}
+              placeholder="Please enter 24 words separted by spaces"
+            />
           </Form.Item>
           <div className={styles.skip}>
             The mnemonic phrase is lost. <a onClick={handleSkip}>Skip it</a>
