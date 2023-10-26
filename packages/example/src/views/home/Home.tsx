@@ -123,7 +123,9 @@ const Home = () => {
 
         <div className={styles.homePartner}>
           <h1>MPC Wallet Solution Powered by</h1>
-          <img src={safeheron} width="120" />
+          <a target={'_blank'} href={'https://www.safeheron.com'}>
+            <img src={safeheron} width="120" />
+          </a>
         </div>
 
         <Loading loading={loading} />

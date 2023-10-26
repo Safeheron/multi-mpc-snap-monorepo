@@ -12,7 +12,7 @@ import {
 import styles from '@/styles/components/InstallReminder.module.less'
 
 const DownloadContainer = styled.div`
-  width: 280px;
+  width: 267px;
   font-size: 16px;
   display: flex;
 

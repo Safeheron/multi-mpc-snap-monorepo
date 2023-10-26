@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 
 import safeheron from '@/assets/safeheron.png'
 import { RouterEnum } from '@/configs/Enums'
-import BetaWarning from '@/containers/BetaWarning'
 import Header from '@/containers/Header'
 import styles from '@/styles/app/index.module.less'
 
@@ -63,7 +62,9 @@ const Index = () => {
         </div>
         <div className={styles.partner}>
           <h1>MPC Wallet Solution Powered by</h1>
-          <img src={safeheron} width="200" />
+          <a target={'_blank'} href={'https://www.safeheron.com'}>
+            <img src={safeheron} width="200" />
+          </a>
         </div>
       </div>
     </div>
