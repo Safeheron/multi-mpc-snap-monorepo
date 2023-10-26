@@ -17,7 +17,7 @@ const FaqTextWrapper = styled.div`
 `
 
 const FaqTitle = styled.div`
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   margin-bottom: 5px;
 `
@@ -25,6 +25,7 @@ const FaqDesc = styled.div`
   color: #6b6d7c;
   font-size: 14px;
   line-height: 20px;
+  margin-bottom: 8px;
 `
 
 const FAQ = () => {
@@ -35,7 +36,7 @@ const FAQ = () => {
         width="800"
         height="400"
         style={{ marginTop: '120px' }}
-        src="https://www.youtube.com/embed/588bNXEiS_s"
+        src="https://youtu.be/wg01OQ-2itQ"
         title="Safeheron Partners with MetaMask, MPCSnap -- FIRST MPC Wallet Between Extension &amp; Hardware"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen></iframe>
@@ -52,9 +53,9 @@ const FAQ = () => {
         </FaqDesc>
         <FaqDesc>
           If you encounter any problems, please send an email to
-          <a target={'_blank'} href={'mailto:support@safeheron.com'}>
+          <a target={'_blank'} href={'mailto:mpcsnap@safeheron.com'}>
             {' '}
-            support@safeheron.com
+            mpcsnap@safeheron.com
           </a>
           .
         </FaqDesc>
