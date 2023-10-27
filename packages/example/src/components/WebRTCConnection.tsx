@@ -1,3 +1,4 @@
+import { useTimeout } from 'ahooks'
 import { message } from 'antd'
 import React, { useEffect, useState } from 'react'
 
@@ -26,6 +27,14 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
   businessType,
 }) => {
   const [offerAndIce, setOfferAndIce] = useState<string>('')
+  const [tipWordsShowState, setTipWordsShowState] = useState(false)
+  const [scanProgress, setScanProgress] = useState(0)
+
+  useTimeout(() => {
+    if (scanProgress === 0) {
+      setTipWordsShowState(true)
+    }
+  }, 20_000)
 
   const [answerAndIce, setAnswerAndIce] = useState<ReceivedSignaling>()
 
@@ -42,7 +51,7 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
     try {
       answerAndIceObj = JSON.parse(qrcodeString) as ReceivedSignaling
       if (!answerAndIceObj.sdp || !answerAndIceObj.candidates) {
-        throw 'Invalid data, must include '
+        throw 'Invalid data, must include sdp and candidates'
       }
       const phoneBusinessType = answerAndIceObj.businessType
       if (phoneBusinessType !== businessType) {
@@ -59,6 +68,12 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
       return
     }
   }
+
+  useEffect(() => {
+    if (scanProgress > 0) {
+      setTipWordsShowState(false)
+    }
+  }, [scanProgress])
 
   useEffect(() => {
     if (answerAndIce) {
@@ -89,13 +104,24 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
 
       <div style={{ display: 'flex', marginTop: '20px', marginBottom: '30px' }}>
         <DynamicQrCode message={offerAndIce} />
-        <div style={{ width: '32px' }} />
-        <ScanDynamicQrCode onComplete={onScanComplete} />
+        <div style={{ width: '30px' }} />
+        <ScanDynamicQrCode
+          onComplete={onScanComplete}
+          onProgress={setScanProgress}
+        />
       </div>
 
       <div className={styles.tipTitle}>
         A LAN will then be created for the offline P2P MPC process.
       </div>
+
+      {tipWordsShowState && (
+        <div className={'warning'} style={{ marginTop: '10px' }}>
+          QR code scanning may not be supported on computers with lower screen
+          resolutions or mobile phones with inadequate cameras. Please try again
+          on a different device.
+        </div>
+      )}
     </div>
   )
 }

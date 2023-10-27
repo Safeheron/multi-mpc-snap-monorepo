@@ -11,9 +11,10 @@ const codeReader = new BrowserQRCodeReader()
 
 interface Props {
   onComplete: (msg: any) => void
+  onProgress?: (number: number) => void
 }
 
-const ScanDynamicQrCode: FC<Props> = ({ onComplete }) => {
+const ScanDynamicQrCode: FC<Props> = ({ onComplete, onProgress }) => {
   const { detected, support, errMessage } = useMediaDeviceDetect()
 
   const [inputDeviceId, setInputDeviceId] = useState('')
@@ -49,6 +50,7 @@ const ScanDynamicQrCode: FC<Props> = ({ onComplete }) => {
         const percent = decoder.getProgress()
         if (percent > progress) {
           setProgress(percent)
+          onProgress && onProgress(percent)
         }
 
         if (!decoder.isComplete()) {
