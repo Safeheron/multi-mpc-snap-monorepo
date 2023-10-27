@@ -6,6 +6,7 @@ export enum RouterEnum {
 
 export enum SnapInvokeMethods {
   heartBeat = 'mpc_snapKeepAlive',
+  remindAfterInstall = 'internal_firstInstallRemainder',
 
   createApproval = 'mpc_createApproval',
   createParty = 'mpc_createParty',

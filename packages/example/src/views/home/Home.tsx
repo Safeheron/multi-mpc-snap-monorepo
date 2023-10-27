@@ -19,6 +19,7 @@ import SignTransactionDialog from '@/containers/SignDialog'
 import WalletNameDialog from '@/containers/WalletNameDialog'
 import Welcome from '@/containers/Welcome'
 import { MetamaskActions, MetaMaskContext } from '@/hooks/MetamaskContext'
+import { remindUserAfterFirstInstall } from '@/service/metamask'
 import { useStore } from '@/store'
 import styles from '@/styles/app/index.module.less'
 import { connectSnap, getSnap, isLocalSnap } from '@/utils/snap'
@@ -59,6 +60,8 @@ const Home = () => {
       interactive.setLoading(true)
       await connectSnap()
       const installedSnap = await getSnap()
+
+      await remindUserAfterFirstInstall()
 
       dispatch({
         type: MetamaskActions.SetInstalled,

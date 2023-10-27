@@ -25,14 +25,14 @@ const Index = () => {
 
       <div className={styles.indexPage}>
         <div className={styles.slogan}>
-          <h1>A Multi-Factor Auth Wallet for Everyone</h1>
+          <h1>A Multi-Factor Authentication Wallet for Everyone</h1>
           <p>
-            A fully decentralized MPC wallet with 3 key shards distributedly
-            stored on MetaMask Extension
+            A fully decentralized MPC wallet with three key shards distributed
+            across the MetaMask Extension
           </p>
           <p>
-            and 2 mobile phones with Safeheron Snap App installed. Two devices
-            are used to sign a transaction.
+            and two mobile phones with the Safeheron Snap App installed. Use two
+            devices to sign transactions.
           </p>
           <Button onClick={goHome}>Launch Wallet</Button>
         </div>

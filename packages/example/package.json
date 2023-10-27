@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/Safeheron/mpcsnap"
   },
-  "author": "SafeheronRenzhao<renzhao@safeheron.com>",
+  "author": "Yann<yanjie@safeheron.com>",
   "scripts": {
     "dev": "cross-env WEBPACK_IS_DEV_SERVER=true NODE_ENV=local webpack serve",
     "deploy": "gh-pages --dist dist",

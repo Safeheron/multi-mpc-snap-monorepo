@@ -59,12 +59,13 @@ enum InternalMPCMnemonicMethods {
   BackupDone = 'mpc_backupUpdate',
 }
 
-enum InternalMPCOtherMethods {
+export enum InternalMPCOtherMethods {
   ListAccounts = 'mpc_requestAccount',
   DeleteAccount = 'mpc_deleteWallet',
   SyncAccount = 'mpc_syncAccount',
   CheckMnemonic = 'mpc_checkMnemonic',
   listPendingRequests = 'internal_listPendingRequests',
+  RemindAfterFirstInstall = 'internal_firstInstallRemainder',
 }
 
 const PERMISSIONS = new Map<string, string[]>()

@@ -39,7 +39,11 @@ import {
 } from '@/mpc-flow/walletManage'
 import { listPendingRequests } from '@/rpc/internalKeyringHandler'
 import { MPCKeyring } from '@/rpc/MPCKeyring'
-import { InternalMPCRecoveryMethods } from '@/rpc/permissions'
+import { onSnapInstallRemainder } from '@/rpc/onSnapInstallRemainder'
+import {
+  InternalMPCOtherMethods,
+  InternalMPCRecoveryMethods,
+} from '@/rpc/permissions'
 import StateManager from '@/StateManager'
 
 let stateManager: StateManager
@@ -257,6 +261,9 @@ export const otherHandlers: OnRpcRequestHandler = async ({ request }) => {
 
     case 'internal_listPendingRequests':
       return listPendingRequests(stateManager)
+
+    case InternalMPCOtherMethods.RemindAfterFirstInstall:
+      return onSnapInstallRemainder()
 
     default:
       throw new MethodNotSupportedError(request.method)

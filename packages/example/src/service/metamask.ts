@@ -74,6 +74,12 @@ export async function listKeyringRequests(): Promise<
   })
 }
 
+export async function remindUserAfterFirstInstall() {
+  return walletInvokeSnap({
+    method: SnapInvokeMethods.remindAfterInstall,
+  })
+}
+
 export async function keyringRejectRequestId(requestId: string) {
   return keyringClient.rejectRequest(requestId)
 }
