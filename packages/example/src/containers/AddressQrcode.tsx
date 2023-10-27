@@ -2,7 +2,6 @@ import { message, Modal } from 'antd'
 import copy from 'copy-to-clipboard'
 import { QRCodeSVG } from 'qrcode.react'
 
-// @ts-expect-error
 import copyIcon from '@/assets/copy.png'
 import styles from '@/styles/containers/AddressCard.module.less'
 
