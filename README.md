@@ -1,15 +1,15 @@
 # MPCSnap
 
-An innovative wallet using 3 key shards that are distributedly stored on
-MetaMask Snap, Safeheron Snap App 1 and Safeheron Snap App 2. Two devices are
-used to sign a transaction.
+A fully decentralized MPC wallet with three key shards distributed across the
+MetaMask Extension and two mobile phones with the Safeheron Snap App installed.
+Use two devices to sign transactions.
 
-### Metamask Flask
+### Metamask
 
-First, install Metamask Flask to use MPCSnap.
+First, install Metamask to use MPCSnap.
 
-- checkout [Metamask Flask page](https://metamask.io/flask/)
-- Install Metamask Flask on your chrome
+- checkout [Metamask download page](https://metamask.io/download/)
+- Install Metamask on your chrome
 
 ### Run MPCSnap demo locally
 
