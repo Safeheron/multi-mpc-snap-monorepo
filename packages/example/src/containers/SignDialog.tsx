@@ -151,7 +151,7 @@ const SignDialog = () => {
   }, [])
 
   return (
-    <Modal centered closable={false} open={true} footer={null} width={960}>
+    <Modal centered closable={false} open={true} footer={null} width={1060}>
       <div className={styles.createDialog}>
         <StepContainer
           buttonContent={
