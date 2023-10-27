@@ -1,6 +1,6 @@
-# MetaMask MPCSnap Example Website
+# Safeheron Snap Website
 
-This is the demo dapp for using MPCSnap between Metamask Flask and Keystone to manage your MPC wallet.
+This is a dApp for using MPCSnap between MetaMask and Safeheron Snap App to manage your MPC wallet.
 
 ### Install dependencies
 
