@@ -22,6 +22,7 @@ import {
 } from '@/service/metamask'
 import { MPCMessageType, PartyId } from '@/service/types'
 import { store } from '@/store'
+import { reportRecoverSuccess } from '@/utils/sentryUtil'
 
 import { MPCMessage, PartyIndexMap } from '../types'
 
@@ -343,6 +344,7 @@ class RecoverAction {
     if (res.success) {
       store.accountModule.setAccount(res.data)
       store.recoveryModule.setRecoverStep(5)
+      reportRecoverSuccess(res.data.address, res.data.id, res.data.walletName)
       this.destroy()
     }
   }
