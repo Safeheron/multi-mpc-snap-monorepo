@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import { FAQ_VIDEO_LINK } from '@/configs/Configs'
 import Header from '@/containers/Header'
 
 const FaqWrapper = styled.div`
@@ -36,7 +37,7 @@ const FAQ = () => {
         width="800"
         height="400"
         style={{ marginTop: '120px' }}
-        src="https://youtu.be/wg01OQ-2itQ"
+        src={FAQ_VIDEO_LINK}
         title="Safeheron Partners with MetaMask, MPCSnap -- FIRST MPC Wallet Between Extension &amp; Hardware"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen></iframe>
