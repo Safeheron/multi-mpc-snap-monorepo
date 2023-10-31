@@ -1,5 +1,6 @@
 import { PartyId } from '@/service/types'
 import { store } from '@/store'
+import { reportWalletCreation } from '@/utils/sentryUtil'
 
 import { createContext, createRound, createSuccess } from '../metamask'
 import { MPCMessage, MPCMessageType } from '../types'
@@ -52,6 +53,7 @@ const KenGenAction = {
     if (res.success) {
       store.interactive.setCreateStep(4)
       store.interactive.setProgress(0)
+      reportWalletCreation(res.data.address, res.data.id, res.data.walletName)
     }
   },
 }

@@ -4,6 +4,7 @@ import { message } from 'antd'
 import { PartyId } from '@/service/types'
 import { store } from '@/store'
 import { provider } from '@/utils'
+import { reportSignSuccess } from '@/utils/sentryUtil'
 
 import { signContext, signRound } from '../metamask'
 import { MPCMessage, MPCMessageType } from '../types'
@@ -47,6 +48,12 @@ const SignAction = {
           await this.sendTransaction(signedTransaction)
         }
         store.interactive.setSignStep(4)
+
+        reportSignSuccess(
+          store.accountModule.address,
+          store.accountModule.walletId,
+          store.signModule.pendingRequest.method
+        )
       } else {
         // continue round
         store.messageModule.rpcChannel?.next({
