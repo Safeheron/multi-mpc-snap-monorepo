@@ -3,8 +3,7 @@ import styled from 'styled-components'
 
 const BetaWrap = styled.div`
   width: 100%;
-  height: 40px;
-  line-height: 40px;
+  padding: 16px 0;
   background-color: #e972071a;
   text-align: center;
   color: #e97207;
