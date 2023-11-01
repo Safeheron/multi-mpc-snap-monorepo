@@ -35,11 +35,6 @@ const onRpcRequest: OnRpcRequestHandler = async snapRequest => {
     await permissionsDetect(snapRequest)
     await setup()
 
-    // Handle keyring methods.
-    if (isKeyringRpcMethod(method)) {
-      return keyringHandler({ origin, request })
-    }
-
     if (isMPCKeygenMethod(method)) {
       return keygenHandler(snapRequest)
     }

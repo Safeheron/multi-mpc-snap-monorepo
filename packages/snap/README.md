@@ -1,20 +1,15 @@
 # MPCSnap
 
-MPCSnap enables MPC Wallet inside MetaMask.
+A fully decentralized MPC wallet with three key shards distributed across the
+MetaMask Extension and two mobile phones with the Safeheron Snap App installed.
+Use two devices to sign transactions.
 
-## Snaps Introduction
+## Reference
+
 For more about Snaps, please follow MetaMask Snaps guide [here](https://docs.metamask.io/snaps/).
 
-## Build
+For more about Keyring Snap Account, follow the [Github](https://github.com/MetaMask/keyring-api).
 
-```
-yarn run build
-```
+## Use our production
 
-## Test MPCSnap
-
-If you want to test `mpcsnap` locally, do:
-
-```
-yarn run serve
-```
+Please visit our website [https://mpcsnap.safeheron.com](https://mpcsnap.safeheron.com)
