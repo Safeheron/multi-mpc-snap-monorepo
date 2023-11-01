@@ -7,7 +7,7 @@
     "type": "github"
   },
   "source": {
-    "shasum": "DQhAkET8vUozuyAbIxgX62D/bOlMIABI97mxpfM4rgc=",
+    "shasum": "QqrCB8h4k9IJLFquLL5i9kQoujhHB726ao4U4aO417s=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -21,9 +21,7 @@
     "snap_dialog": {},
     "endowment:keyring": {
       "allowedOrigins": [
-        "http://localhost:8080",
-        "https://mpcsnap.safeheron.com",
-        "https://test-mpcsnap.safeheron.com"
+        "https://mpcsnap.safeheron.com"
       ]
     },
     "snap_manageState": {},
