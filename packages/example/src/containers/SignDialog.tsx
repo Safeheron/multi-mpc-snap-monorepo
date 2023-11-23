@@ -96,7 +96,7 @@ const SignDialog = () => {
         const signReadyMessage: SignReadyMessage = {
           messageType: OperationType.signReady,
           messageContent: {
-            participants: [PartyId.A, rtcChannel.getPartyId()],
+            partyId: PartyId.A,
             pub: signModule.communicationPub,
           },
         }

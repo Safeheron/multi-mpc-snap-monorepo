@@ -13,15 +13,12 @@ const SignAction = {
   async handleSignReady(messageArray: SignReadyMessage[]) {
     store.interactive.setSignStep(3)
 
-    const { participants, pub } = messageArray[0].messageContent
-    const remotePub = {
-      partyId: participants.find(p => p !== PartyId.A)!,
-      pub,
-    }
+    const { partyId, pub } = messageArray[0].messageContent
+    const remotePub = { partyId, pub }
 
     const res = await signContext(
       store.interactive.sessionId,
-      participants,
+      [partyId, PartyId.A],
       remotePub
     )
 
