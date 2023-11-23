@@ -1,12 +1,12 @@
-import { useTimeout } from 'ahooks'
+import { useGetState, useTimeout } from 'ahooks'
 import { message } from 'antd'
 import React, { useEffect, useState } from 'react'
+import styled from 'styled-components'
+import { v4 as uuidV4 } from 'uuid'
 
 import DynamicQrCode from '@/components/DynamicQrCode'
 import ScanDynamicQrCode from '@/components/ScanDynamicQrCode'
 import { RTCSignaling, WebRTCChannel } from '@/service/channel/WebRTCChannel'
-import { PartyId } from '@/service/types'
-import styles from '@/styles/components/WebRTCConnection.module.less'
 
 type BusinessType = 'create' | 'recovery' | 'sign'
 
@@ -17,10 +17,31 @@ interface WebRTCConnectionProps {
 
 type ReceivedSignaling = RTCSignaling & {
   name: string
-  partyId?: string
   businessType: BusinessType
   version: string
+  connectPairId: string
 }
+
+const WebRTCConnectionContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding-left: 46px;
+  padding-right: 26px;
+  color: #262833;
+  .main-title {
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 20px;
+    margin-bottom: 5px;
+  }
+  .sub-title {
+    font-size: 12px;
+    line-height: 17px;
+  }
+  .tip-title {
+    color: #6b6d7c;
+  }
+`
 
 const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
   webrtcChannel,
@@ -29,6 +50,8 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
   const [offerAndIce, setOfferAndIce] = useState<string>('')
   const [tipWordsShowState, setTipWordsShowState] = useState(false)
   const [scanProgress, setScanProgress] = useState(0)
+
+  const [connectPairId, _, getConnectPairId] = useGetState(uuidV4())
 
   useTimeout(() => {
     if (scanProgress === 0) {
@@ -41,7 +64,13 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
   const init = async () => {
     webrtcChannel!.on('iceReady', () => {
       const localSignalData = webrtcChannel!.getICEAndOffer()
-      setOfferAndIce(JSON.stringify({ ...localSignalData, businessType }))
+      setOfferAndIce(
+        JSON.stringify({
+          ...localSignalData,
+          businessType,
+          connectPairId: getConnectPairId(),
+        })
+      )
     })
     await webrtcChannel!.createOffer()
   }
@@ -51,9 +80,20 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
     try {
       answerAndIceObj = JSON.parse(qrcodeString) as ReceivedSignaling
       if (!answerAndIceObj.sdp || !answerAndIceObj.candidates) {
-        throw 'Invalid data, must include sdp and candidates'
+        throw 'Invalid QR code data, must include sdp and candidates'
       }
       const phoneBusinessType = answerAndIceObj.businessType
+
+      if (getConnectPairId() !== answerAndIceObj.connectPairId) {
+        message.error(
+          `QR code not match. website pairId is [${getConnectPairId()}] but phone's pairId is [${
+            answerAndIceObj.connectPairId
+          }]`,
+          8
+        )
+        return
+      }
+
       if (phoneBusinessType !== businessType) {
         message.error(
           `Operation error, web operation type is [${
@@ -78,7 +118,6 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
   useEffect(() => {
     if (answerAndIce) {
       webrtcChannel?.setName(answerAndIce.name)
-      webrtcChannel?.setPartyId((answerAndIce.partyId ?? '') as PartyId)
       webrtcChannel?.setAnswerAndICE(answerAndIce.sdp, answerAndIce.candidates)
     }
   }, [answerAndIce])
@@ -90,14 +129,14 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
   }, [webrtcChannel])
 
   return (
-    <div className={styles.webrtcConnection}>
-      <div className={styles.mainTitle}>
+    <WebRTCConnectionContainer>
+      <div className={'main-title'}>
         Place the QR code in front of your PC Camera
       </div>
-      <div className={styles.subTitle}>
+      <div className={'sub-title'}>
         Step 1: Use the mobile App to scan the QR code.
       </div>
-      <div className={styles.subTitle}>
+      <div className={'sub-title'}>
         Step 2: Place the QR code of your mobile App in front of your desktop's
         camera until the progress reaches 100%.
       </div>
@@ -111,7 +150,7 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
         />
       </div>
 
-      <div className={styles.tipTitle}>
+      <div className={'tip-title'}>
         A LAN will then be created for the offline P2P MPC process.
       </div>
 
@@ -122,7 +161,7 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
           on a different device.
         </div>
       )}
-    </div>
+    </WebRTCConnectionContainer>
   )
 }
 

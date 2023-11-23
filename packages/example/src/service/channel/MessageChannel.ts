@@ -5,7 +5,6 @@ import { MPCMessage } from '@/service/types'
 
 export abstract class MessageChannel extends EventEmitter {
   name: string
-  protected partyId: PartyId
 
   protected constructor(name: string) {
     super()
@@ -14,14 +13,6 @@ export abstract class MessageChannel extends EventEmitter {
 
   protected abstract connect(callback): void
   protected abstract disconnect(): void
-
-  getPartyId() {
-    return this.partyId
-  }
-
-  setPartyId(partyId: PartyId) {
-    this.partyId = partyId
-  }
 
   setName(name: string) {
     this.name = name
