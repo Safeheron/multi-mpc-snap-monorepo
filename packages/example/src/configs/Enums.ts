@@ -9,7 +9,6 @@ export enum SnapInvokeMethods {
   remindAfterInstall = 'internal_firstInstallRemainder',
 
   createApproval = 'mpc_createApproval',
-  createParty = 'mpc_createParty',
   createContext = 'mpc_createContext',
   createRound = 'mpc_createRound',
   createSuccess = 'mpc_createSuccess',
@@ -24,7 +23,6 @@ export enum SnapInvokeMethods {
   checkMnemonic = 'mpc_checkMnemonic',
 
   backupApproval = 'mpc_backupApproval',
-  backupQuery = 'mpc_backupQuery',
   backupUpdate = 'mpc_backupUpdate',
 
   recoverApproval = 'mpc_recoverApproval',
