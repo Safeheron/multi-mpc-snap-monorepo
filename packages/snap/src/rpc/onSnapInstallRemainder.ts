@@ -8,7 +8,7 @@ export async function onSnapInstallRemainder() {
     panel([
       text('Now you have installed the Safeheron Snap,'),
       text(
-        'now head to mpcsnap.safeheron.com to setup your new MPC wallet with multi-factor authentication.'
+        'now head to **mpcsnap.safeheron.com** to setup your new MPC wallet with multi-factor authentication.'
       ),
     ])
   )
