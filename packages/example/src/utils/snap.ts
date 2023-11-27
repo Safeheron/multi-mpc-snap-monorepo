@@ -1,5 +1,6 @@
 import { GetSnapsResponse, Snap } from '@/@types/snap'
 import { snap_origin, snap_version } from '@/configs/snap'
+import { RPC_KEEPALIVE_METHOD } from '@/service/metamask'
 
 /**
  * Get the installed snaps in MetaMask.
@@ -59,7 +60,7 @@ export const keepalive = async () => {
   console.debug('heartbeat start...')
   await window.ethereum.request({
     method: 'wallet_invokeSnap',
-    params: { snapId: snap_origin, request: { method: 'mpc_snapKeepAlive' } },
+    params: { snapId: snap_origin, request: { method: RPC_KEEPALIVE_METHOD } },
   })
   console.debug('heartbeat end')
 }

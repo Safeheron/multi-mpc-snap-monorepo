@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events'
 
-import { PartyId } from '@/service/types'
 import { MPCMessage } from '@/service/types'
 
 export abstract class MessageChannel extends EventEmitter {

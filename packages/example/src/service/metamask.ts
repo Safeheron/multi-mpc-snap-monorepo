@@ -21,7 +21,6 @@ import type {
   WrappedKeyringRequest,
 } from '@safeheron/mpcsnap-types'
 
-import { SnapInvokeMethods } from '@/configs/Enums'
 import { snap_origin } from '@/configs/snap'
 import { InvokeReqModel } from '@/service/models'
 import { handleSnapResponse } from '@/utils'
@@ -30,13 +29,15 @@ const { ethereum } = window
 
 const keyringClient = new KeyringSnapRpcClient(snap_origin, ethereum)
 
+export const RPC_KEEPALIVE_METHOD = 'mpc_snapKeepAlive'
+
 // walletInvokeSnap
 export async function walletInvokeSnap(req: InvokeReqModel<any>): Promise<any> {
   const params = {
     snapId: snap_origin,
     request: req,
   }
-  if (req.method !== 'mpc_snapKeepAlive') {
+  if (req.method !== RPC_KEEPALIVE_METHOD) {
     console.debug('walletInvokeSnap request:::', req)
   }
   try {
@@ -65,42 +66,36 @@ export async function walletInvokeSnap(req: InvokeReqModel<any>): Promise<any> {
   }
 }
 
-// ----------- keyring request --------------
-export async function listKeyringRequests(): Promise<
-  SnapRpcResponse<WrappedKeyringRequest[]>
-> {
-  return walletInvokeSnap({
-    method: SnapInvokeMethods.listPendingRequests,
-  })
-}
-
-export async function remindUserAfterFirstInstall() {
-  return walletInvokeSnap({
-    method: SnapInvokeMethods.remindAfterInstall,
-  })
-}
-
+// ----------------------------------
+//  keyring requests
 export async function keyringRejectRequestId(requestId: string) {
   return keyringClient.rejectRequest(requestId)
 }
 
-export async function requestAccount(): Promise<SnapRpcResponse<AccountItem>> {
+// ----------------------------------
+//  Custom RPC Requests
+
+export async function listKeyringRequests(): Promise<
+  SnapRpcResponse<WrappedKeyringRequest[]>
+> {
+  return walletInvokeSnap({ method: 'internal_listPendingRequests' })
+}
+
+export async function remindUserAfterFirstInstall() {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.requestAccount,
+    method: 'internal_firstInstallRemainder',
   })
 }
 
-export async function deleteWallet(): Promise<SnapRpcResponse<any>> {
-  return walletInvokeSnap({
-    method: SnapInvokeMethods.deleteWallet,
-  })
+export async function requestAccount(): Promise<SnapRpcResponse<AccountItem>> {
+  return walletInvokeSnap({ method: 'mpc_requestAccount' })
 }
 
 export async function checkMnemonic(
   walletName: string
-): Promise<SnapRpcResponse<any>> {
+): Promise<SnapRpcResponse<string>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.checkMnemonic,
+    method: 'mpc_checkMnemonic',
     params: {
       walletName,
     },
@@ -111,7 +106,7 @@ export async function backupApproval(
   walletName: string
 ): Promise<SnapRpcResponse<{ sessionId: string; mnemonic: string }>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.backupApproval,
+    method: 'mpc_backupApproval',
     params: {
       walletName,
     },
@@ -122,7 +117,7 @@ export async function backupUpdate(
   sessionId: string
 ): Promise<SnapRpcResponse<AccountItem>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.backupUpdate,
+    method: 'mpc_backupUpdate',
     params: {
       sessionId,
     },
@@ -134,7 +129,7 @@ export async function createApproval(
   party: Party
 ): Promise<SnapRpcResponse<CreateApprovalResult>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.createApproval,
+    method: 'mpc_createApproval',
     params: { walletName, party },
   })
 }
@@ -144,7 +139,7 @@ export async function createContext(
   remoteParties: Party[]
 ): Promise<SnapRpcResponse<ComputeMessage[]>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.createContext,
+    method: 'mpc_createContext',
     params: { sessionId, remoteParties },
   })
 }
@@ -154,7 +149,7 @@ export async function createRound(
   messages: ComputeMessage[]
 ): Promise<SnapRpcResponse<RunRoundResponse | CreateResult>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.createRound,
+    method: 'mpc_createRound',
     params: { sessionId, messages },
   })
 }
@@ -163,7 +158,7 @@ export async function createSuccess(
   sessionId: string
 ): Promise<SnapRpcResponse<AccountItem>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.createSuccess,
+    method: 'mpc_createSuccess',
     params: { sessionId },
   })
 }
@@ -174,7 +169,7 @@ export async function signApproval(
   requestId?: string
 ): Promise<SnapRpcResponse<SignApprovalResult>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.signApproval,
+    method: 'mpc_signApproval',
     params: { method, params, requestId },
   })
 }
@@ -185,7 +180,7 @@ export async function signContext(
   remotePub: { partyId: string; pub: string }
 ): Promise<SnapRpcResponse<ComputeMessage[]>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.signContext,
+    method: 'mpc_signContext',
     params: { sessionId, partyIds, remotePub },
   })
 }
@@ -195,7 +190,7 @@ export async function signRound(
   messages: ComputeMessage[]
 ): Promise<SnapRpcResponse<RunRoundResponse | SignResult>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.signRound,
+    method: 'mpc_signRound',
     params: { sessionId, messages },
   })
 }
@@ -204,7 +199,7 @@ export async function recoverApproval(
   walletName?: string
 ): Promise<SnapRpcResponse<RecoverApprovalResult>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.recoverApproval,
+    method: 'mpc_recoverApproval',
     params: {
       walletName,
     },
@@ -217,7 +212,7 @@ export async function recoverPrepare(
   mnemonic?: string
 ): Promise<SnapRpcResponse<any>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.recoverPrepare,
+    method: 'mpc_recoverPrepare',
     params: {
       sessionId,
       walletName,
@@ -230,7 +225,7 @@ export async function createKeyPair(
   sessionId: string
 ): Promise<SnapRpcResponse<string>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.recoverKeyPair,
+    method: 'mpc_recoverKeyPair',
     params: {
       sessionId,
     },
@@ -241,7 +236,7 @@ export async function recoverSetCommunicationPub(
   remotePubs: RecoverSetRemoteCommunicationPubs['params']
 ) {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.setCommunicationPubs,
+    method: 'mpc_recoverSetCommuPubs',
     params: remotePubs,
   })
 }
@@ -259,7 +254,7 @@ export async function recoverContext(
     lostParty,
   }
   return walletInvokeSnap({
-    method: SnapInvokeMethods.recoverContext,
+    method: 'mpc_recoverContext',
     params,
   })
 }
@@ -269,7 +264,7 @@ export async function recoverRound(
   messages: ComputeMessage[]
 ): Promise<SnapRpcResponse<RunRoundResponse | RecoverResult>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.recoverRound,
+    method: 'mpc_recoverRound',
     params: {
       sessionId,
       messages,
@@ -284,7 +279,7 @@ export async function recoverMnemonic(
   remotePubKeys: PubKey[]
 ): Promise<SnapRpcResponse<string>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.recoverMnemonic,
+    method: 'mpc_recoverMnemonic',
     params: {
       sessionId,
       partialShards,
@@ -298,7 +293,7 @@ export async function refreshPrepare(
   sessionId: string
 ): Promise<SnapRpcResponse<PubAndZkp>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.refreshPrepare,
+    method: 'mpc_refreshPrepare',
     params: {
       sessionId,
     },
@@ -311,7 +306,7 @@ export async function refreshContext(
   remoteParties: PartyWithZkp[]
 ): Promise<SnapRpcResponse<ComputeMessage[]>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.refreshContext,
+    method: 'mpc_refreshContext',
     params: {
       sessionId,
       localParty,
@@ -325,7 +320,7 @@ export async function refreshRound(
   messages: ComputeMessage[]
 ): Promise<SnapRpcResponse<RunRoundResponse>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.refreshRound,
+    method: 'mpc_refreshRound',
     params: {
       sessionId,
       messages,
@@ -337,7 +332,7 @@ export async function refreshSuccess(
   sessionId: string
 ): Promise<SnapRpcResponse<AccountItem>> {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.refreshSuccess,
+    method: 'mpc_refreshSuccess',
     params: {
       sessionId,
     },
@@ -346,6 +341,6 @@ export async function refreshSuccess(
 
 export async function syncAccountToMetamask() {
   return walletInvokeSnap({
-    method: SnapInvokeMethods.syncAccount,
+    method: 'mpc_syncAccount',
   })
 }

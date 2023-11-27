@@ -11,11 +11,11 @@ class MessageModule {
     makeAutoObservable(this)
   }
 
-  setMessageRelayer(relayer) {
+  setMessageRelayer(relayer: MessageRelayer) {
     this.messageRelayer = relayer
   }
 
-  setRPCChannel(channel) {
+  setRPCChannel(channel: RPCChannel) {
     this.rpcChannel = channel
   }
 }

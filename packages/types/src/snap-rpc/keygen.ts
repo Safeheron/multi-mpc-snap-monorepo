@@ -57,3 +57,9 @@ export interface CreateResult {
   isComplete: true
   pubKey: string
 }
+
+export type KeygenMethods =
+  | CreateApproval['method']
+  | CreateContext['method']
+  | CreateRound['method']
+  | CreateSuccess['method']

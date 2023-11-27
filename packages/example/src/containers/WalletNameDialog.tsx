@@ -6,7 +6,7 @@ import { RPCChannel } from '@/service/channel/RPCChannel'
 import { createApproval } from '@/service/metamask'
 import MessageRelayer from '@/service/relayer/MessageRelayer'
 import { PartyId } from '@/service/types'
-import { MPCMessageType, PartyIndexMap } from '@/service/types'
+import { PartyIndexMap } from '@/service/types'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/WalletNameDialog.module.less'
 

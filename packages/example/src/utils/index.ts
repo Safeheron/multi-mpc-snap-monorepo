@@ -3,6 +3,8 @@ import copy from 'copy-to-clipboard'
 import { ethers } from 'ethers'
 import { formatUnits } from 'ethers/lib/utils'
 
+import { RPC_KEEPALIVE_METHOD } from '@/service/metamask'
+
 export { ethers }
 
 /**
@@ -102,7 +104,7 @@ export const randomFromArray = (list: string[], x: number): string[] => {
 }
 
 export async function handleSnapResponse(error, req) {
-  if (req.method !== 'mpc_snapKeepAlive') {
+  if (req.method !== RPC_KEEPALIVE_METHOD) {
     console.error(`handleSnapResponse [${req.method}]`, error)
     message.error(error.message || error.errMsg || 'Unknown Snap Error')
   }

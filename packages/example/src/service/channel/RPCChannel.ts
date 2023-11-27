@@ -6,7 +6,6 @@ import {
 import { message } from 'antd'
 
 import { MessageChannel } from '@/service/channel/MessageChannel'
-import { PartyId } from '@/service/types'
 import { MPCMessage, MPCMessageType } from '@/service/types'
 import { store } from '@/store'
 
@@ -17,7 +16,6 @@ import SignAction from '../action/SignAction'
 export class RPCChannel extends MessageChannel {
   constructor() {
     super('snap')
-    this.partyId = PartyId.A
   }
 
   protected connect() {

@@ -143,3 +143,16 @@ export const RefreshSuccessStruct = object({
   }),
 })
 export type RefreshSuccess = Infer<typeof RefreshSuccessStruct>
+
+export type RecoveryMethods =
+  | RecoverApproval['method']
+  | RecoverPrepare['method']
+  | RecoverKeyPair['method']
+  | RecoverSetRemoteCommunicationPubs['method']
+  | RecoverContext['method']
+  | RecoverRound['method']
+  | RecoverMnemonic['method']
+  | RefreshPrepare['method']
+  | RefreshContext['method']
+  | RefreshRound['method']
+  | RefreshSuccess['method']

@@ -17,12 +17,6 @@ class MessageRelayer extends EventEmitter {
     return this.total === this.channelList.length
   }
 
-  setParts(parts?: string[]) {
-    console.log('setParts', parts)
-
-    this.parts = parts
-  }
-
   constructor(private total: number) {
     super()
     console.log('relayer created!')

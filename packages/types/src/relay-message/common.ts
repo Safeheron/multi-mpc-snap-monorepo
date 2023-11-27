@@ -1,3 +1,5 @@
+import { PartyId } from '../snap-rpc'
+
 export enum OperationType {
   partyPrepare = 'partyPrepare',
   partyReady = 'partyReady',
@@ -39,10 +41,15 @@ export type BaseRelayMessage<
   messageContent: Q
 }
 
-export type AbortType = 'create' | 'sign' | 'recover'
+export type AbortMessageContent = {
+  businessType: 'create' | 'sign' | 'recover'
+  from: PartyId
+  abortType: 'error' | 'userCancel'
+  reason: string
+}
 
 export type AbortMessage = BaseRelayMessage<
   OperationType.abort,
   'broadcast',
-  AbortType | undefined
+  AbortMessageContent
 >
