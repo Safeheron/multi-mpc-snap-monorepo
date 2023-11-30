@@ -4,9 +4,7 @@ import { makeAutoObservable } from 'mobx'
 
 import { BaseTxObj, FeeData } from '@/service/models'
 import { store } from '@/store'
-import { ethers, stringToHex } from '@/utils'
-
-let provider: undefined | ethers.providers.Web3Provider
+import { ethers, getProvider, stringToHex } from '@/utils'
 
 class TransactionModule {
   maxLength: 30
@@ -42,10 +40,8 @@ class TransactionModule {
   }
 
   async getFeeData() {
-    if (!provider) {
-      //@ts-ignore
-      provider = new ethers.providers.Web3Provider(window.ethereum)
-    }
+    const provider = getProvider()
+
     this.feeDataLoading = true
     try {
       const feeData = await provider.getFeeData()

@@ -3,10 +3,9 @@ import { ethers } from 'ethers'
 import { makeAutoObservable } from 'mobx'
 
 import { requestAccount } from '@/service/metamask'
+import { getProvider } from '@/utils'
 
 const LOOP_GAP = 20_000
-
-let provider: undefined | ethers.providers.Web3Provider
 
 class AccountModule {
   walletId = ''
@@ -72,13 +71,9 @@ class AccountModule {
 
   async getBalance(address: string) {
     if (!address) return
-    if (!provider) {
-      // @ts-ignore
-      provider = new ethers.providers.Web3Provider(window.ethereum)
-    }
     try {
       console.debug('Start to loop balance...')
-      const res = await provider.getBalance(address)
+      const res = await getProvider().getBalance(address)
       console.debug('Loop balance result: ', res.toString())
       this.balance = res.toString()
     } catch (error) {

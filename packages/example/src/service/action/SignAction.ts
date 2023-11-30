@@ -1,15 +1,13 @@
 import { SignReadyMessage } from '@safeheron/mpcsnap-types'
 import { message } from 'antd'
-import { ethers } from 'ethers'
 
 import { PartyId } from '@/service/types'
 import { store } from '@/store'
+import { getProvider } from '@/utils'
 import { reportSignSuccess } from '@/utils/sentryUtil'
 
 import { signContext, signRound } from '../metamask'
 import { MPCMessage, MPCMessageType } from '../types'
-
-let provider: undefined | ethers.providers.Web3Provider
 
 const SignAction = {
   emitSignFlowError(errMsg: string) {
@@ -76,12 +74,8 @@ const SignAction = {
   },
 
   async sendTransaction(signedTransaction: string) {
-    if (!provider) {
-      // @ts-ignore
-      provider = new ethers.providers.Web3Provider(window.ethereum)
-    }
     try {
-      const response = await provider.sendTransaction(signedTransaction)
+      const response = await getProvider().sendTransaction(signedTransaction)
       if ('error' in response) {
         console.error('send transaction occur an error: ', response.error)
         message.error('Sign success but send transaction with provider failed.')

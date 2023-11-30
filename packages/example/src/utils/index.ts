@@ -7,14 +7,15 @@ import { RPC_KEEPALIVE_METHOD } from '@/service/metamask'
 
 export { ethers }
 
-/**
- * This provider may init fail and cannot resume
- * @deprecated
- */
-export const provider = window.ethereum
-  ? // @ts-ignore
-    new ethers.providers.Web3Provider(window.ethereum)
-  : null
+let provider: undefined | ethers.providers.Web3Provider
+
+export function getProvider(): ethers.providers.Web3Provider {
+  if (!provider) {
+    // @ts-ignore
+    provider = new ethers.providers.Web3Provider(window.ethereum)
+  }
+  return provider
+}
 
 export const wei2eth = (
   weiHex?: string,

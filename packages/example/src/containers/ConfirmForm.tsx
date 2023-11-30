@@ -5,11 +5,9 @@ import { parseEther } from 'ethers/lib/utils'
 import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
 
-import { signApproval } from '@/service/metamask'
-import MessageRelayer from '@/service/relayer/MessageRelayer'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/SendDialog.module.less'
-import { ethers, provider, wei2eth } from '@/utils'
+import { ethers, getProvider, wei2eth } from '@/utils'
 
 const ConfirmForm = () => {
   const {
@@ -27,7 +25,7 @@ const ConfirmForm = () => {
   useEffect(() => {}, [])
 
   const handleConfirm = async () => {
-    if (!provider) return
+    const provider = getProvider()
 
     try {
       interactive.setLoading(true)
