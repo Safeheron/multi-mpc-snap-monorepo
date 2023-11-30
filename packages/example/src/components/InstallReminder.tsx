@@ -37,8 +37,8 @@ const InstallReminder = () => {
   return (
     <div className={styles.reminder}>
       <p>
-        Please ensure you've installed MetaMask on your Google Chrome and
-        Safeheron Snap App on your two mobile phones.
+        Please ensure you've installed MetaMask on your browser and Safeheron
+        Snap App on your two mobile phones.
       </p>
       <div className={styles.btns}>
         <a

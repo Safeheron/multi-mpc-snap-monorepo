@@ -61,8 +61,7 @@ const RecoverPrepareDialog = () => {
           desc={
             <p>
               To recover an MPC Wallet, please make sure you have MetaMask on
-              your Google Chrome and the Safeheron Snap App on two separate
-              phones.
+              your browser and the Safeheron Snap App on two separate phones.
               <br /> <br />
               For wallet recovery, you'll need at least two out of the three
               backed-up private key shards (A, B, and C).
