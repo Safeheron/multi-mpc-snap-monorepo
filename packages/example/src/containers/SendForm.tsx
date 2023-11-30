@@ -34,13 +34,13 @@ const SendForm = () => {
 
   const onFinish = async (v: any) => {
     transactionModule.setBaseTx(v)
-    interactive.setSendFormCompleted(true)
+    transactionModule.setSendFormCompleted(true)
   }
 
   const handleCancel = async () => {
     form.resetFields()
     transactionModule.setBaseTx({})
-    interactive.setSendDialogVisible(false)
+    transactionModule.setSendDialogVisible(false)
   }
 
   const handleMax = () => {

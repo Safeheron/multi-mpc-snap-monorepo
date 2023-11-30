@@ -6,20 +6,26 @@ import { createContext, createRound, createSuccess } from '../metamask'
 import { MPCMessage, MPCMessageType } from '../types'
 
 const KenGenAction = {
+  emitKeygenFlowError(errMsg: string) {
+    store.keygenModule.rpcChannel?.emitAbortMessage('keygen', 'error', errMsg)
+  },
+
   async handlePartyReady(messageArray: MPCMessage[]) {
     const remoteParties = messageArray.map(
       ({ messageContent }) => messageContent
     )
 
-    const res = await createContext(store.interactive.sessionId, remoteParties)
+    const res = await createContext(store.keygenModule.sessionId, remoteParties)
 
     if (res.success) {
-      console.log('createContext result', res.data)
-
-      store.messageModule.rpcChannel?.next({
+      store.keygenModule.rpcChannel?.next({
         messageType: MPCMessageType.keyGenRound,
         messageContent: res.data,
       })
+    } else {
+      this.emitKeygenFlowError(
+        res.errMsg ?? 'KeygenFlow error: call rpc createContext method error.'
+      )
     }
   },
 
@@ -29,31 +35,39 @@ const KenGenAction = {
     )
 
     const res = await createRound(
-      store.interactive.sessionId,
+      store.keygenModule.sessionId,
       remoteMessageList
     )
     if (res.success) {
       if (res.data.isComplete) {
-        store.messageModule.rpcChannel?.next({
+        store.keygenModule.rpcChannel?.next({
           messageType: MPCMessageType.createSuccess,
           messageContent: null,
         })
       } else {
         // continue round
-        store.messageModule.rpcChannel?.next({
+        store.keygenModule.rpcChannel?.next({
           messageType: MPCMessageType.keyGenRound,
           messageContent: res.data.message,
         })
       }
+    } else {
+      this.emitKeygenFlowError(
+        res.errMsg ?? 'KeygenFlow error: call rpc keygenRound method error.'
+      )
     }
   },
 
   async handleCreateSuccess() {
-    const res = await createSuccess(store.interactive.sessionId)
+    const res = await createSuccess(store.keygenModule.sessionId)
     if (res.success) {
-      store.interactive.setCreateStep(4)
+      store.keygenModule.setCreateStep(4)
       store.interactive.setProgress(0)
       reportWalletCreation(res.data.address, res.data.id, res.data.walletName)
+    } else {
+      this.emitKeygenFlowError(
+        res.errMsg ?? 'KeygenFlow error: call keygenSuccess method error.'
+      )
     }
   },
 }

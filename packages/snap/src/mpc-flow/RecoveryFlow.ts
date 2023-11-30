@@ -53,7 +53,7 @@ class RecoveryFlow extends BaseFlow {
   private remotePub?: string
   private lostPub?: string
 
-  private communicationPubs?: RecoverSetRemoteCommunicationPubs['params']
+  private communicationPubs?: RecoverSetRemoteCommunicationPubs['params']['remotePubs']
 
   private newSignKey?: string
 
@@ -85,6 +85,8 @@ class RecoveryFlow extends BaseFlow {
     this.keyRecovery = this.mpcInstance.KeyRecovery.getCoSigner()
     await this.keyRecovery.setupLocalCpkp()
 
+    this.privKey = this.keyRecovery.localCommunicationPriv
+
     return succeed({
       sessionId: this.sessionId,
       keyshareExist: !!this.signKey,
@@ -93,8 +95,10 @@ class RecoveryFlow extends BaseFlow {
   }
 
   async setCommunicationPubs(
-    pubs: RecoverSetRemoteCommunicationPubs['params']
+    sessionId: string,
+    pubs: RecoverSetRemoteCommunicationPubs['params']['remotePubs']
   ) {
+    this.verifySession(sessionId)
     this.communicationPubs = pubs
     return succeed(true)
   }
@@ -122,6 +126,10 @@ class RecoveryFlow extends BaseFlow {
     return succeed(true)
   }
 
+  /**
+   * @deprecated
+   * @param sessionId
+   */
   async recoverKeyPair(sessionId: string): Promise<SnapRpcResponse<string>> {
     this.verifySession(sessionId)
     if (!this.keyRecovery!.localCommunicationPriv) {

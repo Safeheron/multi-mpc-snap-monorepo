@@ -1,8 +1,4 @@
-import {
-  OperationType,
-  SignPrepareParams,
-  SignReadyMessage,
-} from '@safeheron/mpcsnap-types'
+import { OperationType, SignReadyMessage } from '@safeheron/mpcsnap-types'
 import { SignPrepareMessage } from '@safeheron/mpcsnap-types/src/relay-message/sign'
 import { Button, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
@@ -46,18 +42,12 @@ const steps = [
 const SignDialog = () => {
   useSnapKeepAlive()
 
-  const {
-    interactive,
-    messageModule,
-    signModule,
-    networkModule,
-    accountModule,
-  } = useStore()
+  const { interactive, signModule, networkModule, accountModule } = useStore()
 
   const { currentChain } = networkModule
   const { balanceEth, walletId } = accountModule
 
-  const step = interactive.signStep
+  const step = signModule.signStep
   const [webrtcChannel, setWebrtcChannel] = useState<WebRTCChannel>()
 
   const isSuccess = step > 3
@@ -100,20 +90,20 @@ const SignDialog = () => {
             pub: signModule.communicationPub,
           },
         }
-        messageModule.rpcChannel?.next(signReadyMessage)
+        signModule.rpcChannel?.next(signReadyMessage)
 
-        interactive.setSignStep(2)
+        signModule.setSignStep(2)
       }, 1000)
     })
 
-    messageModule.messageRelayer?.join(rtcChannel)
+    signModule.messageRelayer?.join(rtcChannel)
   }
 
   const handleTxnHash = async () => {
-    const { method, params, chainId: thisChainId } = signModule.pendingRequest
+    const { chainId: thisChainId } = signModule.pendingRequest
     const explorer = networkModule.getExplorer(thisChainId)
-    if (explorer && interactive.txHash) {
-      window.open(`${explorer}/tx/${interactive.txHash}`)
+    if (explorer && signModule.txHash) {
+      window.open(`${explorer}/tx/${signModule.txHash}`)
     }
   }
 
@@ -122,8 +112,8 @@ const SignDialog = () => {
     showConfirm({
       content: CANCEL_CONFIRM_TEXT,
       onOk: () => {
-        interactive.setSignTransactionDialogVisible(false)
-        messageModule.rpcChannel?.next({
+        signModule.setSignTransactionDialogVisible(false)
+        signModule.rpcChannel?.next({
           messageType: MPCMessageType.abort,
           sendType: 'broadcast',
           messageContent: 'signTransaction',
@@ -133,21 +123,17 @@ const SignDialog = () => {
   }
 
   const handleClose = () => {
-    interactive.setSignTransactionDialogVisible(false)
+    signModule.setSignTransactionDialogVisible(false)
   }
 
   useEffect(() => {
     const rpcChannel = new RPCChannel()
-    messageModule.setRPCChannel(rpcChannel)
-    messageModule.messageRelayer?.join(rpcChannel)
+    signModule.setRPCChannel(rpcChannel)
+    signModule.messageRelayer?.join(rpcChannel)
+
+    signModule.setTxHash('')
 
     setupRtcChannel()
-
-    interactive.setTxHash('')
-
-    return () => {
-      interactive.setCreateStep(1)
-    }
   }, [])
 
   return (
@@ -157,7 +143,7 @@ const SignDialog = () => {
           buttonContent={
             isSuccess ? (
               <>
-                {interactive.txHash && (
+                {signModule.txHash && (
                   <Button
                     type="primary"
                     onClick={handleTxnHash}

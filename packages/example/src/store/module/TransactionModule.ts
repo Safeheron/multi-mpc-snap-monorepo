@@ -4,11 +4,12 @@ import { makeAutoObservable } from 'mobx'
 
 import { BaseTxObj, FeeData } from '@/service/models'
 import { store } from '@/store'
-import { ethers, provider, stringToHex } from '@/utils'
+import { ethers, stringToHex } from '@/utils'
+
+let provider: undefined | ethers.providers.Web3Provider
 
 class TransactionModule {
   maxLength: 30
-  timer: any
 
   baseTx: BaseTxObj = {} as BaseTxObj
   transactionObject: TransactionObject = {} as TransactionObject
@@ -18,8 +19,19 @@ class TransactionModule {
     gasLimit: '21000',
   } as FeeData
 
+  sendDialogVisible = false
+  sendFormCompleted = false
+
   constructor() {
     makeAutoObservable(this)
+  }
+
+  setSendDialogVisible(value: boolean) {
+    this.sendDialogVisible = value
+  }
+
+  setSendFormCompleted(value: boolean) {
+    this.sendFormCompleted = value
   }
 
   setBaseTx(data) {
@@ -30,7 +42,10 @@ class TransactionModule {
   }
 
   async getFeeData() {
-    if (!provider) return
+    if (!provider) {
+      //@ts-ignore
+      provider = new ethers.providers.Web3Provider(window.ethereum)
+    }
     this.feeDataLoading = true
     try {
       const feeData = await provider.getFeeData()

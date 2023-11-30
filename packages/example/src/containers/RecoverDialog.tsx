@@ -1,4 +1,8 @@
-import { OperationType, RecoverPrepareMessage } from '@safeheron/mpcsnap-types'
+import {
+  AbortMessage,
+  OperationType,
+  RecoverPrepareMessage,
+} from '@safeheron/mpcsnap-types'
 import { Button, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
@@ -11,8 +15,7 @@ import MnemonicForm from '@/containers/MnemonicForm'
 import useConfirm from '@/hooks/useConfirm'
 import useSnapKeepAlive from '@/hooks/useSnapKeepAlive'
 import { WebRTCChannel } from '@/service/channel/WebRTCChannel'
-import { backupApproval } from '@/service/metamask'
-import { MPCMessageType } from '@/service/types'
+import { PartyId } from '@/service/types'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/RecoverDialog.module.less'
 
@@ -42,13 +45,8 @@ const steps = [
 const RecoverDialog = () => {
   useSnapKeepAlive()
 
-  const {
-    interactive,
-    messageModule,
-    accountModule,
-    recoveryModule,
-    backupModule,
-  } = useStore()
+  const { interactive, accountModule, recoveryModule, backupModule } =
+    useStore()
 
   const { recoverStep: step } = recoveryModule
   const { backuped } = accountModule
@@ -78,12 +76,12 @@ const RecoverDialog = () => {
             messageType: OperationType.recoverPrepare,
             messageContent: {
               index: 2,
-              sessionId: interactive.sessionId,
+              sessionId: recoveryModule.sessionId,
             },
           }
 
           await channel1.sendMessage(JSON.stringify([recoverPrepareMessage]))
-          messageModule.messageRelayer?.join(channel1)
+          recoveryModule.messageRelayer?.join(channel1)
           recoveryModule.setRecoverStep(step + 1)
         }, 1000)
       })
@@ -96,11 +94,11 @@ const RecoverDialog = () => {
             messageType: OperationType.recoverPrepare,
             messageContent: {
               index: 3,
-              sessionId: interactive.sessionId,
+              sessionId: recoveryModule.sessionId,
             },
           }
           await channel2.sendMessage(JSON.stringify([recoverPrepareMessage]))
-          messageModule.messageRelayer?.join(channel2)
+          recoveryModule.messageRelayer?.join(channel2)
           recoveryModule.setRecoverStep(step + 1)
         }, 1000)
       })
@@ -114,11 +112,19 @@ const RecoverDialog = () => {
         'Do you confirm the cancellation? Canceling will terminate this operational process.',
       onOk: () => {
         recoveryModule.setRecoverDialogVisible(false)
-        messageModule.rpcChannel?.next({
-          messageType: MPCMessageType.abort,
+
+        const abortMessage: AbortMessage = {
           sendType: 'broadcast',
-          messageContent: 'recover',
-        })
+          messageType: OperationType.abort,
+          messageContent: {
+            businessType: 'recover',
+            from: PartyId.A,
+            abortType: 'userCancel',
+            reason: 'User cancel the recovery flow',
+          },
+        }
+
+        recoveryModule.rpcChannel?.next(abortMessage)
       },
     })
   }
@@ -127,18 +133,15 @@ const RecoverDialog = () => {
     recoveryModule.setRecoverDialogVisible(false)
   }
 
-  const handleBackupLater = () => {
-    recoveryModule.setRecoverDialogVisible(false)
-  }
+  const handleBackupLater = () => handleBack()
 
   const handleBackupWallet = async () => {
     await accountModule.requestAccount()
-    const res = await backupApproval(accountModule.walletName)
+    const res = await backupModule.requestBackupApproval(
+      accountModule.walletName
+    )
     if (res.success) {
       recoveryModule.setRecoverDialogVisible(false)
-      interactive.setSessionId(res.data.sessionId)
-      backupModule.setMnemonic(res.data.mnemonic)
-      backupModule.setBackupDialogVisible(true)
     }
   }
 
@@ -179,13 +182,13 @@ const RecoverDialog = () => {
               {step === 1 && (
                 <WebRTCConnection
                   webrtcChannel={webrtcChannel1}
-                  businessType={'recovery'}
+                  businessType={'recover'}
                 />
               )}
               {step === 2 && (
                 <WebRTCConnection
                   webrtcChannel={webrtcChannel2}
-                  businessType={'recovery'}
+                  businessType={'recover'}
                 />
               )}
               {step === 3 && <MnemonicForm />}

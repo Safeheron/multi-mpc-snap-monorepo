@@ -42,10 +42,10 @@ export type BaseRelayMessage<
 }
 
 export type AbortMessageContent = {
-  businessType: 'create' | 'sign' | 'recover'
-  from: PartyId
+  businessType: 'keygen' | 'sign' | 'recover'
   abortType: 'error' | 'userCancel'
   reason: string
+  from?: PartyId
 }
 
 export type AbortMessage = BaseRelayMessage<

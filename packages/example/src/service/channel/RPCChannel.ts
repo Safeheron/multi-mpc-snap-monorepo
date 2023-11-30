@@ -1,12 +1,14 @@
 import {
+  AbortMessage,
   BaseRelayMessage,
   OperationType,
   SendType,
 } from '@safeheron/mpcsnap-types'
+import { AbortMessageContent } from '@safeheron/mpcsnap-types/src'
 import { message } from 'antd'
 
 import { MessageChannel } from '@/service/channel/MessageChannel'
-import { MPCMessage, MPCMessageType } from '@/service/types'
+import { MPCMessage, MPCMessageType, PartyId } from '@/service/types'
 import { store } from '@/store'
 
 import KenGenAction from '../action/KenGenAction'
@@ -16,10 +18,6 @@ import SignAction from '../action/SignAction'
 export class RPCChannel extends MessageChannel {
   constructor() {
     super('snap')
-  }
-
-  protected connect() {
-    return
   }
 
   protected disconnect(): void {
@@ -79,11 +77,6 @@ export class RPCChannel extends MessageChannel {
         await RecoverAction.handleMnemonicReady(messageArray)
         interactive.setProgress(25)
         break
-      case MPCMessageType.keyPairReady:
-        interactive.setProgress(29)
-        await RecoverAction.handleKeyPairReady(messageArray)
-        interactive.setProgress(33)
-        break
       case MPCMessageType.recoverSuccess:
         interactive.setProgress(37)
         await RecoverAction.handleRecoverSuccess()
@@ -117,7 +110,9 @@ export class RPCChannel extends MessageChannel {
         await RecoverAction.handlePartySecretKeyReady(messageArray[0])
         break
       case MPCMessageType.abort:
-        this.handleAbort(messageArray[0].messageContent)
+        // @ts-ignore
+        const { messageContent } = messageArray[0] as AbortMessage
+        this.handleAbort(messageContent.businessType, messageContent.reason)
         break
       default:
         console.log('not allow')
@@ -138,29 +133,54 @@ export class RPCChannel extends MessageChannel {
     )
   }
 
-  private handleAbort(type) {
-    const { interactive, recoveryModule } = store
+  emitAbortMessage(
+    businessType: AbortMessageContent['businessType'],
+    abortType: AbortMessageContent['abortType'],
+    reason: string
+  ) {
+    const abortMessage: AbortMessage = {
+      messageType: OperationType.abort,
+      sendType: 'broadcast',
+      messageContent: {
+        from: PartyId.A,
+        businessType,
+        abortType,
+        reason,
+      },
+    }
+
+    this.next(abortMessage)
+
+    this.handleAbort(businessType, reason)
+  }
+
+  private handleAbort(
+    type: AbortMessageContent['businessType'],
+    errMessage?: string
+  ) {
+    const { interactive, recoveryModule, signModule, keygenModule } = store
     interactive.setProgress(0)
+
     switch (type) {
-      case 'create':
-        message.error('Create wallet canceled')
-        interactive.setCreateDialogVisible(false)
+      case 'keygen':
+        message.error(errMessage ?? 'Create wallet canceled', 5)
+        keygenModule.setCreateDialogVisible(false)
         break
 
       case 'sign':
-        message.error('Sign canceled')
-        interactive.setSignTransactionDialogVisible(false)
+        message.error(errMessage ?? 'Sign canceled', 5)
+        signModule.setSignTransactionDialogVisible(false)
         break
 
       case 'recover':
-        message.error('Recover canceled')
+        message.error(errMessage ?? 'Recover canceled', 5)
         recoveryModule.setRecoverDialogVisible(false)
         break
 
       default:
-        message.error('Process Aborted.')
-        interactive.setCreateDialogVisible(false)
-        interactive.setSignTransactionDialogVisible(false)
+        message.error(errMessage ?? 'Process Aborted.', 5)
+        keygenModule.setCreateDialogVisible(false)
+        signModule.setSignTransactionDialogVisible(false)
         recoveryModule.setRecoverDialogVisible(false)
         break
     }

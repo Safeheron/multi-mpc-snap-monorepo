@@ -11,8 +11,8 @@ import { useStore } from '@/store'
 import styles from '@/styles/containers/RecoverPrepareDialog.module.less'
 
 const RecoverPrepareDialog = () => {
-  const { interactive, accountModule, messageModule, recoveryModule } =
-    useStore()
+  const { interactive, accountModule, recoveryModule } = useStore()
+
   const handleRecover = async () => {
     recoveryModule.setRecoverPrepareDialogVisible(false)
     interactive.setLoading(true)
@@ -21,7 +21,7 @@ const RecoverPrepareDialog = () => {
     interactive.setLoading(false)
 
     if (res.success) {
-      interactive.setSessionId(res.data.sessionId)
+      recoveryModule.setSessionId(res.data.sessionId)
       recoveryModule.setLocalKeyshareExist(res.data.keyshareExist)
       recoveryModule.setLocalCommunicationPub(res.data.pub)
       await startRecover()
@@ -30,9 +30,11 @@ const RecoverPrepareDialog = () => {
 
   const startRecover = async () => {
     const rpcChannel = new RPCChannel()
-    messageModule.setRPCChannel(rpcChannel)
+    recoveryModule.setRPCChannel(rpcChannel)
+
     const messageRelayer = new MessageRelayer(3)
-    messageModule.setMessageRelayer(messageRelayer)
+    recoveryModule.setMessageRelayer(messageRelayer)
+
     messageRelayer.join(rpcChannel)
 
     const roleReadyMessage: RoleReadyMessage = {

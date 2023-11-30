@@ -22,7 +22,7 @@ const RANDOM_NUMBER = IS_PROD ? 6 : 1
 const BackupDialog = () => {
   useSnapKeepAlive()
 
-  const { interactive, accountModule, backupModule } = useStore()
+  const { accountModule, backupModule } = useStore()
   const { mnemonic } = backupModule
 
   const [step, setStep] = useState(0)
@@ -54,16 +54,12 @@ const BackupDialog = () => {
       setStep(2)
     } else if (step === 2) {
       setBackupLoading(true)
-      try {
-        const res = await backupUpdate(interactive.sessionId)
-        if (!res.success) return
-        accountModule.setAccount(res.data)
-        setStep(3)
-      } catch (e) {
-        /* no op */
-      } finally {
-        setBackupLoading(false)
-      }
+      const res = await backupModule.finishBackup()
+      if (!res.success) return
+
+      accountModule.setAccount(res.data)
+      setStep(3)
+      setBackupLoading(false)
     }
   }
 

@@ -42,7 +42,6 @@ enum InternalMPCSignMethods {
 export enum InternalMPCRecoveryMethods {
   ApprovalRecovery = 'mpc_recoverApproval',
   RecoveryPrepare = 'mpc_recoverPrepare',
-  RecoveryKeyPair = 'mpc_recoverKeyPair',
   RecoverSetCommunicationPubs = 'mpc_recoverSetCommuPubs',
   RecoveryContext = 'mpc_recoverContext',
   RecoveryRound = 'mpc_recoverRound',

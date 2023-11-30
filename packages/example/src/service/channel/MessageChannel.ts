@@ -10,7 +10,6 @@ export abstract class MessageChannel extends EventEmitter {
     this.name = name
   }
 
-  protected abstract connect(callback): void
   protected abstract disconnect(): void
 
   setName(name: string) {
@@ -25,7 +24,7 @@ export abstract class MessageChannel extends EventEmitter {
   }
 
   /**
-   * receive message from website
+   * receive message from remote
    * @param msg
    */
   receiveExternal(msg: string) {

@@ -12,7 +12,7 @@ import { mnemonicValidator } from '@/utils/validator'
 
 const MnemonicForm = () => {
   const [form] = Form.useForm()
-  const { interactive, messageModule, recoveryModule } = useStore()
+  const { recoveryModule } = useStore()
   const { showConfirm, showInfo } = useConfirm()
 
   const handleSkip = async () => {
@@ -21,46 +21,50 @@ const MnemonicForm = () => {
         content:
           'A minimum of 2 private key shards is necessary for wallet recovery. If other devices have already bypassed entering the mnemonic phrase, this device can no longer skip this step. Please input the mnemonic phrase for this device.',
       })
-    } else {
-      try {
-        if (!recoveryModule.hasOtherShard) {
-          await form.validateFields(['walletName'])
-        }
-        showConfirm({
-          content:
-            'The wallet address will remain the same, but remember to back up the recovered private key shard before using the wallet.',
-          onOk() {
-            const walletName = form.getFieldValue('walletName')
+      return
+    }
 
-            recoveryModule.setInputMnemonic('')
-            interactive.setWalletName(walletName)
+    try {
+      if (!recoveryModule.hasOtherShard) {
+        await form.validateFields(['walletName'])
+      }
+      showConfirm({
+        content:
+          'The wallet address will remain the same, but remember to back up the recovered private key shard before using the wallet.',
+        onOk() {
+          const walletName = form.getFieldValue('walletName')
 
-            messageModule.rpcChannel?.next({
-              sendType: 'broadcast',
-              messageType: MPCMessageType.mnemonicSkip,
-              messageContent: null,
-            })
-            messageModule.rpcChannel?.next({
-              messageType: MPCMessageType.mnemonicReady,
-              messageContent: {
-                walletName,
-                hasMnemonic: false,
-                partyId: PartyId.A,
-              },
-            })
+          recoveryModule.setInputMnemonic('')
+          recoveryModule.setWalletName(walletName)
 
-            recoveryModule.setMnemonicFormType('done')
-          },
-        })
-      } catch (error) {}
+          recoveryModule.rpcChannel?.next({
+            sendType: 'broadcast',
+            messageType: MPCMessageType.mnemonicSkip,
+            messageContent: null,
+          })
+
+          recoveryModule.rpcChannel?.next({
+            messageType: MPCMessageType.mnemonicReady,
+            messageContent: {
+              walletName,
+              hasMnemonic: false,
+              partyId: PartyId.A,
+            },
+          })
+
+          recoveryModule.setMnemonicFormType('done')
+        },
+      })
+    } catch (error) {
+      // no op
     }
   }
   const onFinish = values => {
-    interactive.setWalletName(values.walletName)
-
+    recoveryModule.setWalletName(values.walletName)
     recoveryModule.setInputMnemonic(values.mnemonic)
     recoveryModule.setMnemonicFormType('done')
-    messageModule.rpcChannel?.next({
+
+    recoveryModule.rpcChannel?.next({
       messageType: MPCMessageType.mnemonicReady,
       messageContent: {
         walletName: values.walletName,

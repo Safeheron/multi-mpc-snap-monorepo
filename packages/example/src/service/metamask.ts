@@ -27,12 +27,12 @@ import { handleSnapResponse } from '@/utils'
 
 const { ethereum } = window
 
-const keyringClient = new KeyringSnapRpcClient(snap_origin, ethereum)
-
 export const RPC_KEEPALIVE_METHOD = 'mpc_snapKeepAlive'
 
 // walletInvokeSnap
-export async function walletInvokeSnap(req: InvokeReqModel<any>): Promise<any> {
+export async function walletInvokeSnap(
+  req: InvokeReqModel<any>
+): Promise<SnapRpcResponse<any>> {
   const params = {
     snapId: snap_origin,
     request: req,
@@ -56,12 +56,14 @@ export async function walletInvokeSnap(req: InvokeReqModel<any>): Promise<any> {
     handleSnapResponse(res, req)
     return {
       success: false,
+      errMsg: res.errMsg ?? `[wallet_invokeSnap](${req.method}) error`,
     }
   } catch (error) {
     handleSnapResponse(error, req)
 
     return {
       success: false,
+      errMsg: error?.message ?? `[wallet_invokeSnap](${req.method}) error`,
     }
   }
 }
@@ -69,6 +71,7 @@ export async function walletInvokeSnap(req: InvokeReqModel<any>): Promise<any> {
 // ----------------------------------
 //  keyring requests
 export async function keyringRejectRequestId(requestId: string) {
+  const keyringClient = new KeyringSnapRpcClient(snap_origin, ethereum)
   return keyringClient.rejectRequest(requestId)
 }
 
@@ -221,23 +224,13 @@ export async function recoverPrepare(
   })
 }
 
-export async function createKeyPair(
-  sessionId: string
-): Promise<SnapRpcResponse<string>> {
-  return walletInvokeSnap({
-    method: 'mpc_recoverKeyPair',
-    params: {
-      sessionId,
-    },
-  })
-}
-
 export async function recoverSetCommunicationPub(
-  remotePubs: RecoverSetRemoteCommunicationPubs['params']
+  sessionId: string,
+  remotePubs: RecoverSetRemoteCommunicationPubs['params']['remotePubs']
 ) {
   return walletInvokeSnap({
     method: 'mpc_recoverSetCommuPubs',
-    params: remotePubs,
+    params: { sessionId, remotePubs },
   })
 }
 

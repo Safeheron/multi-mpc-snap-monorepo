@@ -1,6 +1,6 @@
 import { Button, Popover } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import copy from '@/assets/copy.png'
 import dashboardImg from '@/assets/dashboard.png'
@@ -11,13 +11,8 @@ import logoZerion from '@/assets/logo-zerion.png'
 import receive from '@/assets/receive.png'
 import send from '@/assets/send.png'
 import ActionPopover from '@/components/ActionPopover'
-import { CACHE_ID_SYNC_ACCOUNT_TIP } from '@/configs/Configs'
 import SendDialog from '@/containers/SendDialog'
-import {
-  backupApproval,
-  checkMnemonic,
-  syncAccountToMetamask,
-} from '@/service/metamask'
+import { checkMnemonic, syncAccountToMetamask } from '@/service/metamask'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/AddressCard.module.less'
 import { copyText, wei2eth } from '@/utils'
@@ -59,14 +54,7 @@ const AddressCard = () => {
     backupModule,
   } = useStore()
   const { currentChain } = networkModule
-  const {
-    address,
-    walletName,
-    balance,
-    backuped,
-    synced,
-    requestAccountLoading,
-  } = accountModule
+  const { address, walletName, balance, backuped, synced } = accountModule
 
   const [qrcodeVisible, setQrcodeVisible] = useState(false)
   const popoverRef = useRef<any>()
@@ -86,8 +74,8 @@ const AddressCard = () => {
       return
     }
 
-    interactive.setSendFormCompleted(false)
-    interactive.setSendDialogVisible(true)
+    transactionModule.setSendFormCompleted(false)
+    transactionModule.setSendDialogVisible(true)
     transactionModule.setBaseTx({})
   }
 
@@ -102,17 +90,12 @@ const AddressCard = () => {
   const handleBackupApproval = async () => {
     popoverRef.current?.hide()
     interactive.setLoading(true)
-    const res = await backupApproval(walletName)
+    await backupModule.requestBackupApproval(walletName)
     interactive.setLoading(false)
-
-    if (res.success) {
-      interactive.setSessionId(res.data.sessionId)
-      backupModule.setMnemonic(res.data.mnemonic)
-      backupModule.setBackupDialogVisible(true)
-    }
   }
 
   const handleCheckShard = async () => {
+    popoverRef.current?.hide()
     const res = await checkMnemonic(walletName)
     if (res.success) {
       backupModule.setMnemonic(res.data)
@@ -120,7 +103,8 @@ const AddressCard = () => {
     }
   }
 
-  const handleRecover = async () => {
+  const handleRecover = () => {
+    popoverRef.current?.hide()
     recoveryModule.setRecoverPrepareDialogVisible(true)
   }
 
@@ -135,30 +119,8 @@ const AddressCard = () => {
     await accountModule.requestAccount()
   }
 
-  const [mentioned, setMentioned] = useState(false)
-  const setup = () => {
-    const tipCache = localStorage.getItem(CACHE_ID_SYNC_ACCOUNT_TIP)
-    setMentioned(Boolean(tipCache))
-  }
-
-  const hideTip = () => {
-    setMentioned(true)
-    localStorage.setItem(CACHE_ID_SYNC_ACCOUNT_TIP, '1')
-  }
-
-  useEffect(() => {
-    setup()
-  }, [])
-
   return (
     <div className={styles.addressCard}>
-      {!mentioned && synced && (
-        <p className={styles.tip}>
-          The wallet has been added to your MetaMask account. You can now
-          directly use the wallet in MetaMask. <a onClick={hideTip}>Hide</a>
-        </p>
-      )}
-
       <div className={styles.account}>
         <h1>{walletName} </h1>
         {backuped ? (
@@ -244,7 +206,7 @@ const AddressCard = () => {
         visible={qrcodeVisible}
         onClose={() => setQrcodeVisible(false)}
       />
-      {interactive.sendDialogVisible && <SendDialog />}
+      {transactionModule.sendDialogVisible && <SendDialog />}
       {backupModule.notBackupDialogVisible && (
         <NotBackupDialog onSubmit={handleBackupApproval} />
       )}

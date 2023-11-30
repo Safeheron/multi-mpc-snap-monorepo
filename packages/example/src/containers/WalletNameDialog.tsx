@@ -11,22 +11,19 @@ import { useStore } from '@/store'
 import styles from '@/styles/containers/WalletNameDialog.module.less'
 
 const WalletNameDialog = () => {
-  const { interactive, messageModule } = useStore()
+  const { interactive, keygenModule } = useStore()
 
   const [form] = Form.useForm()
   const [, forceUpdate] = useState({})
 
-  useEffect(() => {
-    forceUpdate({})
-  }, [])
+  useEffect(() => forceUpdate({}), [])
 
   const handleCancel = () => {
-    interactive.setWalletNameDialogVisible(false)
+    keygenModule.setWalletNameDialogVisible(false)
   }
 
   const onFinish = async values => {
-    console.log(values)
-    interactive.setWalletName(values.name)
+    keygenModule.setWalletName(values.name)
     handleCancel()
 
     const party = {
@@ -39,12 +36,14 @@ const WalletNameDialog = () => {
     interactive.setLoading(false)
 
     if (res.success) {
-      interactive.setSessionId(res.data.sessionId)
+      keygenModule.setSessionId(res.data.sessionId)
 
       const rpcChannel = new RPCChannel()
-      messageModule.setRPCChannel(rpcChannel)
+      keygenModule.setRPCChannel(rpcChannel)
+
       const messageRelayer = new MessageRelayer(3)
-      messageModule.setMessageRelayer(messageRelayer)
+      keygenModule.setMessageRelayer(messageRelayer)
+
       messageRelayer.join(rpcChannel)
 
       const partyReadyMessage: PartyReadyMessage = {
@@ -53,9 +52,11 @@ const WalletNameDialog = () => {
       }
 
       rpcChannel.next(partyReadyMessage)
+
       interactive.setProgress(5)
-      interactive.setCreateStep(1)
-      interactive.setCreateDialogVisible(true)
+
+      keygenModule.setCreateStep(1)
+      keygenModule.setCreateDialogVisible(true)
     }
   }
 
@@ -93,7 +94,11 @@ const WalletNameDialog = () => {
             rules={[
               {
                 validator: (rule, value) =>
-                  value ? Promise.resolve() : Promise.reject('Please agree'),
+                  value
+                    ? Promise.resolve()
+                    : Promise.reject(
+                        'Please check and the User and Privacy Agreement.'
+                      ),
               },
             ]}>
             <Checkbox>

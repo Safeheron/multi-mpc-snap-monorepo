@@ -26,27 +26,20 @@ import {
 const LOOP_GAP = 5_000
 
 const PendingRequestList: React.FC = () => {
-  const {
-    signModule,
-    interactive,
-    messageModule,
-    networkModule,
-    accountModule,
-  } = useStore()
+  const { signModule, networkModule, accountModule } = useStore()
   const { address, backuped } = accountModule
 
   const [requests, setRequests] = useState<WrappedKeyringRequest[]>([])
 
   const getSnapRequests = async () => {
     const r = await listKeyringRequests()
-    console.debug('loop request result ...', r)
     if (r.success) {
       setRequests(r.data)
     } else {
       // TODO show rpc error
     }
   }
-  const { pause, resume } = useAsyncInterval(getSnapRequests, LOOP_GAP)
+  const { pause, resume } = useAsyncInterval(getSnapRequests, LOOP_GAP, true)
 
   const resolveRequest = async (
     rpcRequest: KeyringRequest['request'],
@@ -79,27 +72,17 @@ const PendingRequestList: React.FC = () => {
       default:
         throw new Error('Unknown request method: ' + requestMethod)
     }
-    signModule.setPendingRequest({
-      method: requestMethod,
-      params: originalParams,
-      createTime: time,
-      chainId: tryToExtractChainId(requestMethod, params),
-    })
-
-    // approval send transaction
-    const ret = await signApproval(requestMethod, originalParams, requestId)
-
-    if (ret.success) {
-      interactive.setSessionId(ret.data.sessionId)
-      signModule.setCommunicationPub(ret.data.pub)
-
-      // setup message channel
-      const messageRelayer = new MessageRelayer(2)
-      messageModule.setMessageRelayer(messageRelayer)
-      interactive.setSignStep(1)
-
-      // open dialog
-      interactive.setSignTransactionDialogVisible(true)
+    const ret = await signModule.requestSignApproval(
+      {
+        method: requestMethod,
+        params: originalParams,
+        createTime: time,
+        chainId: tryToExtractChainId(requestMethod, params),
+      },
+      requestId
+    )
+    if (!ret.success) {
+      // empty op
     }
   }
 

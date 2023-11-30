@@ -1,6 +1,7 @@
 import { lazy } from 'react'
 
-import { RouterEnum } from '@/configs/Enums'
+
+import { RouterEnum } from '@/configs/Configs';
 const ROUTER_PATH = process.env.ROUTER_PATH
 
 const routes = [

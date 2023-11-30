@@ -35,15 +35,17 @@ const HomeContainer = styled.div`
 `
 
 const Home = () => {
-  const { accountModule, interactive, recoveryModule, backupModule } =
-    useStore()
   const {
-    loading,
-    walletNameDialogVisible,
-    createDialogVisible,
-    signTransactionDialogVisible,
-  } = interactive
-
+    accountModule,
+    interactive,
+    recoveryModule,
+    backupModule,
+    signModule,
+    keygenModule,
+  } = useStore()
+  const { loading } = interactive
+  const { walletNameDialogVisible, createDialogVisible } = keygenModule
+  const { signTransactionDialogVisible } = signModule
   const { backupDialogVisible, checkShardDialogVisible } = backupModule
   const { recoverDialogVisible, recoverPrepareDialogVisible } = recoveryModule
   const { address, requestAccountLoading } = accountModule

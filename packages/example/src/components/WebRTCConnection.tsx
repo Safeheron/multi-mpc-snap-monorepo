@@ -8,7 +8,7 @@ import DynamicQrCode from '@/components/DynamicQrCode'
 import ScanDynamicQrCode from '@/components/ScanDynamicQrCode'
 import { RTCSignaling, WebRTCChannel } from '@/service/channel/WebRTCChannel'
 
-type BusinessType = 'create' | 'recovery' | 'sign'
+type BusinessType = 'keygen' | 'recover' | 'sign'
 
 interface WebRTCConnectionProps {
   webrtcChannel?: WebRTCChannel

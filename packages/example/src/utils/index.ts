@@ -103,6 +103,12 @@ export const randomFromArray = (list: string[], x: number): string[] => {
   return newList
 }
 
+/**
+ * This method will be deleted after all rpc-method errors handled by each flow
+ * @deprecated
+ * @param error
+ * @param req
+ */
 export async function handleSnapResponse(error, req) {
   if (req.method !== RPC_KEEPALIVE_METHOD) {
     console.error(`handleSnapResponse [${req.method}]`, error)

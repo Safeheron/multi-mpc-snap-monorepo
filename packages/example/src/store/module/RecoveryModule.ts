@@ -1,8 +1,14 @@
 import { makeAutoObservable } from 'mobx'
 
+import { RPCChannel } from '@/service/channel/RPCChannel'
+import MessageRelayer from '@/service/relayer/MessageRelayer'
+
 type MnemonicFormType = 'init' | 'done' | 'noNeed'
 
-class RecoveryModule {
+export default class RecoveryModule {
+  rpcChannel?: RPCChannel
+  messageRelayer?: MessageRelayer
+
   walletName = ''
   sessionId = ''
 
@@ -21,7 +27,7 @@ class RecoveryModule {
   // other party skip input mnemonic
   isSkip = false
 
-  // at least one another party have key shard
+  // at least one party has key shard, self party does not need to fill mnemonic
   hasOtherShard = false
 
   get localPartyHasMnemonic() {
@@ -30,6 +36,14 @@ class RecoveryModule {
 
   constructor() {
     makeAutoObservable(this)
+  }
+
+  setWalletName(name: string) {
+    this.walletName = name
+  }
+
+  setSessionId(sessionId: string) {
+    this.sessionId = sessionId
   }
 
   setLocalKeyshareExist(val: boolean) {
@@ -65,6 +79,12 @@ class RecoveryModule {
   setLocalCommunicationPub(pub: string) {
     this.localCommunicationPub = pub
   }
-}
 
-export default RecoveryModule
+  setRPCChannel(rpcChannel: RPCChannel) {
+    this.rpcChannel = rpcChannel
+  }
+
+  setMessageRelayer(messageRelayer: MessageRelayer) {
+    this.messageRelayer = messageRelayer
+  }
+}

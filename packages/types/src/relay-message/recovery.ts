@@ -35,12 +35,6 @@ export type MnemonicReadyMessage = BaseRelayMessage<
   }
 >
 
-export type KeypairReadyMessage = BaseRelayMessage<
-  OperationType.keyPairReady,
-  undefined,
-  { partyId: string; pubKey: string }
->
-
 export type RecoverSuccessMessage = BaseRelayMessage<
   OperationType.recoverSuccess,
   undefined,

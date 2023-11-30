@@ -15,7 +15,6 @@ const ConfirmForm = () => {
   const {
     interactive,
     accountModule,
-    messageModule,
     transactionModule,
     signModule,
     networkModule,
@@ -50,36 +49,29 @@ const ConfirmForm = () => {
       }
 
       transactionModule.setTransactionObject(txObj)
-      signModule.setPendingRequest({
+
+      const res = await signModule.requestSignApproval({
         method: EthMethod.SignTransaction,
         params: txObj,
         createTime: Date.now(),
         chainId: hexChainId,
       })
 
-      // @ts-ignore
-      const res = await signApproval('eth_signTransaction', txObj)
       interactive.setLoading(false)
 
       if (res.success) {
-        interactive.setSessionId(res.data.sessionId)
-        signModule.setCommunicationPub(res.data.pub)
-
-        const messageRelayer = new MessageRelayer(2)
-        messageModule.setMessageRelayer(messageRelayer)
-        interactive.setSendDialogVisible(false)
+        transactionModule.setSendDialogVisible(false)
         interactive.setProgress(0)
-        interactive.setSignStep(1)
-        interactive.setSignTransactionDialogVisible(true)
+      } else {
+        // no op
       }
     } catch (error) {
+      console.error('Confirm transaction error: ', error)
       interactive.setLoading(false)
     }
   }
 
-  const handleBack = () => {
-    interactive.setSendFormCompleted(false)
-  }
+  const handleBack = () => transactionModule.setSendFormCompleted(false)
 
   return (
     <div className={styles.confirmDialog}>
