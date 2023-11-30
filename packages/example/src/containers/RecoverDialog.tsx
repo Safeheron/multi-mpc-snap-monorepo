@@ -34,7 +34,7 @@ const steps = [
   {
     title:
       'Step 3: Enter the mnemonic phrase for each private key shard separately as prompted and submit them for confirmation',
-    successText: 'Filled',
+    successText: 'Completed',
   },
   {
     title: 'Step 4: Wait for recovery to complete successfully',
