@@ -43,11 +43,48 @@ const WebRTCConnectionContainer = styled.div`
   }
 `
 
+function extractIPFromICECandidates(iceCandidates: any[]) {
+  const ipAddresses: string[] = []
+  iceCandidates.forEach(candidate => {
+    if (candidate.candidate) {
+      const ipMatch = candidate.candidate.match(/(?:\d{1,3}\.){3}\d{1,3}/)
+      if (ipMatch) {
+        ipAddresses.push(ipMatch[0])
+      }
+    }
+  })
+  return ipAddresses
+}
+
+function isSameSubnet(ip1: string, ip2: string) {
+  const subnet1 = ip1.split('.').slice(0, 3).join('.')
+  const subnet2 = ip2.split('.').slice(0, 3).join('.')
+  return subnet1 === subnet2
+}
+
+function areCandidatesInSameSubnet(
+  localICECandidates: any[],
+  remoteICECandidates: any[]
+) {
+  const localIPs = extractIPFromICECandidates(localICECandidates)
+  const remoteIPs = extractIPFromICECandidates(remoteICECandidates)
+
+  for (const localIP of localIPs) {
+    for (const remoteIP of remoteIPs) {
+      if (isSameSubnet(localIP, remoteIP)) {
+        return true
+      }
+    }
+  }
+
+  return false
+}
+
 const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
   webrtcChannel,
   businessType,
 }) => {
-  const [offerAndIce, setOfferAndIce] = useState<string>('')
+  const [offerAndIce, setOfferAndIce, getOfferAndIce] = useGetState<string>('')
   const [tipWordsShowState, setTipWordsShowState] = useState(false)
   const [scanProgress, setScanProgress] = useState(0)
 
@@ -100,9 +137,29 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
             businessType ?? 'unknown'
           }] and phone's operation type is [${phoneBusinessType}]`
         )
-      } else {
-        setAnswerAndIce(answerAndIceObj)
+        return
       }
+
+      const localICECandidates = JSON.parse(getOfferAndIce()).candidates
+      const remoteICECandidates = answerAndIceObj.candidates
+
+      const areInSameSubnet = areCandidatesInSameSubnet(
+        localICECandidates,
+        remoteICECandidates
+      )
+
+      /**
+       * When the IPs do not match, it is not 100% sure whether they are in the same LAN,
+       * so only give a prompt.
+       */
+      if (!areInSameSubnet) {
+        message.warning(
+          'It seems that your mobile phone and computer are not in the same LAN, which may prevent the connection from being established.',
+          5
+        )
+      }
+
+      setAnswerAndIce(answerAndIceObj)
     } catch (e) {
       message.error(e.message ?? 'Parse QrCode data error!')
       return
