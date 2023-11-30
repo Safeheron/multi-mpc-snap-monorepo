@@ -1,6 +1,6 @@
 import { OperationType, SignReadyMessage } from '@safeheron/mpcsnap-types'
 import { SignPrepareMessage } from '@safeheron/mpcsnap-types/src/relay-message/sign'
-import { Button, Modal } from 'antd'
+import { Button, message as AntMessage, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
 
@@ -11,6 +11,7 @@ import StepText from '@/components/StepText'
 import WebRTCConnection from '@/components/WebRTCConnection'
 import useConfirm, { CANCEL_CONFIRM_TEXT } from '@/hooks/useConfirm'
 import useSnapKeepAlive from '@/hooks/useSnapKeepAlive'
+import useWebRTCFailedStateDetect from '@/hooks/useWebRTCFailedStateDetect'
 import { RPCChannel } from '@/service/channel/RPCChannel'
 import { WebRTCChannel } from '@/service/channel/WebRTCChannel'
 import { PartyId } from '@/service/types'
@@ -51,6 +52,17 @@ const SignDialog = () => {
   const [webrtcChannel, setWebrtcChannel] = useState<WebRTCChannel>()
 
   const isSuccess = step > 3
+
+  const onPeerClosed = () => {
+    AntMessage.error(
+      `WebRTC Peer Connection failed or closed, close the process.`,
+      5
+    )
+    signModule.setSignTransactionDialogVisible(false)
+    signModule.setSignStep(1)
+  }
+
+  const startDetect = useWebRTCFailedStateDetect(onPeerClosed, webrtcChannel)
 
   const setupRtcChannel = async () => {
     const rtcChannel = new WebRTCChannel('signChannel')
@@ -93,6 +105,8 @@ const SignDialog = () => {
         signModule.rpcChannel?.next(signReadyMessage)
 
         signModule.setSignStep(2)
+
+        startDetect()
       }, 1000)
     })
 
@@ -113,6 +127,7 @@ const SignDialog = () => {
       content: CANCEL_CONFIRM_TEXT,
       onOk: () => {
         signModule.setSignTransactionDialogVisible(false)
+
         signModule.rpcChannel?.next({
           messageType: MPCMessageType.abort,
           sendType: 'broadcast',

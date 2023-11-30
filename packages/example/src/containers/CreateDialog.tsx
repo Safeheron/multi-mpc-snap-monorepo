@@ -3,7 +3,7 @@ import {
   OperationType,
   PartyPrepareMessage,
 } from '@safeheron/mpcsnap-types'
-import { Button, Modal } from 'antd'
+import { Button, message as AntMessage, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
 
@@ -13,6 +13,7 @@ import StepText from '@/components/StepText'
 import WebRTCConnection from '@/components/WebRTCConnection'
 import useConfirm, { CANCEL_CONFIRM_TEXT } from '@/hooks/useConfirm'
 import useSnapKeepAlive from '@/hooks/useSnapKeepAlive'
+import useWebRTCFailedStateDetect from '@/hooks/useWebRTCFailedStateDetect'
 import { WebRTCChannel } from '@/service/channel/WebRTCChannel'
 import { PartyId } from '@/service/types'
 import { useStore } from '@/store'
@@ -46,12 +47,23 @@ const CreateDialog = () => {
   const [webrtcChannel1, setWebrtcChannel1] = useState<WebRTCChannel>()
   const [webrtcChannel2, setWebrtcChannel2] = useState<WebRTCChannel>()
 
-  useEffect(() => {
-    // TODO close webrtc connection
-    return () => {
-      keygenModule.setCreateStep(1)
-    }
-  }, [webrtcChannel1])
+  const onPeerClosed = () => {
+    AntMessage.error(
+      `WebRTC Peer Connection failed or closed, close the process.`,
+      5
+    )
+    keygenModule.setCreateDialogVisible(false)
+    keygenModule.setCreateStep(1)
+  }
+
+  const detectRtcChannel1ClosedState = useWebRTCFailedStateDetect(
+    onPeerClosed,
+    webrtcChannel1
+  )
+  const detectRtcChannel2ClosedState = useWebRTCFailedStateDetect(
+    onPeerClosed,
+    webrtcChannel2
+  )
 
   const isSuccess = step > 3
 
@@ -65,7 +77,7 @@ const CreateDialog = () => {
       setWebrtcChannel1(rtcChannel1)
       rtcChannel1.once('channelOpen', () => {
         setTimeout(async () => {
-          const message: PartyPrepareMessage = {
+          const partyPrepareMessage: PartyPrepareMessage = {
             messageType: OperationType.partyPrepare,
             messageContent: {
               walletName: keygenModule.walletName,
@@ -73,8 +85,10 @@ const CreateDialog = () => {
               sessionId: keygenModule.sessionId,
             },
           }
-          await rtcChannel1.sendMessage(JSON.stringify(message))
+          await rtcChannel1.sendMessage(JSON.stringify(partyPrepareMessage))
           keygenModule.setCreateStep(step + 1)
+
+          detectRtcChannel1ClosedState()
         }, 1000)
       })
       keygenModule.messageRelayer?.join(rtcChannel1)
@@ -83,7 +97,7 @@ const CreateDialog = () => {
       setWebrtcChannel2(rtcChannel2)
       rtcChannel2.once('channelOpen', () => {
         setTimeout(async () => {
-          const message: PartyPrepareMessage = {
+          const partyPrepareMessage: PartyPrepareMessage = {
             messageType: OperationType.partyPrepare,
             messageContent: {
               walletName: keygenModule.walletName,
@@ -92,8 +106,9 @@ const CreateDialog = () => {
             },
           }
 
-          await rtcChannel2.sendMessage(JSON.stringify(message))
+          await rtcChannel2.sendMessage(JSON.stringify(partyPrepareMessage))
           keygenModule.setCreateStep(step + 1)
+          detectRtcChannel2ClosedState()
         }, 1000)
       })
       keygenModule.messageRelayer?.join(rtcChannel2)

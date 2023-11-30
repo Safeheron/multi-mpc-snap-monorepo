@@ -3,7 +3,7 @@ import {
   OperationType,
   RecoverPrepareMessage,
 } from '@safeheron/mpcsnap-types'
-import { Button, Modal } from 'antd'
+import { Button, message as AntMessage, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
 
@@ -14,6 +14,7 @@ import WebRTCConnection from '@/components/WebRTCConnection'
 import MnemonicForm from '@/containers/MnemonicForm'
 import useConfirm from '@/hooks/useConfirm'
 import useSnapKeepAlive from '@/hooks/useSnapKeepAlive'
+import useWebRTCFailedStateDetect from '@/hooks/useWebRTCFailedStateDetect'
 import { WebRTCChannel } from '@/service/channel/WebRTCChannel'
 import { PartyId } from '@/service/types'
 import { useStore } from '@/store'
@@ -54,6 +55,24 @@ const RecoverDialog = () => {
   const [webrtcChannel1, setWebrtcChannel1] = useState<WebRTCChannel>()
   const [webrtcChannel2, setWebrtcChannel2] = useState<WebRTCChannel>()
 
+  const onPeerClosed = () => {
+    AntMessage.error(
+      `WebRTC Peer Connection failed or closed, close the process.`,
+      5
+    )
+    recoveryModule.setRecoverDialogVisible(false)
+    recoveryModule.setRecoverStep(1)
+  }
+
+  const startDetectChannel1ClosedState = useWebRTCFailedStateDetect(
+    onPeerClosed,
+    webrtcChannel1
+  )
+  const startDetectChannel2ClosedState = useWebRTCFailedStateDetect(
+    onPeerClosed,
+    webrtcChannel2
+  )
+
   useEffect(() => {
     return () => {
       recoveryModule.setRecoverStep(0)
@@ -83,6 +102,8 @@ const RecoverDialog = () => {
           await channel1.sendMessage(JSON.stringify([recoverPrepareMessage]))
           recoveryModule.messageRelayer?.join(channel1)
           recoveryModule.setRecoverStep(step + 1)
+
+          startDetectChannel1ClosedState()
         }, 1000)
       })
     } else if (step === 2) {
@@ -100,6 +121,8 @@ const RecoverDialog = () => {
           await channel2.sendMessage(JSON.stringify([recoverPrepareMessage]))
           recoveryModule.messageRelayer?.join(channel2)
           recoveryModule.setRecoverStep(step + 1)
+
+          startDetectChannel2ClosedState()
         }, 1000)
       })
     }

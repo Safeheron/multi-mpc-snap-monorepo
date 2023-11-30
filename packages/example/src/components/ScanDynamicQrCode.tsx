@@ -4,6 +4,7 @@ import { IScannerControls } from '@zxing/browser/esm/common/IScannerControls'
 import { message } from 'antd'
 import pako from 'pako'
 import { FC, useEffect, useRef, useState } from 'react'
+import styled from 'styled-components'
 
 import { useMediaDeviceDetect } from '@/hooks/useMediaDeviceDetect'
 
@@ -14,11 +15,25 @@ interface Props {
   onProgress?: (number: number) => void
 }
 
+const Container = styled.div`
+  .video-container {
+    background: black;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    width: 200px;
+    height: 200px;
+  }
+  .tip {
+    text-align: center;
+    margin-top: 7px;
+  }
+`
+
 const ScanDynamicQrCode: FC<Props> = ({ onComplete, onProgress }) => {
   const { detected, support, errMessage } = useMediaDeviceDetect()
 
   const [inputDeviceId, setInputDeviceId] = useState('')
-  const [progress, setProgress] = useState<number>(0)
+  const [progress, setProgress] = useState<number>(0.2)
   const previewEle = useRef<HTMLVideoElement>(null)
   const cameraControls = useRef<IScannerControls>()
 
@@ -91,15 +106,8 @@ const ScanDynamicQrCode: FC<Props> = ({ onComplete, onProgress }) => {
   }, [detected])
 
   return (
-    <div>
-      <div
-        style={{
-          background: 'black',
-          border: '1px solid rgba(0, 0, 0, 0.12)',
-          overflow: 'hidden',
-          width: 200,
-          height: 200,
-        }}>
+    <Container>
+      <div className={'video-container'}>
         <video
           ref={previewEle}
           id="videoRef"
@@ -110,9 +118,9 @@ const ScanDynamicQrCode: FC<Props> = ({ onComplete, onProgress }) => {
         />
       </div>
       {progress > 0 && progress < 1 && (
-        <div>Progress: {(progress * 100).toFixed(0)}%</div>
+        <div className={'tip'}>Progress: {(progress * 100).toFixed(0)}%</div>
       )}
-    </div>
+    </Container>
   )
 }
 
