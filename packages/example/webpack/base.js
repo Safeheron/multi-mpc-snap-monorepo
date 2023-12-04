@@ -28,7 +28,7 @@ export default {
   entry,
   output: {
     path: path.join(__dirname, '../dist'),
-    publicPath: '/',
+    // publicPath: '/',
     filename: isDevServer ? `${VERSION}/js/[name].[fullhash].js` : `${VERSION}/js/[name].[contenthash].js`,
     assetModuleFilename: 'assets/[name][ext]',
     chunkFilename: `${VERSION}/js/[name].js`

@@ -41,6 +41,9 @@ class RecoveryFlow extends BaseFlow {
   private keyRecovery?: KeyRecovery
   private keyRefresh?: KeyRefresh
 
+  private localKeyshareExist = false
+  private oldAddress = ''
+
   private mpcHelper: MPCHelper
   private signKey = ''
   private walletName = ''
@@ -80,12 +83,15 @@ class RecoveryFlow extends BaseFlow {
       }
       this.mnemonic = res.mnemo ?? ''
       this.backuped = true
+      this.oldAddress = wallet!.address
     }
 
     this.keyRecovery = this.mpcInstance.KeyRecovery.getCoSigner()
     await this.keyRecovery.setupLocalCpkp()
 
     this.privKey = this.keyRecovery.localCommunicationPriv
+
+    this.localKeyshareExist = !!this.signKey
 
     return succeed({
       sessionId: this.sessionId,
@@ -271,6 +277,16 @@ class RecoveryFlow extends BaseFlow {
     if (this.keyRefresh!.isComplete) {
       this.newSignKey = this.keyRefresh!.getSignKey()
       this.pubKey = this.keyRefresh!.getPub()
+
+      const address = ethers.utils.computeAddress(`0x${this.pubKey}`)
+
+      if (this.localKeyshareExist && address !== this.oldAddress) {
+        return errored(
+          'Recover failed. Recovered address does not match the old address in the keyshare, ' +
+            'please make sure you enter the mnemonic phrase according to the role prompted, and make sure every word is correct.'
+        )
+      }
+
       return succeed({
         isComplete: this.keyRefresh!.isComplete,
         pubKey: this.pubKey,
@@ -340,6 +356,8 @@ class RecoveryFlow extends BaseFlow {
     this.remotePub = ''
     this.newSignKey = ''
     this.mnemonic = ''
+    this.oldAddress = ''
+    this.localKeyshareExist = false
 
     this.keyRecovery = undefined
     this.keyRefresh = undefined

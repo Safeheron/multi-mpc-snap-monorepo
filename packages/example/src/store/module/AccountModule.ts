@@ -15,6 +15,7 @@ class AccountModule {
   synced = false
 
   balance = '' // wei
+  balanceLoading = false
 
   private loopFlag = false
 
@@ -37,7 +38,7 @@ class AccountModule {
     this.backuped = account.backuped
     this.synced = account.synced
     this.walletId = account.id
-    this.loopBalance(this.address)
+    this.loopBalance()
   }
 
   async requestAccount() {
@@ -53,27 +54,27 @@ class AccountModule {
     this.backuped = backuped
   }
 
-  async loopBalance(address: string) {
+  async loopBalance() {
     if (!this.loopFlag) {
       clearTimeout(this.timer)
-      await this.loop(address)
+      await this.loop()
     }
   }
 
-  private async loop(address: string) {
+  private async loop() {
     this.loopFlag = true
-    await this.getBalance(address)
+    await this.getBalance()
 
     this.timer = setTimeout(() => {
-      this.loop(address)
+      this.loop()
     }, LOOP_GAP)
   }
 
-  async getBalance(address: string) {
-    if (!address) return
+  async getBalance() {
+    if (!this.address) return
     try {
       console.debug('Start to loop balance...')
-      const res = await getProvider().getBalance(address)
+      const res = await getProvider().getBalance(this.address)
       console.debug('Loop balance result: ', res.toString())
       this.balance = res.toString()
     } catch (error) {

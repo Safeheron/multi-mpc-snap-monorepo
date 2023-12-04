@@ -33,7 +33,7 @@ const ScanDynamicQrCode: FC<Props> = ({ onComplete, onProgress }) => {
   const { detected, support, errMessage } = useMediaDeviceDetect()
 
   const [inputDeviceId, setInputDeviceId] = useState('')
-  const [progress, setProgress] = useState<number>(0.2)
+  const [progress, setProgress] = useState<number>(0)
   const previewEle = useRef<HTMLVideoElement>(null)
   const cameraControls = useRef<IScannerControls>()
 
