@@ -3,7 +3,15 @@ import { BrowserQRCodeReader } from '@zxing/browser'
 import { IScannerControls } from '@zxing/browser/esm/common/IScannerControls'
 import { message } from 'antd'
 import pako from 'pako'
-import { FC, useEffect, useRef, useState } from 'react'
+import React, {
+  FC,
+  ForwardRefExoticComponent,
+  ForwardRefRenderFunction,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react'
 import styled from 'styled-components'
 
 import { useMediaDeviceDetect } from '@/hooks/useMediaDeviceDetect'
@@ -13,6 +21,10 @@ const codeReader = new BrowserQRCodeReader()
 interface Props {
   onComplete: (msg: any) => void
   onProgress?: (number: number) => void
+}
+
+interface Handle {
+  resume: () => void
 }
 
 const Container = styled.div`
@@ -29,13 +41,22 @@ const Container = styled.div`
   }
 `
 
-const ScanDynamicQrCode: FC<Props> = ({ onComplete, onProgress }) => {
+const ScanDynamicQrCode: React.ForwardRefRenderFunction<Handle, Props> = (
+  { onComplete, onProgress },
+  ref
+) => {
   const { detected, support, errMessage } = useMediaDeviceDetect()
 
   const [inputDeviceId, setInputDeviceId] = useState('')
   const [progress, setProgress] = useState<number>(0)
   const previewEle = useRef<HTMLVideoElement>(null)
   const cameraControls = useRef<IScannerControls>()
+
+  useImperativeHandle(ref, () => ({
+    resume: () => {
+      setup()
+    },
+  }))
 
   const setup = async () => {
     if (!detected) return
@@ -124,4 +145,4 @@ const ScanDynamicQrCode: FC<Props> = ({ onComplete, onProgress }) => {
   )
 }
 
-export default ScanDynamicQrCode
+export default React.forwardRef(ScanDynamicQrCode)

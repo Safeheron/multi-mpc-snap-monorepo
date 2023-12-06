@@ -75,7 +75,7 @@ const RecoverDialog = () => {
 
   useEffect(() => {
     return () => {
-      recoveryModule.setRecoverStep(0)
+      recoveryModule.setRecoverStep(1)
     }
   }, [])
 

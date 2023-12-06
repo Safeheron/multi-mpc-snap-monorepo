@@ -1,6 +1,6 @@
 import { useGetState, useTimeout } from 'ahooks'
 import { message } from 'antd'
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { v4 as uuidV4 } from 'uuid'
 
@@ -96,6 +96,9 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
   webrtcChannel,
   businessType,
 }) => {
+  const scanDynamicQrcodeRef =
+    useRef<React.ElementRef<typeof ScanDynamicQrCode>>(null)
+
   const [offerAndIce, setOfferAndIce, getOfferAndIce] = useGetState<string>('')
   const [scanHardTips, setScanHardTips] = useState(false)
   const [scanProgress, setScanProgress] = useState(0)
@@ -128,6 +131,7 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
           }]`,
           8
         )
+        scanDynamicQrcodeRef.current?.resume()
         return
       }
 
@@ -137,6 +141,7 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
             businessType ?? 'unknown'
           }] and phone's operation type is [${phoneBusinessType}]`
         )
+        scanDynamicQrcodeRef.current?.resume()
         return
       }
 
@@ -162,6 +167,7 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
       setAnswerAndIce(answerAndIceObj)
     } catch (e) {
       message.error(e.message ?? 'Parse QrCode data error!')
+      scanDynamicQrcodeRef.current?.resume()
       return
     }
   }
@@ -258,6 +264,7 @@ const WebRTCConnection: React.FC<WebRTCConnectionProps> = ({
             <DynamicQrCode message={offerAndIce} />
             <div style={{ width: '30px' }} />
             <ScanDynamicQrCode
+              ref={scanDynamicQrcodeRef}
               onComplete={onScanComplete}
               onProgress={setScanProgress}
             />
