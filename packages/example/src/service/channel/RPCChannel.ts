@@ -35,7 +35,7 @@ export class RPCChannel extends MessageChannel {
       case MPCMessageType.partyReady:
         interactive.setProgress(15)
         await KenGenAction.handlePartyReady(messageArray)
-        interactive.setProgress(31)
+        interactive.setProgress(28)
         break
       case MPCMessageType.keyGenRound:
         interactive.setProgressAdd(6)

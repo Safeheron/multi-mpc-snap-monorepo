@@ -253,14 +253,7 @@ class RecoveryFlow extends BaseFlow {
       this.communicationPubs!
     )
 
-    const totalIndexArray = [
-      localParty.index,
-      ...remoteParties.map(rp => rp.index),
-    ]
-    await this.keyRefresh?.prepareKeyGenParams(
-      localParty.party_id,
-      totalIndexArray
-    )
+    await this.keyRefresh?.prepareKeyGenParams()
 
     // Currently, We assign the key shard in Snap to A, so the remote parties index are determined
     const res = await this.keyRefresh!.createContext()
@@ -329,10 +322,15 @@ class RecoveryFlow extends BaseFlow {
 
     if (this.backuped && !newState.synced) {
       const metamaskAccount = convertSnapAccountToKeyringAccount(newState)
-      await syncAccountToMetaMask(metamaskAccount)
+      try {
+        await syncAccountToMetaMask(metamaskAccount)
 
-      newState.synced = true
-      await this.stateManager.saveOrUpdateAccount(newState)
+        newState.synced = true
+        await this.stateManager.saveOrUpdateAccount(newState)
+      } catch (e) {
+        newState.synced = false
+        await this.stateManager.saveOrUpdateAccount(newState)
+      }
     }
 
     this.cleanup()

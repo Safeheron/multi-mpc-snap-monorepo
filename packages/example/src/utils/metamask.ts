@@ -13,7 +13,8 @@ export const isSupportSnap = async () => {
     })
 
     return true
-  } catch {
+  } catch (e) {
+    console.error('detect snap compatible error: ', e)
     return false
   }
 }
