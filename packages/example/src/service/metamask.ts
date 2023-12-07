@@ -11,8 +11,8 @@ import type {
   PubKey,
   RecoverApprovalResult,
   RecoverContext,
+  RecoverPrepare,
   RecoverResult,
-  RecoverSetRemoteCommunicationPubs,
   RunRoundResponse,
   SignApproval,
   SignApprovalResult,
@@ -212,6 +212,7 @@ export async function recoverApproval(
 export async function recoverPrepare(
   sessionId: string,
   walletName: string,
+  remotePubs: RecoverPrepare['params']['remotePubs'],
   mnemonic?: string
 ): Promise<SnapRpcResponse<any>> {
   return walletInvokeSnap({
@@ -219,18 +220,9 @@ export async function recoverPrepare(
     params: {
       sessionId,
       walletName,
+      remotePubs,
       mnemonic,
     },
-  })
-}
-
-export async function recoverSetCommunicationPub(
-  sessionId: string,
-  remotePubs: RecoverSetRemoteCommunicationPubs['params']['remotePubs']
-) {
-  return walletInvokeSnap({
-    method: 'mpc_recoverSetCommuPubs',
-    params: { sessionId, remotePubs },
   })
 }
 

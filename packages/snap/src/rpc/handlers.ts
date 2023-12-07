@@ -16,7 +16,6 @@ import {
   RecoverMnemonicStruct,
   RecoverPrepareStruct,
   RecoverRoundStruct,
-  RecoverSetRemoteCommunicationPubsStruct,
   RefreshContextStruct,
   RefreshPrepareStruct,
   RefreshRoundStruct,
@@ -177,17 +176,13 @@ export const recoverHandler: OnRpcRequestHandler = async ({ request }) => {
 
     case 'mpc_recoverPrepare':
       assert(request, RecoverPrepareStruct)
-      return recoveryFlow.recoverPrepare(
-        request.params.sessionId,
-        request.params.walletName,
-        request.params.mnemonic
-      )
+      const { sessionId, walletName, remotePubs, mnemonic } = request.params
 
-    case InternalMPCRecoveryMethods.RecoverSetCommunicationPubs:
-      assert(request, RecoverSetRemoteCommunicationPubsStruct)
-      return recoveryFlow.setCommunicationPubs(
-        request.params.sessionId,
-        request.params.remotePubs
+      return recoveryFlow.recoverPrepare(
+        sessionId,
+        walletName,
+        remotePubs,
+        mnemonic
       )
 
     case 'mpc_recoverContext':

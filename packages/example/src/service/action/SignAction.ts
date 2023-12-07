@@ -1,4 +1,4 @@
-import { SignReadyMessage } from '@safeheron/mpcsnap-types'
+import { OperationType, SignReadyMessage } from '@safeheron/mpcsnap-types'
 import { message } from 'antd'
 
 import { PartyId } from '@/service/types'
@@ -7,7 +7,7 @@ import { getProvider } from '@/utils'
 import { reportSignSuccess } from '@/utils/sentryUtil'
 
 import { signContext, signRound } from '../metamask'
-import { MPCMessage, MPCMessageType } from '../types'
+import { MPCMessage } from '../types'
 
 const SignAction = {
   emitSignFlowError(errMsg: string) {
@@ -28,7 +28,7 @@ const SignAction = {
 
     if (res.success) {
       store.signModule.rpcChannel?.next({
-        messageType: MPCMessageType.signRound,
+        messageType: OperationType.signRound,
         messageContent: res.data,
       })
     } else {
@@ -62,7 +62,7 @@ const SignAction = {
       } else {
         // continue round
         store.signModule.rpcChannel?.next({
-          messageType: MPCMessageType.signRound,
+          messageType: OperationType.signRound,
           messageContent: res.data.message,
         })
       }

@@ -2,11 +2,11 @@ import { Button } from 'antd'
 import { useNavigate } from 'react-router-dom'
 
 import safeheron from '@/assets/safeheron.png'
+import { RouterEnum } from '@/configs/Configs'
 import Header from '@/containers/Header'
 import styles from '@/styles/app/index.module.less'
 
 import { narrower_feats, wider_feats } from './feats'
-import { RouterEnum } from '@/configs/Configs';
 
 const Index = () => {
   const navigate = useNavigate()

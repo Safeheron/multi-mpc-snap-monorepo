@@ -13,7 +13,6 @@ import {
   MnemonicSkipMessage,
   PartySecretKeyReadyMessage,
   RecoverPrepareMessage,
-  RecoverReadyMessage,
   RecoverRoundMessage,
   RecoverSuccessMessage,
   RefreshReadyMessage,
@@ -39,7 +38,6 @@ export type RelayMessage =
   | SignRoundMessage
   | RecoverPrepareMessage
   | RoleReadyMessage
-  | RecoverReadyMessage
   | MnemonicSkipMessage
   | MnemonicReadyMessage
   | RecoverSuccessMessage

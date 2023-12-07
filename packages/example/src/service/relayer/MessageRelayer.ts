@@ -1,13 +1,14 @@
+import { OperationType } from '@safeheron/mpcsnap-types'
 import { EventEmitter } from 'events'
 
 import { MessageChannel } from '../channel/MessageChannel'
-import { MPCMessage, MPCMessageType } from '../types'
+import { MPCMessage } from '../types'
 
 class MessageRelayer extends EventEmitter {
   channelList: MessageChannel[] = []
 
-  messagePool: Map<MPCMessageType, MPCMessage[]> = new Map<
-    MPCMessageType,
+  messagePool: Map<OperationType, MPCMessage[]> = new Map<
+    OperationType,
     MPCMessage[]
   >()
 

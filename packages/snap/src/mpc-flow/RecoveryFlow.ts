@@ -16,7 +16,7 @@ import {
   RecoverContext,
   SnapRpcResponse,
 } from '@safeheron/mpcsnap-types'
-import { RecoverSetRemoteCommunicationPubs } from '@safeheron/mpcsnap-types/src'
+import { RecoverPrepare } from '@safeheron/mpcsnap-types/src'
 import { ethers } from 'ethers'
 import { v4 as uuidV4 } from 'uuid'
 
@@ -56,7 +56,7 @@ class RecoveryFlow extends BaseFlow {
   private remotePub?: string
   private lostPub?: string
 
-  private communicationPubs?: RecoverSetRemoteCommunicationPubs['params']['remotePubs']
+  private communicationPubs?: RecoverPrepare['params']['remotePubs']
 
   private newSignKey?: string
 
@@ -76,14 +76,15 @@ class RecoveryFlow extends BaseFlow {
     this.sessionId = uuidV4()
     const wallet = this.getWallet()
     this.signKey = wallet?.signKey ?? ''
-    if (this.signKey) {
+    if (wallet && this.signKey) {
       const res = await this.mpcHelper.extractMnemonicFromSignKey(this.signKey)
       if (res.err) {
         throw new Error(res.err.err_msg)
       }
       this.mnemonic = res.mnemo ?? ''
       this.backuped = true
-      this.oldAddress = wallet!.address
+      this.walletName = wallet.name
+      this.oldAddress = wallet.address
     }
 
     this.keyRecovery = this.mpcInstance.KeyRecovery.getCoSigner()
@@ -100,18 +101,10 @@ class RecoveryFlow extends BaseFlow {
     })
   }
 
-  async setCommunicationPubs(
-    sessionId: string,
-    pubs: RecoverSetRemoteCommunicationPubs['params']['remotePubs']
-  ) {
-    this.verifySession(sessionId)
-    this.communicationPubs = pubs
-    return succeed(true)
-  }
-
   async recoverPrepare(
     sessionId: string,
     walletName: string,
+    remotePubs: RecoverPrepare['params']['remotePubs'],
     mnemonic?: string
   ): Promise<SnapRpcResponse<boolean>> {
     this.verifySession(sessionId)
@@ -124,7 +117,16 @@ class RecoveryFlow extends BaseFlow {
       return errored('Local keyshare exist. Param [mnemonic] is not needed.')
     }
 
-    this.walletName = walletName
+    if (this.walletName && this.walletName !== walletName) {
+      return errored('Keyshare in Snap exist, cannot change the wallet name.')
+    }
+
+    if (!this.walletName) {
+      this.walletName = walletName
+    }
+
+    this.communicationPubs = remotePubs
+
     if (mnemonic) {
       this.mnemonic = normalizeMnemonic(mnemonic)
       this.backuped = true

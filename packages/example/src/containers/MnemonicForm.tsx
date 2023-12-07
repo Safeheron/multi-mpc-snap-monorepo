@@ -1,3 +1,4 @@
+import { OperationType } from '@safeheron/mpcsnap-types'
 import { Button, Form, Input } from 'antd'
 import { observer } from 'mobx-react-lite'
 
@@ -5,7 +6,6 @@ import noNeed from '@/assets/no-need.png'
 import waiting from '@/assets/waiting.png'
 import useConfirm from '@/hooks/useConfirm'
 import { PartyId } from '@/service/types'
-import { MPCMessageType } from '@/service/types'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/MnemonicForm.module.less'
 import { mnemonicValidator } from '@/utils/validator'
@@ -39,12 +39,12 @@ const MnemonicForm = () => {
 
           recoveryModule.rpcChannel?.next({
             sendType: 'broadcast',
-            messageType: MPCMessageType.mnemonicSkip,
+            messageType: OperationType.mnemonicSkip,
             messageContent: null,
           })
 
           recoveryModule.rpcChannel?.next({
-            messageType: MPCMessageType.mnemonicReady,
+            messageType: OperationType.mnemonicReady,
             messageContent: {
               walletName,
               hasMnemonic: false,
@@ -65,7 +65,7 @@ const MnemonicForm = () => {
     recoveryModule.setMnemonicFormType('done')
 
     recoveryModule.rpcChannel?.next({
-      messageType: MPCMessageType.mnemonicReady,
+      messageType: OperationType.mnemonicReady,
       messageContent: {
         walletName: values.walletName,
         hasMnemonic: true,
@@ -84,7 +84,9 @@ const MnemonicForm = () => {
           layout="vertical"
           onFinish={onFinish}
           requiredMark={false}>
-          {!recoveryModule.hasOtherShard && (
+          {!(
+            recoveryModule.hasOtherShard || recoveryModule.localKeyshareExist
+          ) && (
             <Form.Item
               label="Wallet name"
               name="walletName"

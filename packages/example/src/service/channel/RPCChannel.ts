@@ -8,7 +8,7 @@ import { AbortMessageContent } from '@safeheron/mpcsnap-types/src'
 import { message } from 'antd'
 
 import { MessageChannel } from '@/service/channel/MessageChannel'
-import { MPCMessage, MPCMessageType, PartyId } from '@/service/types'
+import { MPCMessage, PartyId } from '@/service/types'
 import { store } from '@/store'
 
 import KenGenAction from '../action/KenGenAction'
@@ -32,84 +32,79 @@ export class RPCChannel extends MessageChannel {
 
     switch (type) {
       // create
-      case MPCMessageType.partyReady:
+      case OperationType.partyReady:
         interactive.setProgress(15)
         await KenGenAction.handlePartyReady(messageArray)
         interactive.setProgress(28)
         break
-      case MPCMessageType.keyGenRound:
+      case OperationType.keyGenRound:
         interactive.setProgressAdd(6)
         await KenGenAction.handleKeyGenRound(messageArray)
         interactive.setProgressAdd(6)
         break
-      case MPCMessageType.createSuccess:
+      case OperationType.createSuccess:
         interactive.setProgress(100)
         await KenGenAction.handleCreateSuccess()
         break
 
       // sign
-      case MPCMessageType.signReady:
+      case OperationType.signReady:
         interactive.setProgress(6)
         // @ts-ignore
         await SignAction.handleSignReady(messageArray)
         interactive.setProgress(12)
         break
-      case MPCMessageType.signRound:
+      case OperationType.signRound:
         interactive.setProgressAdd(11)
         await SignAction.handleSignRound(messageArray)
         interactive.setProgressAdd(11)
         break
 
       // recover
-      case MPCMessageType.roleReady:
+      case OperationType.roleReady:
         interactive.setProgress(4)
         // @ts-ignore
         await RecoverAction.handleRoleReady(messageArray)
-        interactive.setProgress(8)
-        break
-      case MPCMessageType.recoverReady:
-        interactive.setProgress(12)
-        await RecoverAction.handleRecoverReady(messageArray)
         interactive.setProgress(16)
         break
-      case MPCMessageType.mnemonicReady:
+      case OperationType.mnemonicReady:
         interactive.setProgress(21)
         await RecoverAction.handleMnemonicReady(messageArray)
         interactive.setProgress(25)
         break
-      case MPCMessageType.recoverSuccess:
+      case OperationType.recoverSuccess:
         interactive.setProgress(37)
         await RecoverAction.handleRecoverSuccess()
         interactive.setProgress(41)
         break
-      case MPCMessageType.refreshReady:
+      case OperationType.refreshReady:
         interactive.setProgress(46)
         await RecoverAction.handleRefreshReady(messageArray)
         interactive.setProgress(62)
         break
-      case MPCMessageType.refreshRound:
+      case OperationType.refreshRound:
         interactive.setProgressAdd(5)
         await RecoverAction.handleRefreshRound(messageArray)
         interactive.setProgressAdd(5)
         break
-      case MPCMessageType.refreshSuccess:
+      case OperationType.refreshSuccess:
         interactive.setProgress(99)
         await RecoverAction.handleRefreshSuccess()
         interactive.setProgress(100)
         break
 
       // p2p
-      case MPCMessageType.recoverRound:
+      case OperationType.recoverRound:
         await RecoverAction.handleRecoverRound(messageArray[0])
         break
       // broadcast
-      case MPCMessageType.mnemonicSkip:
+      case OperationType.mnemonicSkip:
         await RecoverAction.handleMnemonicSkip()
         break
-      case MPCMessageType.partySecretKeyReady:
+      case OperationType.partySecretKeyReady:
         await RecoverAction.handlePartySecretKeyReady(messageArray[0])
         break
-      case MPCMessageType.abort:
+      case OperationType.abort:
         // @ts-ignore
         const { messageContent } = messageArray[0] as AbortMessage
         this.handleAbort(messageContent.businessType, messageContent.reason)

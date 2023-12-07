@@ -25,27 +25,16 @@ export const RecoverPrepareStruct = object({
   params: object({
     sessionId: string(),
     walletName: string(),
-    mnemonic: optional(string()),
-  }),
-})
-export type RecoverPrepare = Infer<typeof RecoverPrepareStruct>
-
-export const RecoverSetRemoteCommunicationPubsStruct = object({
-  ...CommonHeader,
-  method: literal('mpc_recoverSetCommuPubs'),
-  params: object({
-    sessionId: string(),
     remotePubs: array(
       object({
         partyId: string(),
         pub: string(),
       })
     ),
+    mnemonic: optional(string()),
   }),
 })
-export type RecoverSetRemoteCommunicationPubs = Infer<
-  typeof RecoverSetRemoteCommunicationPubsStruct
->
+export type RecoverPrepare = Infer<typeof RecoverPrepareStruct>
 
 export const RecoverContextStruct = object({
   ...CommonHeader,
@@ -141,7 +130,6 @@ export type RefreshSuccess = Infer<typeof RefreshSuccessStruct>
 export type RecoveryMethods =
   | RecoverApproval['method']
   | RecoverPrepare['method']
-  | RecoverSetRemoteCommunicationPubs['method']
   | RecoverContext['method']
   | RecoverRound['method']
   | RecoverMnemonic['method']

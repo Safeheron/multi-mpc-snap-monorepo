@@ -10,10 +10,8 @@ export enum OperationType {
   signReady = 'signReady',
   signRound = 'signRound',
 
-  roleReady = 'roleReady',
   recoverPrepare = 'recoverPrepare',
-  keyPairReady = 'keyPairReady',
-  recoverReady = 'recoverReady',
+  roleReady = 'roleReady',
   mnemonicReady = 'mnemonicReady',
   recoverRound = 'recoverRound',
   partySecretKeyReady = 'partySecretKeyReady',

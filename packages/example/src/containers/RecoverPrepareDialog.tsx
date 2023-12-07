@@ -44,6 +44,8 @@ const RecoverPrepareDialog = () => {
         index: 1,
         walletId: accountModule.walletId,
         pub: recoveryModule.localCommunicationPub,
+        walletName: accountModule.walletName,
+        hasKeyShare: recoveryModule.localKeyshareExist,
       },
     }
 

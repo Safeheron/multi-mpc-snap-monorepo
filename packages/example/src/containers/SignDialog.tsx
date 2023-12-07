@@ -15,7 +15,6 @@ import useWebRTCFailedStateDetect from '@/hooks/useWebRTCFailedStateDetect'
 import { RPCChannel } from '@/service/channel/RPCChannel'
 import { WebRTCChannel } from '@/service/channel/WebRTCChannel'
 import { PartyId } from '@/service/types'
-import { MPCMessageType } from '@/service/types'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/CreateDialog.module.less'
 import { formatToUSDateTime } from '@/utils/dateUtil'
@@ -129,7 +128,7 @@ const SignDialog = () => {
         signModule.setSignTransactionDialogVisible(false)
 
         signModule.rpcChannel?.next({
-          messageType: MPCMessageType.abort,
+          messageType: OperationType.abort,
           sendType: 'broadcast',
           messageContent: 'signTransaction',
         })

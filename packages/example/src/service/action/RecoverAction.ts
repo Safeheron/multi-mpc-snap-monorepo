@@ -5,6 +5,7 @@ import type {
   PartyWithZkp,
   PubAndZkp,
   PubKey,
+  RecoverPrepare,
   SendType,
 } from '@safeheron/mpcsnap-types'
 import { OperationType } from '@safeheron/mpcsnap-types'
@@ -16,13 +17,12 @@ import {
   recoverMnemonic,
   recoverPrepare,
   recoverRound,
-  recoverSetCommunicationPub,
   refreshContext,
   refreshPrepare,
   refreshRound,
   refreshSuccess,
 } from '@/service/metamask'
-import { MPCMessageType, PartyId } from '@/service/types'
+import { getPartyId, PartyId } from '@/service/types'
 import { store } from '@/store'
 import { reportRecoverSuccess } from '@/utils/sentryUtil'
 
@@ -62,13 +62,21 @@ class RecoverAction {
    * @param messageArray
    */
   async handleRoleReady(messageArray: RoleReadyMessage[]) {
-    const walletIdArray = messageArray
-      .map(m => m.messageContent.walletId)
-      .filter(Boolean)
-    if (store.accountModule.walletId) {
-      walletIdArray.push(store.accountModule.walletId)
+    const localKeyshareExist = store.recoveryModule.localKeyshareExist
+    const otherPartiesKeyshareBothExist = messageArray.every(v =>
+      Boolean(v.messageContent.hasKeyShare)
+    )
+    // has 3 keyShard, does not need to recover.
+    if (otherPartiesKeyshareBothExist && localKeyshareExist) {
+      // If both side have key shards, don't needed recovery
+      store.recoveryModule.setMnemonicFormType('noNeed')
+      return
     }
 
+    // Check wallet id in case user use different wallet to recover
+    let walletIdArray = messageArray.map(m => m.messageContent.walletId)
+    walletIdArray.push(store.accountModule.walletId)
+    walletIdArray = walletIdArray.filter(Boolean)
     if (walletIdArray && walletIdArray.length >= 2) {
       const firstEle = walletIdArray[0]
       const walletMatched = walletIdArray.every(wi => wi === firstEle)
@@ -86,70 +94,79 @@ class RecoverAction {
       }
     }
 
-    // @ts-ignore
-    this.remotePubKeys = messageArray.map(ma => ({
-      partyId: ma.messageContent.partyId,
-      pubKey: ma.messageContent.pub,
-    }))
-
-    const res = await recoverSetCommunicationPub(
-      store.recoveryModule.sessionId,
-      messageArray.map(ma => ({
-        partyId: ma.messageContent.partyId,
-        pub: ma.messageContent.pub,
+    /**
+     * Confirm remote party communication pub, there are 3 types, include 7 enumerable states
+     *
+     * ① Both remote parties have private key shards
+     *  -- [{index: 2, partyId: B}, {index: 3, partyId: C}]
+     *  -- [{index: 2, partyId: C}, {index: 3, partyId: B}]
+     *
+     * ② Both remote parties not have private key shards
+     * -- [{index: 2, partyId: undefined}, {index: 3, partyId: undefined}]
+     *
+     * ③ Only one remote parties have private key shards
+     * -- [{index: 2, partyId: B}, {index: 3, partyId: undefined}]
+     * -- [{index: 2, partyId: C}, {index: 3, partyId: undefined}]
+     * -- [{index: 2, partyId: undefined}, {index: 3, partyId: B}]
+     * -- [{index: 2, partyId: undefined}, {index: 3, partyId: C}]
+     *
+     */
+    const otherPartiesBothHaveNotKeyshares = messageArray.every(
+      v => !Boolean(v.messageContent.hasKeyShare)
+    )
+    if (otherPartiesKeyshareBothExist) {
+      this.remotePubKeys = messageArray.map(ma => ({
+        partyId: ma.messageContent.partyId as PartyId,
+        pubKey: ma.messageContent.pub,
       }))
-    )
-    if (!res.success) {
-      this.emitRecoveryFlowError(
-        res.errMsg ?? 'RecoverFlow: Set communication pub failed'
+    } else if (otherPartiesBothHaveNotKeyshares) {
+      // @ts-ignore
+      this.remotePubKeys = messageArray.map(ma => {
+        return {
+          partyId: getPartyId(ma.messageContent.index),
+          pubKey: ma.messageContent.pub,
+        }
+      })
+    } else {
+      const fixedRemoteParty = messageArray.find(
+        ma => ma.messageContent.partyId
       )
-      return
+      const notFixedRemoteParty = messageArray.find(
+        ma => !ma.messageContent.partyId
+      )
+
+      const fixedPartyId = fixedRemoteParty!.messageContent.partyId as PartyId
+      const fixedPartyPub = fixedRemoteParty!.messageContent.pub
+
+      const notFixedPartyId = fixedPartyId === PartyId.B ? PartyId.C : PartyId.B
+      const notFixedPartyPub = notFixedRemoteParty!.messageContent.pub
+      this.remotePubKeys = [
+        { partyId: fixedPartyId, pubKey: fixedPartyPub },
+        { partyId: notFixedPartyId, pubKey: notFixedPartyPub },
+      ]
     }
 
-    this.sendMessage({
-      messageType: OperationType.recoverReady,
-      messageContent: store.recoveryModule.localKeyshareExist,
-    })
-  }
-
-  /**
-   * 1. confirm whether three party needs to recover the mnemonic phrase
-   * 2. confirm each party next UI ( mnemonicInput，walletName  | waiting page )
-   * @param messageArray
-   */
-  async handleRecoverReady(messageArray: MPCMessage<boolean>[]) {
-    const localKeyshareExist = store.recoveryModule.localKeyshareExist
-    const otherPartiesKeyshareExist = messageArray.every(v =>
-      Boolean(v.messageContent)
-    )
-
-    // has 3 keyShard
-    if (otherPartiesKeyshareExist && localKeyshareExist) {
-      // If both side have key shards, don't needed recovery
-      store.recoveryModule.setMnemonicFormType('noNeed')
-      return
-    }
-
+    // setup walletName
     if (localKeyshareExist) {
       // If I have private key shards on my side
       store.recoveryModule.setWalletName(store.accountModule.walletName)
       store.recoveryModule.setMnemonicFormType('done')
-
-      store.recoveryModule.rpcChannel?.next({
-        messageType: MPCMessageType.mnemonicReady,
+      this.sendMessage({
+        messageType: OperationType.mnemonicReady,
         messageContent: {
           hasMnemonic: true,
           walletName: store.recoveryModule.walletName,
           partyId: PartyId.A,
         },
       })
-    } else {
-      // If I don't have a private key shard, jump to enter the mnemonic step
-      store.recoveryModule.setMnemonicFormType('init')
-      // If other side has key shards, there is no need to enter wallet Name
-      if (messageArray.some(v => Boolean(v.messageContent))) {
-        store.recoveryModule.setOtherShard(true)
-      }
+      return
+    }
+
+    // If I don't have a private key shard, jump to enter the mnemonic step
+    store.recoveryModule.setMnemonicFormType('init')
+    // If other side has key shards, there is no need to enter wallet Name
+    if (messageArray.some(v => Boolean(v.messageContent.hasKeyShare))) {
+      store.recoveryModule.setOtherShard(true)
     }
   }
 
@@ -176,9 +193,16 @@ class RecoverAction {
       v => v.messageContent.hasMnemonic
     )
 
+    const remotePubs: RecoverPrepare['params']['remotePubs'] =
+      this.remotePubKeys!.map(rp => ({
+        partyId: rp.partyId,
+        pub: rp.pubKey,
+      }))
+
     const recoverPrepareRes = await recoverPrepare(
       store.recoveryModule.sessionId,
       store.recoveryModule.walletName,
+      remotePubs,
       store.recoveryModule.inputMnemonic
     )
     if (!recoverPrepareRes.success) {

@@ -1,9 +1,11 @@
+import { OperationType } from '@safeheron/mpcsnap-types'
+
 import { PartyId } from '@/service/types'
 import { store } from '@/store'
 import { reportWalletCreation } from '@/utils/sentryUtil'
 
 import { createContext, createRound, createSuccess } from '../metamask'
-import { MPCMessage, MPCMessageType } from '../types'
+import { MPCMessage } from '../types'
 
 const KenGenAction = {
   emitKeygenFlowError(errMsg: string) {
@@ -19,7 +21,7 @@ const KenGenAction = {
 
     if (res.success) {
       store.keygenModule.rpcChannel?.next({
-        messageType: MPCMessageType.keyGenRound,
+        messageType: OperationType.keyGenRound,
         messageContent: res.data,
       })
     } else {
@@ -41,13 +43,13 @@ const KenGenAction = {
     if (res.success) {
       if (res.data.isComplete) {
         store.keygenModule.rpcChannel?.next({
-          messageType: MPCMessageType.createSuccess,
+          messageType: OperationType.createSuccess,
           messageContent: null,
         })
       } else {
         // continue round
         store.keygenModule.rpcChannel?.next({
-          messageType: MPCMessageType.keyGenRound,
+          messageType: OperationType.keyGenRound,
           messageContent: res.data.message,
         })
       }
