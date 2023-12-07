@@ -54,6 +54,7 @@ const ScanDynamicQrCode: React.ForwardRefRenderFunction<Handle, Props> = (
 
   useImperativeHandle(ref, () => ({
     resume: () => {
+      setProgress(0)
       setup()
     },
   }))
