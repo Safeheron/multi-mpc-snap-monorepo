@@ -13,6 +13,8 @@ interface Props {
 }
 
 const MpcState: FC<Props> = ({ loading, number, text }) => {
+  console.log('渲染 mpc state...', loading, number, text)
+
   return (
     <div className={styles.mpcState}>
       {loading ? (
