@@ -1,3 +1,4 @@
+import { Loading3QuartersOutlined } from '@ant-design/icons'
 import { Button } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useContext, useEffect, useMemo } from 'react'
@@ -83,8 +84,12 @@ const Home = () => {
     if (!address && requestAccountLoading) {
       return (
         <div
-          style={{ textAlign: 'center', marginTop: '200px', height: '400px' }}>
-          Request MPC Account...
+          style={{ textAlign: 'center', marginTop: '200px', height: '300px' }}>
+          <Loading3QuartersOutlined
+            style={{ fontSize: 42, color: '#496ce9' }}
+            spin
+          />
+          <p style={{ marginTop: '16px' }}>Request Account...</p>
         </div>
       )
     }
