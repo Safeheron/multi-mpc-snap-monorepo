@@ -23,7 +23,6 @@ const Lottie: FC<Props> = ({ data, style = {} }) => {
 
   const start = () => {
     instance?.destroy()
-    console.log('加载 lottie')
     const animation = lottie.loadAnimation({
       container: lottieRef.current,
       animationData: data,

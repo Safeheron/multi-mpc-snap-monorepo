@@ -3,9 +3,10 @@ import {
   OperationType,
   PartyPrepareMessage,
 } from '@safeheron/mpcsnap-types'
+import { useUpdateEffect } from 'ahooks'
 import { Button, message as AntMessage, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import MPCState from '@/components/MPCState'
 import StepContainer from '@/components/StepContainer'
@@ -43,6 +44,7 @@ const CreateDialog = () => {
 
   const { interactive, accountModule, backupModule, keygenModule } = useStore()
   const step = keygenModule.createStep
+  const isSuccess = step > 3
 
   const [webrtcChannel1, setWebrtcChannel1] = useState<WebRTCChannel>()
   const [webrtcChannel2, setWebrtcChannel2] = useState<WebRTCChannel>()
@@ -53,7 +55,6 @@ const CreateDialog = () => {
       5
     )
     keygenModule.setCreateDialogVisible(false)
-    keygenModule.setCreateStep(1)
   }
 
   const detectRtcChannel1ClosedState = useWebRTCFailedStateDetect(
@@ -65,54 +66,49 @@ const CreateDialog = () => {
     webrtcChannel2
   )
 
-  const isSuccess = step > 3
+  const rtcChannel1Init = useRef<boolean>(false)
+  const setupChannel1 = () => {
+    const rtcChannel1 = new WebRTCChannel('channel1')
+    setWebrtcChannel1(rtcChannel1)
+    rtcChannel1.once('channelOpen', () => {
+      setTimeout(async () => {
+        const partyPrepareMessage: PartyPrepareMessage = {
+          messageType: OperationType.partyPrepare,
+          messageContent: {
+            walletName: keygenModule.walletName,
+            partyId: PartyId.B,
+            sessionId: keygenModule.sessionId,
+          },
+        }
+        await rtcChannel1.sendMessage(JSON.stringify(partyPrepareMessage))
+        keygenModule.setCreateStep(step + 1)
 
-  useEffect(() => {
-    setupWebRTCChannel()
-  }, [step])
+        detectRtcChannel1ClosedState()
+      }, 1000)
+    })
+    keygenModule.messageRelayer?.join(rtcChannel1)
+  }
 
-  const setupWebRTCChannel = () => {
-    if (step === 1) {
-      const rtcChannel1 = new WebRTCChannel('channel1')
-      setWebrtcChannel1(rtcChannel1)
-      rtcChannel1.once('channelOpen', () => {
-        setTimeout(async () => {
-          const partyPrepareMessage: PartyPrepareMessage = {
-            messageType: OperationType.partyPrepare,
-            messageContent: {
-              walletName: keygenModule.walletName,
-              partyId: PartyId.B,
-              sessionId: keygenModule.sessionId,
-            },
-          }
-          await rtcChannel1.sendMessage(JSON.stringify(partyPrepareMessage))
-          keygenModule.setCreateStep(step + 1)
+  const setupChannel2 = () => {
+    const rtcChannel2 = new WebRTCChannel('channel2')
+    setWebrtcChannel2(rtcChannel2)
+    rtcChannel2.once('channelOpen', () => {
+      setTimeout(async () => {
+        const partyPrepareMessage: PartyPrepareMessage = {
+          messageType: OperationType.partyPrepare,
+          messageContent: {
+            walletName: keygenModule.walletName,
+            partyId: PartyId.C,
+            sessionId: keygenModule.sessionId,
+          },
+        }
 
-          detectRtcChannel1ClosedState()
-        }, 1000)
-      })
-      keygenModule.messageRelayer?.join(rtcChannel1)
-    } else if (step === 2) {
-      const rtcChannel2 = new WebRTCChannel('channel2')
-      setWebrtcChannel2(rtcChannel2)
-      rtcChannel2.once('channelOpen', () => {
-        setTimeout(async () => {
-          const partyPrepareMessage: PartyPrepareMessage = {
-            messageType: OperationType.partyPrepare,
-            messageContent: {
-              walletName: keygenModule.walletName,
-              partyId: PartyId.C,
-              sessionId: keygenModule.sessionId,
-            },
-          }
-
-          await rtcChannel2.sendMessage(JSON.stringify(partyPrepareMessage))
-          keygenModule.setCreateStep(step + 1)
-          detectRtcChannel2ClosedState()
-        }, 1000)
-      })
-      keygenModule.messageRelayer?.join(rtcChannel2)
-    }
+        await rtcChannel2.sendMessage(JSON.stringify(partyPrepareMessage))
+        keygenModule.setCreateStep(step + 1)
+        detectRtcChannel2ClosedState()
+      }, 1000)
+    })
+    keygenModule.messageRelayer?.join(rtcChannel2)
   }
 
   const handleBackupLater = async () => {
@@ -154,6 +150,14 @@ const CreateDialog = () => {
       keygenModule.setCreateDialogVisible(false)
     }
   }
+
+  useEffect(() => {
+    if (step === 1) {
+      setupChannel1()
+    } else if (step === 2) {
+      setupChannel2()
+    }
+  }, [step])
 
   return (
     <Modal centered closable={false} open={true} footer={null} width={1060}>
