@@ -1,11 +1,11 @@
-import { FC, StrictMode, Suspense } from 'react'
+import { FC, Suspense } from 'react'
 import { HashRouter as Router, Route, Routes } from 'react-router-dom'
 
 import Footer from '@/containers/Footer'
 import routes from '@/routes'
 
 const App: FC = () => (
-  <StrictMode>
+  <>
     <Router>
       <Suspense fallback={<div />}>
         <div>
@@ -22,6 +22,6 @@ const App: FC = () => (
       </Suspense>
     </Router>
     <Footer />
-  </StrictMode>
+  </>
 )
 export default App
