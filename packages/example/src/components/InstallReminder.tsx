@@ -9,7 +9,50 @@ import {
   IOS_DOWNLOAD_URL,
   METAMASK_EXTENSION_URL,
 } from '@/configs/Configs'
-import styles from '@/styles/components/InstallReminder.module.less'
+
+const InstallReminderContainer = styled.div`
+  padding: 0 80px;
+  .tip-container {
+    padding-left: 76px;
+    p {
+      color: #6b6d7c;
+      margin: 0;
+      &:first-child {
+        margin-bottom: 10px;
+      }
+    }
+  }
+  .btns {
+    display: flex;
+    justify-content: center;
+    margin-top: 35px;
+    .link {
+      height: 36px;
+      border-radius: 36px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      background-color: #dfe3e9;
+      font-weight: 500;
+      color: #262833;
+      cursor: pointer;
+
+      & > img {
+        width: 8.5px;
+        margin-top: 2px;
+        margin-left: 5px;
+      }
+
+      &:hover {
+        background-color: #cfd6ed;
+      }
+
+      &:last-child {
+        margin-left: 30px;
+      }
+    }
+  }
+`
 
 const DownloadContainer = styled.div`
   width: 267px;
@@ -35,16 +78,18 @@ const DownloadContainer = styled.div`
 
 const InstallReminder = () => {
   return (
-    <div className={styles.reminder}>
-      <p>
-        Please ensure you've installed MetaMask on your browser and Safeheron
-        Snap App on your two mobile phones.
-      </p>
-      <div className={styles.btns}>
-        <a
-          className={styles.link}
-          target="_blank"
-          href={METAMASK_EXTENSION_URL}>
+    <InstallReminderContainer>
+      <div className="tip-container">
+        <p>
+          Please ensure you've installed MetaMask on your browser and Safeheron
+          Snap App on your two mobile phones.
+        </p>
+        <p>Setup Steps:</p>
+        <p>1. Connect MetaMask. </p>
+        <p>2. Create your MPC wallet according to the steps on the page.</p>
+      </div>
+      <div className={'btns'}>
+        <a className={'link'} target="_blank" href={METAMASK_EXTENSION_URL}>
           <span>Download MetaMask</span>
           <img src={arrow} />
         </a>
@@ -66,13 +111,13 @@ const InstallReminder = () => {
               </div>
             </DownloadContainer>
           }>
-          <div className={styles.link}>
+          <div className={'link'}>
             <span>Install Safeheron Snap App</span>
             <img src={arrow} />
           </div>
         </Popover>
       </div>
-    </div>
+    </InstallReminderContainer>
   )
 }
 
