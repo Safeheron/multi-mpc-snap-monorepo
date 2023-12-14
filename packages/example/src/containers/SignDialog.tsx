@@ -148,6 +148,10 @@ const SignDialog = () => {
     signModule.setTxHash('')
 
     setupRtcChannel()
+
+    return () => {
+      webrtcChannel?.disconnect()
+    }
   }, [])
 
   return (

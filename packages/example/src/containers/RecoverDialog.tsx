@@ -76,6 +76,9 @@ const RecoverDialog = () => {
   useEffect(() => {
     return () => {
       recoveryModule.setRecoverStep(1)
+
+      webrtcChannel1?.disconnect()
+      webrtcChannel2?.disconnect()
     }
   }, [])
 

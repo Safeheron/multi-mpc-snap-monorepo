@@ -157,6 +157,11 @@ const CreateDialog = () => {
     } else if (step === 2) {
       setupChannel2()
     }
+
+    return () => {
+      webrtcChannel1?.disconnect()
+      webrtcChannel2?.disconnect()
+    }
   }, [step])
 
   return (
