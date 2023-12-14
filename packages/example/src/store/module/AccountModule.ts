@@ -1,4 +1,5 @@
 import type { AccountItem } from '@safeheron/mpcsnap-types'
+import { message } from 'antd'
 import { ethers } from 'ethers'
 import { makeAutoObservable } from 'mobx'
 
@@ -50,10 +51,6 @@ class AccountModule {
     }
   }
 
-  setBackupStatus(backuped) {
-    this.backuped = backuped
-  }
-
   async loopBalance() {
     if (!this.loopFlag) {
       clearTimeout(this.timer)
@@ -78,6 +75,7 @@ class AccountModule {
       console.debug('Loop balance result: ', res.toString())
       this.balance = res.toString()
     } catch (error) {
+      message.error('Get balance failed: ' + error?.message ?? '')
       console.error(error)
     }
   }
