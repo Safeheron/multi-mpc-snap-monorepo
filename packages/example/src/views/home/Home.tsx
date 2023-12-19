@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite'
 import { useContext, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
 
+import MetaMaskFox from '@/assets/metamask-fox.svg'
 import safeheron from '@/assets/safeheron.png'
 import Loading from '@/components/Loading'
 import AddressCard from '@/containers/AddressCard'
@@ -28,6 +29,15 @@ import { connectSnap, getSnap, isLocalSnap } from '@/utils/snap'
 const HomeWrap = styled.div`
   width: 100%;
   padding-top: 73px;
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #76d572;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
 `
 
 const HomeContainer = styled.div`
@@ -118,6 +128,17 @@ const Home = () => {
           disabled={!isLocal && (!state.supportedSnap || !!state.installedSnap)}
           color={'primary'}
           onClick={connectMetamask}>
+          {state.installedSnap && <span className={'dot'}></span>}
+          {!state.installedSnap && (
+            <span
+              style={{
+                verticalAlign: 'middle',
+                marginRight: '10px',
+                display: 'inline-block',
+              }}>
+              <MetaMaskFox />
+            </span>
+          )}
           {state.installedSnap
             ? isLocal
               ? 'Reconnect'
