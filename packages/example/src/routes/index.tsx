@@ -1,20 +1,22 @@
-import { lazy } from 'react'
-
 import { RouterEnum } from '@/configs/Configs'
+import FaqIndex from '@/views/faq/Index'
+import Home from '@/views/home/Home'
+import Index from '@/views/Index'
+
 const ROUTER_PATH = process.env.ROUTER_PATH
 
 const routes = [
   {
     path: RouterEnum.home,
-    element: lazy(() => import('@/views/home/Home')),
+    element: Home,
   },
   {
     path: RouterEnum.index,
-    element: lazy(() => import('@/views/Index/Index')),
+    element: Index,
   },
   {
     path: RouterEnum.faq,
-    element: lazy(() => import('@/views/faq/Index')),
+    element: FaqIndex,
   },
 ]
 
