@@ -301,7 +301,8 @@ class RecoverAction {
             partySecretKey: res.data.partySecretKey,
             pubKeyOfThreeParty: res.data.pubKeyOfThreeParty,
           },
-          sendType: 'broadcast',
+          to: this.lostPartyInfo?.name,
+          sendType: 'p2p',
         })
 
         this.sendMessage({
@@ -313,6 +314,7 @@ class RecoverAction {
           messageType: OperationType.recoverRound,
           messageContent: res.data?.message,
           to: this.remotePartyInfo?.name,
+          sendType: 'p2p',
         })
       }
     } else {
