@@ -1,5 +1,6 @@
 import { LoadingOutlined } from '@ant-design/icons'
 import { Button, Form, Input, Space } from 'antd'
+import BigNumber from 'bignumber.js'
 import { isAddress } from 'ethers/lib/utils'
 import { debounce } from 'lodash'
 import { observer } from 'mobx-react-lite'
@@ -11,7 +12,7 @@ import styles from '@/styles/containers/SendDialog.module.less'
 import { ethers, wei2eth } from '@/utils'
 
 const SendForm = () => {
-  const { interactive, transactionModule, networkModule } = useStore()
+  const { transactionModule, networkModule } = useStore()
   const { baseTx, fee, feeData, availableBalance, feeDataLoading } =
     transactionModule
   const { currentChain } = networkModule
@@ -116,6 +117,11 @@ const SendForm = () => {
                   }
                   if (value > wei2eth(availableBalance)) {
                     return Promise.reject('Insufficient balance')
+                  }
+                  if (BigNumber(value).isLessThan(BigNumber('1e-18'))) {
+                    return Promise.reject(
+                      'Minimum amount sent is 0.000000000000000001'
+                    )
                   }
                   return Promise.resolve()
                 },
