@@ -249,6 +249,7 @@ export class WebRTCChannel extends MessageChannel {
         `[webrtc](${this.name}) dataChannel cannot send message, invalid readyState: %s.`,
         this.dc.readyState
       )
+      this.disconnect()
       return
     }
 

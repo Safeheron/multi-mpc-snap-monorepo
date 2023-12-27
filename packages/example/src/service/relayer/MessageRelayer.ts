@@ -100,9 +100,11 @@ class MessageRelayer extends EventEmitter {
       if (type === OperationType.recoverRound && messageArray.length === 2) {
         this.messagePool.delete(type)
         this.channelList.forEach(channel => {
-          const combineMessage = messageArray.filter(m => m.to === channel.name)
-          if (combineMessage) {
-            channel.receiveInternal(JSON.stringify(combineMessage))
+          const filteredMessage = messageArray.filter(
+            m => m.to === channel.name
+          )
+          if (filteredMessage && filteredMessage.length > 0) {
+            channel.receiveInternal(JSON.stringify(filteredMessage))
           }
         })
         return
