@@ -18,7 +18,6 @@ class MessageRelayer extends EventEmitter {
 
   constructor(private total: number) {
     super()
-    console.log('relayer created!')
   }
 
   private collectMessage(message: MPCMessage) {
@@ -97,6 +96,18 @@ class MessageRelayer extends EventEmitter {
     )
 
     this.messagePool.forEach((messageArray, type) => {
+      // This is a patch to ensure recover timing. The relayer model needs to be redesigned.
+      if (type === OperationType.recoverRound && messageArray.length === 2) {
+        this.messagePool.delete(type)
+        this.channelList.forEach(channel => {
+          const combineMessage = messageArray.filter(m => m.to === channel.name)
+          if (combineMessage) {
+            channel.receiveInternal(JSON.stringify(combineMessage))
+          }
+        })
+        return
+      }
+
       if (messageArray.length === this.total) {
         // delete sent messages
         this.messagePool.delete(type)

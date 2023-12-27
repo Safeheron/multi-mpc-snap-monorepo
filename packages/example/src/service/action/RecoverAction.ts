@@ -314,7 +314,6 @@ class RecoverAction {
           messageType: OperationType.recoverRound,
           messageContent: res.data?.message,
           to: this.remotePartyInfo?.name,
-          sendType: 'p2p',
         })
       }
     } else {
