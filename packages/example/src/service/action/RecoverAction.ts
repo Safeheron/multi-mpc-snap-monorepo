@@ -441,7 +441,7 @@ class RecoverAction {
       partyId: message.messageContent.partyId,
       shard,
     })
-    this.pubKeyOfThreeParty = pubKeyOfThreeParty
+    // this.pubKeyOfThreeParty = pubKeyOfThreeParty
 
     if (this.partySecretKeys.length === 2) {
       const res = await recoverMnemonic(
@@ -472,6 +472,13 @@ class RecoverAction {
     store.recoveryModule.setOtherShard(false)
     store.recoveryModule.setSkip(false)
     store.recoveryModule.setMnemonicFormType('init')
+  }
+
+  cleanup() {
+    this.partySecretKeys = []
+    this.remotePartyInfo = undefined
+    this.lostPartyInfo = undefined
+    this.remotePubKeys = []
   }
 }
 

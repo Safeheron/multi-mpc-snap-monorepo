@@ -12,8 +12,6 @@ class MessageRelayer extends EventEmitter {
     MPCMessage[]
   >()
 
-  private parts?: string[] = []
-
   get channelIsReady() {
     return this.total === this.channelList.length
   }
@@ -28,11 +26,6 @@ class MessageRelayer extends EventEmitter {
     const sendType = message.sendType || 'all'
     if (!messageType || sendType !== 'all') return
 
-    if (!message.to) {
-      this.parts = undefined
-    } else {
-      this.parts = [message.from, message.to]
-    }
     if (this.messagePool.has(messageType)) {
       this.messagePool.get(messageType)!.push(message)
     } else {
@@ -104,34 +97,17 @@ class MessageRelayer extends EventEmitter {
     )
 
     this.messagePool.forEach((messageArray, type) => {
-      if (!this.parts?.length) {
-        if (messageArray.length === this.total) {
-          // delete sended messages
-          this.messagePool.delete(type)
+      if (messageArray.length === this.total) {
+        // delete sent messages
+        this.messagePool.delete(type)
 
-          // send message
-          this.channelList.forEach(channel => {
-            const combineMessage = messageArray.filter(
-              m => m.from !== channel.name
-            )
-            channel.receiveInternal(JSON.stringify(combineMessage))
-          })
-        }
-      } else {
-        if (messageArray.length === this.parts.length) {
-          // delete sended messages
-          this.messagePool.delete(type)
-
-          // send message
-          this.channelList.forEach(channel => {
-            if (this.parts?.includes(channel.name)) {
-              const combineMessage = messageArray.filter(
-                m => m.from !== channel.name
-              )
-              channel.receiveInternal(JSON.stringify(combineMessage))
-            }
-          })
-        }
+        // send message
+        this.channelList.forEach(channel => {
+          const combineMessage = messageArray.filter(
+            m => m.from !== channel.name
+          )
+          channel.receiveInternal(JSON.stringify(combineMessage))
+        })
       }
     })
   }

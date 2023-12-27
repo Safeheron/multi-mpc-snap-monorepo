@@ -3,6 +3,7 @@ import { Button, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
 
 import ButtonContainer from '@/components/ButtonContainer'
+import recoverAction from '@/service/action/RecoverAction'
 import { RPCChannel } from '@/service/channel/RPCChannel'
 import { recoverApproval } from '@/service/metamask'
 import MessageRelayer from '@/service/relayer/MessageRelayer'
@@ -16,6 +17,10 @@ const RecoverPrepareDialog = () => {
   const handleRecover = async () => {
     recoveryModule.setRecoverPrepareDialogVisible(false)
     interactive.setLoading(true)
+
+    recoverAction.destroy()
+    recoverAction.cleanup()
+
     const res = await recoverApproval(accountModule.walletName)
 
     interactive.setLoading(false)
