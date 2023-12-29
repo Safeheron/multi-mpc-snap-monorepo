@@ -134,19 +134,6 @@ class RecoveryFlow extends BaseFlow {
     return succeed(true)
   }
 
-  /**
-   * @deprecated
-   * @param sessionId
-   */
-  async recoverKeyPair(sessionId: string): Promise<SnapRpcResponse<string>> {
-    this.verifySession(sessionId)
-    if (!this.keyRecovery!.localCommunicationPriv) {
-      await this.keyRecovery?.setupLocalCpkp()
-    }
-    this.privKey = this.keyRecovery!.localCommunicationPriv
-    return succeed(this.keyRecovery!.localCommunicationPub)
-  }
-
   async recoverContext(
     sessionId: string,
     localParty: RecoverContext['params']['localParty'],
