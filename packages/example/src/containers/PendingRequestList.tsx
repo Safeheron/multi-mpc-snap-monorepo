@@ -1,3 +1,4 @@
+import { InfoCircleOutlined } from '@ant-design/icons'
 import { EthMethod, KeyringRequest } from '@metamask/keyring-api'
 import { WrappedKeyringRequest } from '@safeheron/mpcsnap-types'
 import { Space, Table } from 'antd'
@@ -9,12 +10,7 @@ import React, { useEffect, useState } from 'react'
 import emptyPng from '@/assets/empty.png'
 import useAsyncInterval from '@/hooks/useAsyncInterval'
 import useConfirm from '@/hooks/useConfirm'
-import {
-  keyringRejectRequestId,
-  listKeyringRequests,
-  signApproval,
-} from '@/service/metamask'
-import MessageRelayer from '@/service/relayer/MessageRelayer'
+import { keyringRejectRequestId, listKeyringRequests } from '@/service/metamask'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/TransactionList.module.less'
 import { formatToUSDateTime } from '@/utils/dateUtil'
@@ -169,6 +165,16 @@ const PendingRequestList: React.FC = () => {
       <div className={styles.title}>Your Safeheron Snap is ready to use.</div>
       <div className={styles.subTitle}>
         Any pending signature requests will appear below.
+      </div>
+      <div className={styles.riskText}>
+        <InfoCircleOutlined style={{ marginRight: '6px' }} />
+        Pose potential security risks when interacting with specific dApps which
+        using signature-derived keys.{' '}
+        <a
+          href="https://blog.safeheron.com/blog/insights/safeheron-originals/enhancing-security-on-mpc-wallet-dydx-connections"
+          target={'_blank'}>
+          Learn more.
+        </a>
       </div>
       <div className={styles.record}>
         {requests.length > 0 ? (

@@ -6,6 +6,7 @@ declare namespace TransactionListModuleLessNamespace {
     emptyContainer: string
     emptyTipList: string
     record: string
+    riskText: string
     subTitle: string
     title: string
   }
