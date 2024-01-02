@@ -1,5 +1,5 @@
 import { Loading3QuartersOutlined } from '@ant-design/icons'
-import { Button } from 'antd'
+import { Button, message } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useContext, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
@@ -69,6 +69,10 @@ const Home = () => {
   )
 
   const connectMetamask = async () => {
+    if (!state.supportedSnap) {
+      message.warning('You should install MetaMask first.')
+      return
+    }
     try {
       interactive.setLoading(true)
       await connectSnap()

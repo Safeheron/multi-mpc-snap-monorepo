@@ -15,6 +15,7 @@ const InstallReminderContainer = styled.div`
   .tip-container {
     padding-left: 76px;
     p {
+      text-align: left;
       color: #6b6d7c;
       margin: 0;
       &:first-child {
