@@ -7,6 +7,8 @@ import { getSnaps } from './snap'
 export const isSupportSnap = async () => {
   const provider = window.ethereum
 
+  if (!provider) return false
+
   try {
     await provider?.request({
       method: 'wallet_getSnaps',
