@@ -26,7 +26,7 @@ const Footer = () => {
         className={'link'}
         target={'_blank'}
         href={'https://github.com/Safeheron/snap-offline-recovery-tool'}>
-        Recover Private Key Tool
+        Recover Private Key
       </a>
     </FooterWrapper>
   )
