@@ -3,16 +3,19 @@ import copy from 'copy-to-clipboard'
 import { ethers } from 'ethers'
 import { formatUnits } from 'ethers/lib/utils'
 
+import { RPC_KEEPALIVE_METHOD } from '@/service/metamask'
+
 export { ethers }
 
-/**
- * This provider may init fail and cannot resume
- * @deprecated
- */
-export const provider = window.ethereum
-  ? // @ts-ignore
-    new ethers.providers.Web3Provider(window.ethereum)
-  : null
+let provider: undefined | ethers.providers.Web3Provider
+
+export function getProvider(): ethers.providers.Web3Provider {
+  if (!provider) {
+    // @ts-ignore
+    provider = new ethers.providers.Web3Provider(window.ethereum)
+  }
+  return provider
+}
 
 export const wei2eth = (
   weiHex?: string,
@@ -101,8 +104,14 @@ export const randomFromArray = (list: string[], x: number): string[] => {
   return newList
 }
 
+/**
+ * This method will be deleted after all rpc-method errors handled by each flow
+ * @deprecated
+ * @param error
+ * @param req
+ */
 export async function handleSnapResponse(error, req) {
-  if (req.method !== 'mpc_snapKeepAlive') {
+  if (req.method !== RPC_KEEPALIVE_METHOD) {
     console.error(`handleSnapResponse [${req.method}]`, error)
     message.error(error.message || error.errMsg || 'Unknown Snap Error')
   }

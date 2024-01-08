@@ -59,3 +59,8 @@ export interface SignResult {
   isComplete: true
   signedTransaction: string
 }
+
+export type SignMethods =
+  | SignApproval['method']
+  | SignContext['method']
+  | SignRound['method']

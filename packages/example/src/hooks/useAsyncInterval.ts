@@ -2,9 +2,13 @@ import { useEffect, useRef } from 'react'
 
 type PromisedFn = (...args: any) => Promise<any>
 
-export default function useAsyncInterval(fn: PromisedFn, delay) {
+export default function useAsyncInterval(
+  fn: PromisedFn,
+  delay: number,
+  immediate = false
+) {
   const savedCallback = useRef<PromisedFn>()
-  const isPausedRef = useRef(false)
+  const isPausedRef = useRef(immediate)
   const timeoutIdRef = useRef<NodeJS.Timeout>()
 
   useEffect(() => {

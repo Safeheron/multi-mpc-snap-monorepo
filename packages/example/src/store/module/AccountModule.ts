@@ -1,12 +1,12 @@
 import type { AccountItem } from '@safeheron/mpcsnap-types'
+import { message } from 'antd'
 import { ethers } from 'ethers'
 import { makeAutoObservable } from 'mobx'
 
 import { requestAccount } from '@/service/metamask'
+import { getProvider } from '@/utils'
 
 const LOOP_GAP = 20_000
-
-let provider: undefined | ethers.providers.Web3Provider
 
 class AccountModule {
   walletId = ''
@@ -16,6 +16,7 @@ class AccountModule {
   synced = false
 
   balance = '' // wei
+  balanceLoading = false
 
   private loopFlag = false
 
@@ -38,7 +39,7 @@ class AccountModule {
     this.backuped = account.backuped
     this.synced = account.synced
     this.walletId = account.id
-    this.loopBalance(this.address)
+    this.loopBalance()
   }
 
   async requestAccount() {
@@ -50,38 +51,31 @@ class AccountModule {
     }
   }
 
-  setBackupStatus(backuped) {
-    this.backuped = backuped
-  }
-
-  async loopBalance(address: string) {
+  async loopBalance() {
     if (!this.loopFlag) {
       clearTimeout(this.timer)
-      await this.loop(address)
+      await this.loop()
     }
   }
 
-  private async loop(address: string) {
+  private async loop() {
     this.loopFlag = true
-    await this.getBalance(address)
+    await this.getBalance()
 
     this.timer = setTimeout(() => {
-      this.loop(address)
+      this.loop()
     }, LOOP_GAP)
   }
 
-  async getBalance(address: string) {
-    if (!address) return
-    if (!provider) {
-      // @ts-ignore
-      provider = new ethers.providers.Web3Provider(window.ethereum)
-    }
+  async getBalance() {
+    if (!this.address) return
     try {
       console.debug('Start to loop balance...')
-      const res = await provider.getBalance(address)
+      const res = await getProvider().getBalance(this.address)
       console.debug('Loop balance result: ', res.toString())
       this.balance = res.toString()
     } catch (error) {
+      message.error('Get balance failed: ' + error?.message ?? '')
       console.error(error)
     }
   }

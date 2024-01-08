@@ -1,6 +1,6 @@
-import { SnapInvokeMethods } from '@/configs/Enums'
+import { SnapRpcMethods } from '@safeheron/mpcsnap-types'
 export interface InvokeReqModel<T> {
-  method: SnapInvokeMethods
+  method: SnapRpcMethods
   params?: T
 }
 

@@ -3,6 +3,7 @@ import { Button, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
 
 import ButtonContainer from '@/components/ButtonContainer'
+import recoverAction from '@/service/action/RecoverAction'
 import { RPCChannel } from '@/service/channel/RPCChannel'
 import { recoverApproval } from '@/service/metamask'
 import MessageRelayer from '@/service/relayer/MessageRelayer'
@@ -11,17 +12,21 @@ import { useStore } from '@/store'
 import styles from '@/styles/containers/RecoverPrepareDialog.module.less'
 
 const RecoverPrepareDialog = () => {
-  const { interactive, accountModule, messageModule, recoveryModule } =
-    useStore()
+  const { interactive, accountModule, recoveryModule } = useStore()
+
   const handleRecover = async () => {
     recoveryModule.setRecoverPrepareDialogVisible(false)
     interactive.setLoading(true)
+
+    recoverAction.destroy()
+    recoverAction.cleanup()
+
     const res = await recoverApproval(accountModule.walletName)
 
     interactive.setLoading(false)
 
     if (res.success) {
-      interactive.setSessionId(res.data.sessionId)
+      recoveryModule.setSessionId(res.data.sessionId)
       recoveryModule.setLocalKeyshareExist(res.data.keyshareExist)
       recoveryModule.setLocalCommunicationPub(res.data.pub)
       await startRecover()
@@ -30,9 +35,11 @@ const RecoverPrepareDialog = () => {
 
   const startRecover = async () => {
     const rpcChannel = new RPCChannel()
-    messageModule.setRPCChannel(rpcChannel)
+    recoveryModule.setRPCChannel(rpcChannel)
+
     const messageRelayer = new MessageRelayer(3)
-    messageModule.setMessageRelayer(messageRelayer)
+    recoveryModule.setMessageRelayer(messageRelayer)
+
     messageRelayer.join(rpcChannel)
 
     const roleReadyMessage: RoleReadyMessage = {
@@ -42,6 +49,8 @@ const RecoverPrepareDialog = () => {
         index: 1,
         walletId: accountModule.walletId,
         pub: recoveryModule.localCommunicationPub,
+        walletName: accountModule.walletName,
+        hasKeyShare: recoveryModule.localKeyshareExist,
       },
     }
 
@@ -59,8 +68,7 @@ const RecoverPrepareDialog = () => {
           desc={
             <p>
               To recover an MPC Wallet, please make sure you have MetaMask on
-              your Google Chrome and the Safeheron Snap App on two separate
-              phones.
+              your browser and the Safeheron Snap App on two separate phones.
               <br /> <br />
               For wallet recovery, you'll need at least two out of the three
               backed-up private key shards (A, B, and C).

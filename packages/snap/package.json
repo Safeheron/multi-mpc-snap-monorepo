@@ -1,6 +1,6 @@
 {
   "name": "@safeheron/mpcsnap",
-  "version": "2.4.1",
+  "version": "2.4.6",
   "description": "MetaMask MPCSnap",
   "main": "dist/index.ts",
   "keywords": [
@@ -41,11 +41,11 @@
   },
   "dependencies": {
     "@ethersproject/bytes": "^5.6.1",
-    "@metamask/eth-sig-util": "^6.0.0",
+    "@metamask/eth-sig-util": "^7.0.1",
     "@metamask/keyring-api": "^1.0.0",
     "@metamask/snaps-ui": "^2.0.0",
     "@metamask/snaps-utils": "^3.0.0",
-    "@safeheron/mpc-wasm-sdk": "^0.3.1-rc.1",
+    "@safeheron/mpc-wasm-sdk": "0.5.0",
     "@safeheron/mpcsnap-types": "workspace:^",
     "ethers": "^5.6.9",
     "loadsh": "^0.0.4",

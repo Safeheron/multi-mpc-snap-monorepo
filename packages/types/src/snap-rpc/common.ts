@@ -71,3 +71,11 @@ export const PubKeyStruct = object({
   pubKey: string(),
 })
 export type PubKey = Infer<typeof PubKeyStruct>
+
+export interface RemindFirstInstallRequest {
+  method: 'internal_firstInstallRemainder'
+}
+
+export type CommonMethods =
+  | HeartbeatRequest['method']
+  | RemindFirstInstallRequest['method']

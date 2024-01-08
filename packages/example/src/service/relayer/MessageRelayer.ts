@@ -1,31 +1,23 @@
+import { OperationType } from '@safeheron/mpcsnap-types'
 import { EventEmitter } from 'events'
 
 import { MessageChannel } from '../channel/MessageChannel'
-import { MPCMessage, MPCMessageType } from '../types'
+import { MPCMessage } from '../types'
 
 class MessageRelayer extends EventEmitter {
   channelList: MessageChannel[] = []
 
-  messagePool: Map<MPCMessageType, MPCMessage[]> = new Map<
-    MPCMessageType,
+  messagePool: Map<OperationType, MPCMessage[]> = new Map<
+    OperationType,
     MPCMessage[]
   >()
-
-  private parts?: string[] = []
 
   get channelIsReady() {
     return this.total === this.channelList.length
   }
 
-  setParts(parts?: string[]) {
-    console.log('setParts', parts)
-
-    this.parts = parts
-  }
-
   constructor(private total: number) {
     super()
-    console.log('relayer created!')
   }
 
   private collectMessage(message: MPCMessage) {
@@ -33,11 +25,6 @@ class MessageRelayer extends EventEmitter {
     const sendType = message.sendType || 'all'
     if (!messageType || sendType !== 'all') return
 
-    if (!message.to) {
-      this.parts = undefined
-    } else {
-      this.parts = [message.from, message.to]
-    }
     if (this.messagePool.has(messageType)) {
       this.messagePool.get(messageType)!.push(message)
     } else {
@@ -109,34 +96,31 @@ class MessageRelayer extends EventEmitter {
     )
 
     this.messagePool.forEach((messageArray, type) => {
-      if (!this.parts?.length) {
-        if (messageArray.length === this.total) {
-          // delete sended messages
-          this.messagePool.delete(type)
+      // This is a patch to ensure recover timing. The relayer model needs to be redesigned.
+      if (type === OperationType.recoverRound && messageArray.length === 2) {
+        this.messagePool.delete(type)
+        this.channelList.forEach(channel => {
+          const filteredMessage = messageArray.filter(
+            m => m.to === channel.name
+          )
+          if (filteredMessage && filteredMessage.length > 0) {
+            channel.receiveInternal(JSON.stringify(filteredMessage))
+          }
+        })
+        return
+      }
 
-          // send message
-          this.channelList.forEach(channel => {
-            const combineMessage = messageArray.filter(
-              m => m.from !== channel.name
-            )
-            channel.receiveInternal(JSON.stringify(combineMessage))
-          })
-        }
-      } else {
-        if (messageArray.length === this.parts.length) {
-          // delete sended messages
-          this.messagePool.delete(type)
+      if (messageArray.length === this.total) {
+        // delete sent messages
+        this.messagePool.delete(type)
 
-          // send message
-          this.channelList.forEach(channel => {
-            if (this.parts?.includes(channel.name)) {
-              const combineMessage = messageArray.filter(
-                m => m.from !== channel.name
-              )
-              channel.receiveInternal(JSON.stringify(combineMessage))
-            }
-          })
-        }
+        // send message
+        this.channelList.forEach(channel => {
+          const combineMessage = messageArray.filter(
+            m => m.from !== channel.name
+          )
+          channel.receiveInternal(JSON.stringify(combineMessage))
+        })
       }
     })
   }

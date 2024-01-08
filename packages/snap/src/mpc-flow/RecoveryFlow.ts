@@ -16,7 +16,7 @@ import {
   RecoverContext,
   SnapRpcResponse,
 } from '@safeheron/mpcsnap-types'
-import { RecoverSetRemoteCommunicationPubs } from '@safeheron/mpcsnap-types/src'
+import { RecoverPrepare } from '@safeheron/mpcsnap-types/src'
 import { ethers } from 'ethers'
 import { v4 as uuidV4 } from 'uuid'
 
@@ -41,6 +41,9 @@ class RecoveryFlow extends BaseFlow {
   private keyRecovery?: KeyRecovery
   private keyRefresh?: KeyRefresh
 
+  private localKeyshareExist = false
+  private oldAddress = ''
+
   private mpcHelper: MPCHelper
   private signKey = ''
   private walletName = ''
@@ -53,7 +56,7 @@ class RecoveryFlow extends BaseFlow {
   private remotePub?: string
   private lostPub?: string
 
-  private communicationPubs?: RecoverSetRemoteCommunicationPubs['params']
+  private communicationPubs?: RecoverPrepare['params']['remotePubs']
 
   private newSignKey?: string
 
@@ -73,17 +76,23 @@ class RecoveryFlow extends BaseFlow {
     this.sessionId = uuidV4()
     const wallet = this.getWallet()
     this.signKey = wallet?.signKey ?? ''
-    if (this.signKey) {
+    if (wallet && this.signKey) {
       const res = await this.mpcHelper.extractMnemonicFromSignKey(this.signKey)
       if (res.err) {
         throw new Error(res.err.err_msg)
       }
       this.mnemonic = res.mnemo ?? ''
       this.backuped = true
+      this.walletName = wallet.name
+      this.oldAddress = wallet.address
     }
 
     this.keyRecovery = this.mpcInstance.KeyRecovery.getCoSigner()
     await this.keyRecovery.setupLocalCpkp()
+
+    this.privKey = this.keyRecovery.localCommunicationPriv
+
+    this.localKeyshareExist = !!this.signKey
 
     return succeed({
       sessionId: this.sessionId,
@@ -92,16 +101,10 @@ class RecoveryFlow extends BaseFlow {
     })
   }
 
-  async setCommunicationPubs(
-    pubs: RecoverSetRemoteCommunicationPubs['params']
-  ) {
-    this.communicationPubs = pubs
-    return succeed(true)
-  }
-
   async recoverPrepare(
     sessionId: string,
     walletName: string,
+    remotePubs: RecoverPrepare['params']['remotePubs'],
     mnemonic?: string
   ): Promise<SnapRpcResponse<boolean>> {
     this.verifySession(sessionId)
@@ -114,21 +117,21 @@ class RecoveryFlow extends BaseFlow {
       return errored('Local keyshare exist. Param [mnemonic] is not needed.')
     }
 
-    this.walletName = walletName
+    if (this.walletName && this.walletName !== walletName) {
+      return errored('Keyshare in Snap exist, cannot change the wallet name.')
+    }
+
+    if (!this.walletName) {
+      this.walletName = walletName
+    }
+
+    this.communicationPubs = remotePubs
+
     if (mnemonic) {
       this.mnemonic = normalizeMnemonic(mnemonic)
       this.backuped = true
     }
     return succeed(true)
-  }
-
-  async recoverKeyPair(sessionId: string): Promise<SnapRpcResponse<string>> {
-    this.verifySession(sessionId)
-    if (!this.keyRecovery!.localCommunicationPriv) {
-      await this.keyRecovery?.setupLocalCpkp()
-    }
-    this.privKey = this.keyRecovery!.localCommunicationPriv
-    return succeed(this.keyRecovery!.localCommunicationPub)
   }
 
   async recoverContext(
@@ -239,14 +242,7 @@ class RecoveryFlow extends BaseFlow {
       this.communicationPubs!
     )
 
-    const totalIndexArray = [
-      localParty.index,
-      ...remoteParties.map(rp => rp.index),
-    ]
-    await this.keyRefresh?.prepareKeyGenParams(
-      localParty.party_id,
-      totalIndexArray
-    )
+    await this.keyRefresh?.prepareKeyGenParams()
 
     // Currently, We assign the key shard in Snap to A, so the remote parties index are determined
     const res = await this.keyRefresh!.createContext()
@@ -263,6 +259,16 @@ class RecoveryFlow extends BaseFlow {
     if (this.keyRefresh!.isComplete) {
       this.newSignKey = this.keyRefresh!.getSignKey()
       this.pubKey = this.keyRefresh!.getPub()
+
+      const address = ethers.utils.computeAddress(`0x${this.pubKey}`)
+
+      if (this.localKeyshareExist && address !== this.oldAddress) {
+        return errored(
+          'Recover failed. Recovered address does not match the old address in the keyshare, ' +
+            'please make sure you enter the mnemonic phrase according to the role prompted, and make sure every word is correct.'
+        )
+      }
+
       return succeed({
         isComplete: this.keyRefresh!.isComplete,
         pubKey: this.pubKey,
@@ -305,10 +311,15 @@ class RecoveryFlow extends BaseFlow {
 
     if (this.backuped && !newState.synced) {
       const metamaskAccount = convertSnapAccountToKeyringAccount(newState)
-      await syncAccountToMetaMask(metamaskAccount)
+      try {
+        await syncAccountToMetaMask(metamaskAccount)
 
-      newState.synced = true
-      await this.stateManager.saveOrUpdateAccount(newState)
+        newState.synced = true
+        await this.stateManager.saveOrUpdateAccount(newState)
+      } catch (e) {
+        newState.synced = false
+        await this.stateManager.saveOrUpdateAccount(newState)
+      }
     }
 
     this.cleanup()
@@ -332,6 +343,8 @@ class RecoveryFlow extends BaseFlow {
     this.remotePub = ''
     this.newSignKey = ''
     this.mnemonic = ''
+    this.oldAddress = ''
+    this.localKeyshareExist = false
 
     this.keyRecovery = undefined
     this.keyRefresh = undefined

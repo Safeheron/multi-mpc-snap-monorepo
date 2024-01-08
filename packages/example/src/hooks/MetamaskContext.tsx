@@ -28,23 +28,23 @@ export const MetaMaskContext = createContext<
 ])
 
 export enum MetamaskActions {
+  SetSnapSupported = 'SetSnapSupported',
   SetInstalled = 'SetInstalled',
-  SetFlaskDetected = 'SetFlaskDetected',
   SetError = 'SetError',
 }
 
 const reducer: Reducer<MetamaskState, MetamaskDispatch> = (state, action) => {
   switch (action.type) {
+    case MetamaskActions.SetSnapSupported:
+      return {
+        ...state,
+        supportedSnap: action.payload,
+      }
+
     case MetamaskActions.SetInstalled:
       return {
         ...state,
         installedSnap: action.payload,
-      }
-
-    case MetamaskActions.SetFlaskDetected:
-      return {
-        ...state,
-        supportedSnap: action.payload,
       }
 
     case MetamaskActions.SetError:
@@ -78,16 +78,16 @@ export const MetaMaskProvider = ({ children }: { children: ReactNode }) => {
        * Detect if MetaMask support snap
        */
       async function detectSupportSnap() {
-        const isFlaskDetected = await isSupportSnap()
+        const supportSnapFeature = await isSupportSnap()
 
         dispatch({
-          type: MetamaskActions.SetFlaskDetected,
-          payload: isFlaskDetected,
+          type: MetamaskActions.SetSnapSupported,
+          payload: supportSnapFeature,
         })
       }
 
       /**
-       * Detect if the snap is installed.
+       * Detect if the mpc snap is installed.
        */
       async function detectSnapInstalled() {
         const installedSnap = await getSnap()

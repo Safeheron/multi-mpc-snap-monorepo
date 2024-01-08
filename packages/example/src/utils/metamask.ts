@@ -7,13 +7,16 @@ import { getSnaps } from './snap'
 export const isSupportSnap = async () => {
   const provider = window.ethereum
 
+  if (!provider) return false
+
   try {
     await provider?.request({
       method: 'wallet_getSnaps',
     })
 
     return true
-  } catch {
+  } catch (e) {
+    console.error('detect snap compatible error: ', e)
     return false
   }
 }

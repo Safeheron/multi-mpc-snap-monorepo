@@ -1,5 +1,9 @@
-import { OperationType, RecoverPrepareMessage } from '@safeheron/mpcsnap-types'
-import { Button, Modal } from 'antd'
+import {
+  AbortMessage,
+  OperationType,
+  RecoverPrepareMessage,
+} from '@safeheron/mpcsnap-types'
+import { Button, message as AntMessage, Modal } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
 
@@ -10,9 +14,9 @@ import WebRTCConnection from '@/components/WebRTCConnection'
 import MnemonicForm from '@/containers/MnemonicForm'
 import useConfirm from '@/hooks/useConfirm'
 import useSnapKeepAlive from '@/hooks/useSnapKeepAlive'
+import useWebRTCFailedStateDetect from '@/hooks/useWebRTCFailedStateDetect'
 import { WebRTCChannel } from '@/service/channel/WebRTCChannel'
-import { backupApproval } from '@/service/metamask'
-import { MPCMessageType } from '@/service/types'
+import { PartyId } from '@/service/types'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/RecoverDialog.module.less'
 
@@ -30,7 +34,7 @@ const steps = [
   {
     title:
       'Step 3: Enter the mnemonic phrase for each private key shard separately as prompted and submit them for confirmation',
-    successText: 'Filled',
+    successText: 'Completed',
   },
   {
     title: 'Step 4: Wait for recovery to complete successfully',
@@ -42,13 +46,8 @@ const steps = [
 const RecoverDialog = () => {
   useSnapKeepAlive()
 
-  const {
-    interactive,
-    messageModule,
-    accountModule,
-    recoveryModule,
-    backupModule,
-  } = useStore()
+  const { interactive, accountModule, recoveryModule, backupModule } =
+    useStore()
 
   const { recoverStep: step } = recoveryModule
   const { backuped } = accountModule
@@ -56,9 +55,30 @@ const RecoverDialog = () => {
   const [webrtcChannel1, setWebrtcChannel1] = useState<WebRTCChannel>()
   const [webrtcChannel2, setWebrtcChannel2] = useState<WebRTCChannel>()
 
+  const onPeerClosed = () => {
+    AntMessage.error(
+      `WebRTC Peer Connection failed or closed, close the process.`,
+      5
+    )
+    recoveryModule.setRecoverDialogVisible(false)
+    recoveryModule.setRecoverStep(1)
+  }
+
+  const startDetectChannel1ClosedState = useWebRTCFailedStateDetect(
+    onPeerClosed,
+    webrtcChannel1
+  )
+  const startDetectChannel2ClosedState = useWebRTCFailedStateDetect(
+    onPeerClosed,
+    webrtcChannel2
+  )
+
   useEffect(() => {
     return () => {
-      recoveryModule.setRecoverStep(0)
+      recoveryModule.setRecoverStep(1)
+
+      webrtcChannel1?.disconnect()
+      webrtcChannel2?.disconnect()
     }
   }, [])
 
@@ -78,13 +98,15 @@ const RecoverDialog = () => {
             messageType: OperationType.recoverPrepare,
             messageContent: {
               index: 2,
-              sessionId: interactive.sessionId,
+              sessionId: recoveryModule.sessionId,
             },
           }
 
           await channel1.sendMessage(JSON.stringify([recoverPrepareMessage]))
-          messageModule.messageRelayer?.join(channel1)
+          recoveryModule.messageRelayer?.join(channel1)
           recoveryModule.setRecoverStep(step + 1)
+
+          startDetectChannel1ClosedState()
         }, 1000)
       })
     } else if (step === 2) {
@@ -96,12 +118,14 @@ const RecoverDialog = () => {
             messageType: OperationType.recoverPrepare,
             messageContent: {
               index: 3,
-              sessionId: interactive.sessionId,
+              sessionId: recoveryModule.sessionId,
             },
           }
           await channel2.sendMessage(JSON.stringify([recoverPrepareMessage]))
-          messageModule.messageRelayer?.join(channel2)
+          recoveryModule.messageRelayer?.join(channel2)
           recoveryModule.setRecoverStep(step + 1)
+
+          startDetectChannel2ClosedState()
         }, 1000)
       })
     }
@@ -114,11 +138,19 @@ const RecoverDialog = () => {
         'Do you confirm the cancellation? Canceling will terminate this operational process.',
       onOk: () => {
         recoveryModule.setRecoverDialogVisible(false)
-        messageModule.rpcChannel?.next({
-          messageType: MPCMessageType.abort,
+
+        const abortMessage: AbortMessage = {
           sendType: 'broadcast',
-          messageContent: 'recover',
-        })
+          messageType: OperationType.abort,
+          messageContent: {
+            businessType: 'recover',
+            from: PartyId.A,
+            abortType: 'userCancel',
+            reason: 'User cancel the recovery flow',
+          },
+        }
+
+        recoveryModule.rpcChannel?.next(abortMessage)
       },
     })
   }
@@ -127,18 +159,15 @@ const RecoverDialog = () => {
     recoveryModule.setRecoverDialogVisible(false)
   }
 
-  const handleBackupLater = () => {
-    recoveryModule.setRecoverDialogVisible(false)
-  }
+  const handleBackupLater = () => handleBack()
 
   const handleBackupWallet = async () => {
     await accountModule.requestAccount()
-    const res = await backupApproval(accountModule.walletName)
+    const res = await backupModule.requestBackupApproval(
+      accountModule.walletName
+    )
     if (res.success) {
       recoveryModule.setRecoverDialogVisible(false)
-      interactive.setSessionId(res.data.sessionId)
-      backupModule.setMnemonic(res.data.mnemonic)
-      backupModule.setBackupDialogVisible(true)
     }
   }
 
@@ -179,13 +208,13 @@ const RecoverDialog = () => {
               {step === 1 && (
                 <WebRTCConnection
                   webrtcChannel={webrtcChannel1}
-                  businessType={'recovery'}
+                  businessType={'recover'}
                 />
               )}
               {step === 2 && (
                 <WebRTCConnection
                   webrtcChannel={webrtcChannel2}
-                  businessType={'recovery'}
+                  businessType={'recover'}
                 />
               )}
               {step === 3 && <MnemonicForm />}

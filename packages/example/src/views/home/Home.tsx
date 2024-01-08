@@ -1,8 +1,10 @@
-import { Button } from 'antd'
+import { Loading3QuartersOutlined } from '@ant-design/icons'
+import { Button, message } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useContext, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
 
+import MetaMaskFox from '@/assets/metamask-fox.svg'
 import safeheron from '@/assets/safeheron.png'
 import Loading from '@/components/Loading'
 import AddressCard from '@/containers/AddressCard'
@@ -27,6 +29,15 @@ import { connectSnap, getSnap, isLocalSnap } from '@/utils/snap'
 const HomeWrap = styled.div`
   width: 100%;
   padding-top: 73px;
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #76d572;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
 `
 
 const HomeContainer = styled.div`
@@ -35,15 +46,17 @@ const HomeContainer = styled.div`
 `
 
 const Home = () => {
-  const { accountModule, interactive, recoveryModule, backupModule } =
-    useStore()
   const {
-    loading,
-    walletNameDialogVisible,
-    createDialogVisible,
-    signTransactionDialogVisible,
-  } = interactive
-
+    accountModule,
+    interactive,
+    recoveryModule,
+    backupModule,
+    signModule,
+    keygenModule,
+  } = useStore()
+  const { loading } = interactive
+  const { walletNameDialogVisible, createDialogVisible } = keygenModule
+  const { signTransactionDialogVisible } = signModule
   const { backupDialogVisible, checkShardDialogVisible } = backupModule
   const { recoverDialogVisible, recoverPrepareDialogVisible } = recoveryModule
   const { address, requestAccountLoading } = accountModule
@@ -56,6 +69,10 @@ const Home = () => {
   )
 
   const connectMetamask = async () => {
+    if (!state.supportedSnap) {
+      message.warning('You should install MetaMask first.')
+      return
+    }
     try {
       interactive.setLoading(true)
       await connectSnap()
@@ -81,8 +98,12 @@ const Home = () => {
     if (!address && requestAccountLoading) {
       return (
         <div
-          style={{ textAlign: 'center', marginTop: '200px', height: '400px' }}>
-          Request MPC Account...
+          style={{ textAlign: 'center', marginTop: '200px', height: '300px' }}>
+          <Loading3QuartersOutlined
+            style={{ fontSize: 42, color: '#496ce9' }}
+            spin
+          />
+          <p style={{ marginTop: '16px' }}>Request Account...</p>
         </div>
       )
     }
@@ -111,6 +132,17 @@ const Home = () => {
           disabled={!isLocal && (!state.supportedSnap || !!state.installedSnap)}
           color={'primary'}
           onClick={connectMetamask}>
+          {state.installedSnap && <span className={'dot'}></span>}
+          {!state.installedSnap && (
+            <span
+              style={{
+                verticalAlign: 'middle',
+                marginRight: '10px',
+                display: 'inline-block',
+              }}>
+              <MetaMaskFox />
+            </span>
+          )}
           {state.installedSnap
             ? isLocal
               ? 'Reconnect'

@@ -33,7 +33,7 @@ export type SignReadyMessage = BaseRelayMessage<
   OperationType.signReady,
   undefined,
   {
-    participants: string[]
+    partyId: string
     pub: string
   }
 >

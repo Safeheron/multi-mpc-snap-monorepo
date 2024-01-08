@@ -1,3 +1,5 @@
+import { OperationType } from '@safeheron/mpcsnap-types'
+
 export enum PartyId {
   A = 'A',
   B = 'B',
@@ -10,43 +12,19 @@ export const PartyIndexMap = {
   [PartyId.C]: '3',
 }
 
-// TODO replace with mpcsnap-types declarations
-export enum MPCMessageType {
-  partyPrepare = 'partyPrepare',
-  partyReady = 'partyReady',
-  keyGenRound = 'keyGenRound',
-  createSuccess = 'createSuccess',
+export function getPartyIndex(partyId: string | PartyId) {
+  return PartyIndexMap[partyId]
+}
 
-  signPrepare = 'signPrepare',
-  signReady = 'signReady',
-  signRound = 'signRound',
-
-  recoverPrepare = 'recoverPrepare',
-  recoverReady = 'recoverReady',
-  mnemonicReady = 'mnemonicReady',
-  keyPairReady = 'keyPairReady',
-
-  recoverSuccess = 'recoverSuccess',
-  refreshReady = 'refreshReady',
-  refreshRound = 'refreshRound',
-  refreshSuccess = 'refreshSuccess',
-
-  roleReady = 'roleReady',
-
-  // 2/3
-  recoverRound = 'recoverRound',
-
-  // broadcast
-  partySecretKeyReady = 'partySecretKeyReady',
-  mnemonicSkip = 'mnemonicSkip',
-  abort = 'abort',
+export function getPartyId(index: number): PartyId | undefined {
+  return [undefined, PartyId.A, PartyId.B, PartyId.C][index]
 }
 
 type MessageSendType = 'all' | 'broadcast' | 'p2p'
 
 export type MPCMessage<T = any> = {
   from: string
-  messageType: MPCMessageType
+  messageType: OperationType
   messageContent: T
   sendType?: MessageSendType
   to?: string

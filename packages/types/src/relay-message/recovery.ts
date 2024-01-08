@@ -10,13 +10,14 @@ export type RecoverPrepareMessage = BaseRelayMessage<
 export type RoleReadyMessage = BaseRelayMessage<
   OperationType.roleReady,
   undefined,
-  { partyId: string; index: number; walletId?: string; pub: string }
->
-
-export type RecoverReadyMessage = BaseRelayMessage<
-  OperationType.recoverReady,
-  undefined,
-  boolean
+  {
+    index: number
+    pub: string
+    hasKeyShare?: boolean
+    walletId?: string
+    partyId?: string
+    walletName?: string
+  }
 >
 
 export type MnemonicSkipMessage = BaseRelayMessage<
@@ -33,12 +34,6 @@ export type MnemonicReadyMessage = BaseRelayMessage<
     hasMnemonic: boolean
     partyId: string
   }
->
-
-export type KeypairReadyMessage = BaseRelayMessage<
-  OperationType.keyPairReady,
-  undefined,
-  { partyId: string; pubKey: string }
 >
 
 export type RecoverSuccessMessage = BaseRelayMessage<

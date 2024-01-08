@@ -2,7 +2,7 @@ import { Button } from 'antd'
 import { useNavigate } from 'react-router-dom'
 
 import safeheron from '@/assets/safeheron.png'
-import { RouterEnum } from '@/configs/Enums'
+import { RouterEnum } from '@/configs/Configs'
 import Header from '@/containers/Header'
 import styles from '@/styles/app/index.module.less'
 

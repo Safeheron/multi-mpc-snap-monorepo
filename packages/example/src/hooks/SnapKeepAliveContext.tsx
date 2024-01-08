@@ -19,14 +19,14 @@ export const SnapKeepAliveContext = createContext<SnapKeepAliveContextState>({
 const KEEP_ALIVE_GAP = 20_000
 
 export const SnapKeepAliveProvider = ({ children }) => {
-  const timerRef = useRef<NodeJS.Timer | null>(null)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   // To ensure that only one heartbeat between website and snap
   const flagRef = useRef<boolean>(false)
 
   const clear = useCallback(() => {
     if (timerRef.current) {
-      clearInterval(timerRef.current)
+      clearTimeout(timerRef.current)
     }
     flagRef.current = false
   }, [])

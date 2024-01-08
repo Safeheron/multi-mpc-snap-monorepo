@@ -57,14 +57,15 @@ class BackupFlow extends BaseFlow {
     // Then add account to metamask
     // In this action, if something went wrong, ignored.
     // Since that user can sync account any time in website
+    const metamaskAccount: KeyringAccount =
+      convertSnapAccountToKeyringAccount(wallet)
     try {
-      const metamaskAccount: KeyringAccount =
-        convertSnapAccountToKeyringAccount(wallet)
       await syncAccountToMetaMask(metamaskAccount)
-      console.log('sync account to metamask result: ', metamaskAccount)
       wallet.synced = true
       await this.stateManager.saveOrUpdateAccount(wallet)
     } catch (e) {
+      wallet.synced = false
+      await this.stateManager.saveOrUpdateAccount(wallet)
       console.error('cannot sync account to MetaMask', e)
     }
 

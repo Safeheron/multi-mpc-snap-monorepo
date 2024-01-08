@@ -2,7 +2,7 @@ import 'webrtc-adapter'
 
 import { Buffer } from 'buffer'
 
-import { MPCMessage, MPCMessageType } from '@/service/types'
+import { MPCMessage } from '@/service/types'
 import { getLogger, LogType } from '@/utils/Log'
 import metrics from '@/utils/Metrics'
 
@@ -32,12 +32,18 @@ export class WebRTCChannel extends MessageChannel {
 
   private peerMessage: PeerMessage | null = null
 
+  private _peerConnectionState: RTCPeerConnectionState
+
+  get peerConnectionState() {
+    return this._peerConnectionState
+  }
+
   constructor(name: string) {
     super(name)
     metrics.startTransaction(TRACE_CONNECT)
 
     metrics.startChild(TRACE_CONNECT, 'createPC', name)
-    const pc = new RTCPeerConnection()
+    const pc = new RTCPeerConnection({ iceCandidatePoolSize: 10 })
     pc.addEventListener('icecandidate', this.onIceCandidate.bind(this))
     pc.addEventListener(
       'icegatheringstatechange',
@@ -94,11 +100,13 @@ export class WebRTCChannel extends MessageChannel {
     iceCandidates: RTCIceCandidate[]
   ) {
     this.logger.info(
-      `[webrtc](${this.name}) start to set remote ice candidate, local signaling data is: %s, \n remote ice candidates is: %s`,
+      `[webrtc](${this.name}) start to set remote ice candidate, local signalingState is %s, local signaling data is: %s, \n remote ice candidates is: %s`,
+      this.pc.signalingState,
       JSON.stringify(this.getICEAndOffer()),
       JSON.stringify(iceCandidates)
     )
     metrics.startChild(TRACE_CONNECT, 'receive signaling', {
+      signalingState: this.pc.signalingState,
       answer,
       ices: iceCandidates,
       name: this.name,
@@ -112,6 +120,7 @@ export class WebRTCChannel extends MessageChannel {
 
   private onIceConnectionStateChange() {
     const state = this.pc.iceConnectionState
+    this.emit('iceConnectionStateChanged', state)
 
     metrics.startChild(TRACE_CONNECT, 'ice-state-changed', state)
     this.logger.info(
@@ -124,6 +133,9 @@ export class WebRTCChannel extends MessageChannel {
   private onPeerConnectionStateChanged() {
     const state = this.pc.connectionState
 
+    this._peerConnectionState = state
+    this.emit('peerStateChanged', state)
+
     metrics.startChild(TRACE_CONNECT, 'peer-state-changed', state)
     this.logger.info(
       `[webrtc](${this.name}) peer connection state changed, new state is: ${state}`
@@ -131,12 +143,6 @@ export class WebRTCChannel extends MessageChannel {
     metrics.endChild(TRACE_CONNECT, 'peer-state-changed')
 
     if (state === 'closed' || state === 'failed') {
-      this.receiveExternal(
-        JSON.stringify({
-          messageType: MPCMessageType.abort,
-          sendType: 'broadcast',
-        })
-      )
       this.emit('peerClosed')
     }
 
@@ -243,6 +249,7 @@ export class WebRTCChannel extends MessageChannel {
         `[webrtc](${this.name}) dataChannel cannot send message, invalid readyState: %s.`,
         this.dc.readyState
       )
+      this.disconnect()
       return
     }
 

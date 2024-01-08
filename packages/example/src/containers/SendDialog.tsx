@@ -6,8 +6,8 @@ import SendForm from '@/containers/SendForm'
 import { useStore } from '@/store'
 
 const SendDialog = () => {
-  const { interactive } = useStore()
-  const { sendFormCompleted } = interactive
+  const { transactionModule } = useStore()
+  const { sendFormCompleted } = transactionModule
 
   return (
     <Modal centered closable={false} open={true} footer={null} width={720}>

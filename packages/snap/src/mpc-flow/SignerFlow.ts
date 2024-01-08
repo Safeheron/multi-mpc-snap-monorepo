@@ -82,6 +82,7 @@ class KeyGenFlow extends BaseFlow {
     this.verifySession(sessionId)
 
     const hash = this.serialized()
+    console.log('serialized hash: ', hash)
 
     const res = await this.signer!.createContext(
       hash,

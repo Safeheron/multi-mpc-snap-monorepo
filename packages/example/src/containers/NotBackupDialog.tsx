@@ -1,7 +1,6 @@
 import { Button, Modal } from 'antd'
 
 import ButtonContainer from '@/components/ButtonContainer'
-import { backupApproval } from '@/service/metamask'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/NotBackupDialog.module.less'
 
@@ -15,13 +14,12 @@ const NotBackupDialog = ({ onSubmit }) => {
 
   const handleBackupApproval = async () => {
     interactive.setLoading(true)
-    const res = await backupApproval(accountModule.walletName)
+    const res = await backupModule.requestBackupApproval(
+      accountModule.walletName
+    )
     interactive.setLoading(false)
 
     if (res.success) {
-      interactive.setSessionId(res.data.sessionId)
-      backupModule.setMnemonic(res.data.mnemonic)
-      backupModule.setBackupDialogVisible(true)
       backupModule.setNotBackupDialogVisible(false)
     }
   }

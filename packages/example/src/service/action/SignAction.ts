@@ -1,43 +1,48 @@
-import { SignReadyMessage } from '@safeheron/mpcsnap-types'
+import { OperationType, SignReadyMessage } from '@safeheron/mpcsnap-types'
 import { message } from 'antd'
 
 import { PartyId } from '@/service/types'
 import { store } from '@/store'
-import { provider } from '@/utils'
+import { getProvider } from '@/utils'
 import { reportSignSuccess } from '@/utils/sentryUtil'
 
 import { signContext, signRound } from '../metamask'
-import { MPCMessage, MPCMessageType } from '../types'
+import { MPCMessage } from '../types'
 
 const SignAction = {
-  async handleSignReady(messageArray: SignReadyMessage[]) {
-    store.interactive.setSignStep(3)
+  emitSignFlowError(errMsg: string) {
+    store.signModule.rpcChannel?.emitAbortMessage('sign', 'error', errMsg)
+  },
 
-    const { participants, pub } = messageArray[0].messageContent
-    const remotePub = {
-      partyId: participants.find(p => p !== PartyId.A)!,
-      pub,
-    }
+  async handleSignReady(messageArray: SignReadyMessage[]) {
+    store.signModule.setSignStep(3)
+
+    const { partyId, pub } = messageArray[0].messageContent
+    const remotePub = { partyId, pub }
 
     const res = await signContext(
-      store.interactive.sessionId,
-      participants,
+      store.signModule.sessionId,
+      [partyId, PartyId.A],
       remotePub
     )
 
     if (res.success) {
-      console.log('handleSignReady result', res.data)
-      store.messageModule.rpcChannel?.next({
-        messageType: MPCMessageType.signRound,
+      store.signModule.rpcChannel?.next({
+        messageType: OperationType.signRound,
         messageContent: res.data,
       })
+    } else {
+      this.emitSignFlowError(
+        res.errMsg ?? `SignFlow error: call rpc createContext method error.`
+      )
     }
   },
+
   async handleSignRound(messageArray: MPCMessage[]) {
     const remoteMessageList = messageArray.map(v =>
       v.messageContent.find(msg => msg.destination === PartyId.A)
     )
-    const res = await signRound(store.interactive.sessionId, remoteMessageList)
+    const res = await signRound(store.signModule.sessionId, remoteMessageList)
     if (res.success) {
       console.log('handleSignRound result', res.data)
       if (res.data.isComplete) {
@@ -47,7 +52,7 @@ const SignAction = {
 
           await this.sendTransaction(signedTransaction)
         }
-        store.interactive.setSignStep(4)
+        store.signModule.setSignStep(4)
 
         reportSignSuccess(
           store.accountModule.address,
@@ -56,36 +61,35 @@ const SignAction = {
         )
       } else {
         // continue round
-        store.messageModule.rpcChannel?.next({
-          messageType: MPCMessageType.signRound,
+        store.signModule.rpcChannel?.next({
+          messageType: OperationType.signRound,
           messageContent: res.data.message,
         })
       }
+    } else {
+      this.emitSignFlowError(
+        res.errMsg ?? 'SignFlow error: call rpc signRound method error.'
+      )
     }
   },
 
   async sendTransaction(signedTransaction: string) {
-    if (!provider) {
-      console.warn('No provider, can not broadcast transaction.')
-      return
-    }
     try {
-      const response = await provider.sendTransaction(signedTransaction)
+      const response = await getProvider().sendTransaction(signedTransaction)
       if ('error' in response) {
-        console.error('response', response)
-        message.error('Failed')
-        return
+        console.error('send transaction occur an error: ', response.error)
+        message.error('Sign success but send transaction with provider failed.')
+      } else {
+        store.interactive.setProgress(0)
+
+        store.signModule.setTxHash(response.hash)
+        store.signModule.setSignStep(4)
       }
-      console.log('txhash', response.hash)
-
-      store.interactive.setTxHash(response.hash)
-      store.interactive.setSignStep(4)
-      store.interactive.setProgress(0)
     } catch (error) {
-      console.error('sendTransaction', error)
-
-      store.interactive.setSignTransactionDialogVisible(false)
+      console.error('sendTransaction with error: ', error)
       message.error(error.error?.message || error.message)
+    } finally {
+      store.signModule.setSignTransactionDialogVisible(false)
     }
   },
 }

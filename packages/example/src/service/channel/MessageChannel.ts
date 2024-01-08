@@ -1,27 +1,16 @@
 import { EventEmitter } from 'events'
 
-import { PartyId } from '@/service/types'
 import { MPCMessage } from '@/service/types'
 
 export abstract class MessageChannel extends EventEmitter {
   name: string
-  protected partyId: PartyId
 
   protected constructor(name: string) {
     super()
     this.name = name
   }
 
-  protected abstract connect(callback): void
   protected abstract disconnect(): void
-
-  getPartyId() {
-    return this.partyId
-  }
-
-  setPartyId(partyId: PartyId) {
-    this.partyId = partyId
-  }
 
   setName(name: string) {
     this.name = name
@@ -35,7 +24,7 @@ export abstract class MessageChannel extends EventEmitter {
   }
 
   /**
-   * receive message from website
+   * receive message from remote
    * @param msg
    */
   receiveExternal(msg: string) {

@@ -1,3 +1,4 @@
+import { InfoCircleOutlined } from '@ant-design/icons'
 import { EthMethod, KeyringRequest } from '@metamask/keyring-api'
 import { WrappedKeyringRequest } from '@safeheron/mpcsnap-types'
 import { Space, Table } from 'antd'
@@ -9,12 +10,7 @@ import React, { useEffect, useState } from 'react'
 import emptyPng from '@/assets/empty.png'
 import useAsyncInterval from '@/hooks/useAsyncInterval'
 import useConfirm from '@/hooks/useConfirm'
-import {
-  keyringRejectRequestId,
-  listKeyringRequests,
-  signApproval,
-} from '@/service/metamask'
-import MessageRelayer from '@/service/relayer/MessageRelayer'
+import { keyringRejectRequestId, listKeyringRequests } from '@/service/metamask'
 import { useStore } from '@/store'
 import styles from '@/styles/containers/TransactionList.module.less'
 import { formatToUSDateTime } from '@/utils/dateUtil'
@@ -26,27 +22,20 @@ import {
 const LOOP_GAP = 5_000
 
 const PendingRequestList: React.FC = () => {
-  const {
-    signModule,
-    interactive,
-    messageModule,
-    networkModule,
-    accountModule,
-  } = useStore()
+  const { signModule, networkModule, accountModule } = useStore()
   const { address, backuped } = accountModule
 
   const [requests, setRequests] = useState<WrappedKeyringRequest[]>([])
 
   const getSnapRequests = async () => {
     const r = await listKeyringRequests()
-    console.debug('loop request result ...', r)
     if (r.success) {
       setRequests(r.data)
     } else {
       // TODO show rpc error
     }
   }
-  const { pause, resume } = useAsyncInterval(getSnapRequests, LOOP_GAP)
+  const { pause, resume } = useAsyncInterval(getSnapRequests, LOOP_GAP, true)
 
   const resolveRequest = async (
     rpcRequest: KeyringRequest['request'],
@@ -79,27 +68,17 @@ const PendingRequestList: React.FC = () => {
       default:
         throw new Error('Unknown request method: ' + requestMethod)
     }
-    signModule.setPendingRequest({
-      method: requestMethod,
-      params: originalParams,
-      createTime: time,
-      chainId: tryToExtractChainId(requestMethod, params),
-    })
-
-    // approval send transaction
-    const ret = await signApproval(requestMethod, originalParams, requestId)
-
-    if (ret.success) {
-      interactive.setSessionId(ret.data.sessionId)
-      signModule.setCommunicationPub(ret.data.pub)
-
-      // setup message channel
-      const messageRelayer = new MessageRelayer(2)
-      messageModule.setMessageRelayer(messageRelayer)
-      interactive.setSignStep(1)
-
-      // open dialog
-      interactive.setSignTransactionDialogVisible(true)
+    const ret = await signModule.requestSignApproval(
+      {
+        method: requestMethod,
+        params: originalParams,
+        createTime: time,
+        chainId: tryToExtractChainId(requestMethod, params),
+      },
+      requestId
+    )
+    if (!ret.success) {
+      // empty op
     }
   }
 
@@ -186,6 +165,16 @@ const PendingRequestList: React.FC = () => {
       <div className={styles.title}>Your Safeheron Snap is ready to use.</div>
       <div className={styles.subTitle}>
         Any pending signature requests will appear below.
+      </div>
+      <div className={styles.riskText}>
+        <InfoCircleOutlined style={{ marginRight: '6px' }} />
+        Pose potential security risks when interacting with specific dApps which
+        using signature-derived keys.{' '}
+        <a
+          href="https://blog.safeheron.com/blog/insights/safeheron-originals/enhancing-security-on-mpc-wallet-dydx-connections"
+          target={'_blank'}>
+          Learn more.
+        </a>
       </div>
       <div className={styles.record}>
         {requests.length > 0 ? (

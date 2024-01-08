@@ -1,3 +1,5 @@
+import { PartyId } from '../snap-rpc'
+
 export enum OperationType {
   partyPrepare = 'partyPrepare',
   partyReady = 'partyReady',
@@ -8,10 +10,8 @@ export enum OperationType {
   signReady = 'signReady',
   signRound = 'signRound',
 
-  roleReady = 'roleReady',
   recoverPrepare = 'recoverPrepare',
-  keyPairReady = 'keyPairReady',
-  recoverReady = 'recoverReady',
+  roleReady = 'roleReady',
   mnemonicReady = 'mnemonicReady',
   recoverRound = 'recoverRound',
   partySecretKeyReady = 'partySecretKeyReady',
@@ -39,10 +39,15 @@ export type BaseRelayMessage<
   messageContent: Q
 }
 
-export type AbortType = 'create' | 'sign' | 'recover'
+export type AbortMessageContent = {
+  businessType: 'keygen' | 'sign' | 'recover'
+  abortType: 'error' | 'userCancel'
+  reason: string
+  from?: PartyId
+}
 
 export type AbortMessage = BaseRelayMessage<
   OperationType.abort,
   'broadcast',
-  AbortType | undefined
+  AbortMessageContent
 >

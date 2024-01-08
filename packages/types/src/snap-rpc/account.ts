@@ -6,8 +6,8 @@ export interface RequestAccount {
   method: 'mpc_requestAccount'
 }
 
-export interface DeleteWallet {
-  method: 'mpc_deleteWallet'
+export interface SyncAccount {
+  method: 'mpc_syncAccount'
 }
 
 export const BackupApprovalStruct = object({
@@ -36,3 +36,10 @@ export const CheckMnemonicStruct = object({
   }),
 })
 export type CheckMnemonic = Infer<typeof CheckMnemonicStruct>
+
+export type AccountMethods =
+  | RequestAccount['method']
+  | SyncAccount['method']
+  | BackupApproval['method']
+  | BackupUpdate['method']
+  | CheckMnemonic['method']
