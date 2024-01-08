@@ -3963,9 +3963,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safeheron/mpc-wasm-sdk@npm:0.4.1":
-  version: 0.4.1
-  resolution: "@safeheron/mpc-wasm-sdk@npm:0.4.1"
+"@safeheron/mpc-wasm-sdk@npm:0.5.0":
+  version: 0.5.0
+  resolution: "@safeheron/mpc-wasm-sdk@npm:0.5.0"
   dependencies:
     "@babel/preset-typescript": ^7.18.6
     babel-loader: ^9.1.2
@@ -3973,7 +3973,7 @@ __metadata:
     uuid: ^9.0.0
     webassembly-loader: ^1.1.0
     webpack-dev-server: ^4.13.1
-  checksum: 29568bd6f318cd9ab8e2465e58c0b79016c293f4cf0f5b986db591aa9b290704ff94e62aabafe1b1a147312d84248d4039c52dbecd4b2333b3ffa7d7479a2986
+  checksum: 907cc1dded7526b9a9f755c946aa2f59e1160b0e10d92a1154f2adb5b27d2689c5cdfa49b4845e07eeda7e936269bbafb08bdcf441b11f6a562ccfc3815a8b61
   languageName: node
   linkType: hard
 
@@ -4011,7 +4011,7 @@ __metadata:
     "@metamask/snaps-ui": ^2.0.0
     "@metamask/snaps-utils": ^3.0.0
     "@metamask/snaps-webpack-plugin": ^3.0.0
-    "@safeheron/mpc-wasm-sdk": 0.4.1
+    "@safeheron/mpc-wasm-sdk": 0.5.0
     "@safeheron/mpcsnap-types": "workspace:^"
     "@types/jest": ^27.4.0
     "@types/lodash": ^4.14.197
