@@ -118,7 +118,10 @@ const SendForm = () => {
                   if (value > wei2eth(availableBalance)) {
                     return Promise.reject('Insufficient balance')
                   }
-                  if (BigNumber(value).isLessThan(BigNumber('1e-18'))) {
+                  if (
+                    !BigNumber(value).isZero() &&
+                    BigNumber(value).isLessThan(BigNumber('1e-18'))
+                  ) {
                     return Promise.reject(
                       'Minimum amount sent is 0.000000000000000001'
                     )
