@@ -1,7 +1,7 @@
 {
-  "version": "2.4.6",
+  "version": "2.4.7",
   "description": "The Safeheron MPC Snap.",
-  "proposedName": "Safeheron Snap",
+  "proposedName": "Safeheron",
   "repository": {
     "url": "https://github.com/safeheron/multi-mpc-snap-monorepo",
     "type": "github"
