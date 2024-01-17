@@ -126,7 +126,7 @@ class KeyGenFlow extends BaseFlow {
 
           console.log('signed transaction for metamask request >> ', resultSig)
         } else {
-          resultSig = `0x${r}${s}${v.toString(16).padStart(2, '0')}`
+          resultSig = `0x${r}${s}${(v + 27).toString(16).padStart(2, '0')}`
         }
 
         await this.stateManager.deleteRequest(this.metamaskRequestId!)
