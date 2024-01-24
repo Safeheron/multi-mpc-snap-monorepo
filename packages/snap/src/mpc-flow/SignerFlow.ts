@@ -82,7 +82,6 @@ class KeyGenFlow extends BaseFlow {
     this.verifySession(sessionId)
 
     const hash = this.serialized()
-    console.log('serialized hash: ', hash)
 
     const res = await this.signer!.createContext(
       hash,
@@ -123,8 +122,6 @@ class KeyGenFlow extends BaseFlow {
               : this.padHexPrefix(recoveryId.toString(16)),
             chainId: ethers.BigNumber.from(chainId).toHexString(),
           })
-
-          console.log('signed transaction for metamask request >> ', resultSig)
         } else {
           resultSig = `0x${r}${s}${(v + 27).toString(16).padStart(2, '0')}`
         }

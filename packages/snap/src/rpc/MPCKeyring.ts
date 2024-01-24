@@ -62,9 +62,7 @@ export class MPCKeyring implements Keyring {
     const localAccount = this.stateManager.account
     const keyringAccount =
       localAccount && convertSnapAccountToKeyringAccount(localAccount)
-    const result = keyringAccount ? [keyringAccount] : []
-    console.log('list accounts result >>', result)
-    return result
+    return keyringAccount ? [keyringAccount] : []
   }
 
   async listRequests(): Promise<KeyringRequest[]> {

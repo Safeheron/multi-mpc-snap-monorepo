@@ -66,10 +66,8 @@ class StateManager {
   }
 
   async deleteRequest(requestId: string) {
-    console.log('request state manager to delete request: ', requestId)
     const oldRequests = this.#state?.requests ?? {}
     if (!oldRequests[requestId]) {
-      console.log('invalid request id: %s, not need operation', requestId)
       return
     }
     delete oldRequests[requestId]

@@ -66,7 +66,6 @@ class BackupFlow extends BaseFlow {
     } catch (e) {
       wallet.synced = false
       await this.stateManager.saveOrUpdateAccount(wallet)
-      console.error('cannot sync account to MetaMask', e)
     }
 
     return succeed(convertPlainAccount(wallet))

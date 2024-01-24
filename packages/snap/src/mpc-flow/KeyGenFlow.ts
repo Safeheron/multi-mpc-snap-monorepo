@@ -79,10 +79,7 @@ class KeyGenFlow extends BaseFlow {
   async runRound(sessionId: string, remoteMessageList: ComputeMessage[]) {
     this.verifySession(sessionId)
 
-    const round = this.keyGen!.lastIndex
-    console.log('start keygen round', round, remoteMessageList)
     const res = await this.keyGen!.runRound(remoteMessageList)
-    console.log('end keygen round: ', round, res)
     if (this.keyGen!.isComplete) {
       this.signKey = this.keyGen!.getSignKey()
       this.pubKey = this.keyGen!.getPubKey()

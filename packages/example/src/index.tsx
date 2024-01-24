@@ -11,7 +11,7 @@ import { IS_PROD } from '@/utils'
 import { logger } from '@/utils/Log'
 import metrics from '@/utils/Metrics'
 
-logger.setLevel(IS_PROD ? 'error' : 'debug')
+logger.setLevel(IS_PROD ? 'silent' : 'debug')
 metrics.setup()
 
 const root = document.getElementById('root') as HTMLElement

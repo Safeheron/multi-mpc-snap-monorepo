@@ -22,15 +22,9 @@ import {
 } from '@/rpc/permissions'
 
 const onRpcRequest: OnRpcRequestHandler = async snapRequest => {
-  const { request, origin } = snapRequest
+  const { request } = snapRequest
   const method = request.method
 
-  console.log(
-    `request >> (id=${
-      request.id ?? 'null'
-    }, origin=${origin}, method=${method}) :`,
-    request
-  )
   try {
     await permissionsDetect(snapRequest)
     await setup()
@@ -53,12 +47,6 @@ const onRpcRequest: OnRpcRequestHandler = async snapRequest => {
 
     return otherHandlers(snapRequest)
   } catch (e) {
-    console.log(
-      `request error (id=${
-        request.id ?? 'null'
-      }, origin=${origin}, method=${method}) :`,
-      e
-    )
     throw e
   }
 }
