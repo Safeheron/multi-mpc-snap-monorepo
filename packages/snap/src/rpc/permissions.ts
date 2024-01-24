@@ -5,6 +5,7 @@ enum SnapKeyringAccountMethods {
   UpdateAccount = 'keyring_updateAccount',
   DeleteAccount = 'keyring_deleteAccount',
   ExportAccount = 'keyring_exportAccount',
+  FilterAccountChains = 'keyring_filterAccountChains',
 }
 
 enum SnapKeyringRequestMethods {
@@ -73,8 +74,14 @@ const PERMISSIONS = new Map<string, string[]>()
  * resolve request by metamask
  */
 PERMISSIONS.set('metamask', [
-  ...Object.values(SnapKeyringAccountMethods),
-  ...Object.values(SnapKeyringRequestMethods),
+  SnapKeyringAccountMethods.ListAccounts,
+  SnapKeyringAccountMethods.GetAccount,
+  SnapKeyringAccountMethods.FilterAccountChains,
+  SnapKeyringAccountMethods.DeleteAccount,
+  SnapKeyringRequestMethods.ListRequests,
+  SnapKeyringRequestMethods.GetRequest,
+  SnapKeyringRequestMethods.SubmitRequest,
+  SnapKeyringRequestMethods.RejectRequest,
 ])
 
 const websites = ALLOW_SITES
