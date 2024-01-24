@@ -26,8 +26,9 @@
     },
     "snap_manageState": {},
     "endowment:rpc": {
-      "dapps": true,
-      "snaps": false
+      "allowedOrigins": [
+        "https://mpcsnap.safeheron.com"
+      ]
     },
     "endowment:webassembly": {},
     "snap_manageAccounts": {}
