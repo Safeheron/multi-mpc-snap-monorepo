@@ -158,9 +158,7 @@ class RecoveryFlow extends BaseFlow {
     this.verifySession(sessionId)
     const round = this.keyRecovery!.lastIndex
 
-    console.log('start recovery round', round)
     const res = await this.keyRecovery!.runRound(remoteMessageList)
-    console.log('end recovery round', round, res)
 
     if (this.keyRecovery!.isComplete) {
       if (!this.remotePub) {
@@ -252,10 +250,7 @@ class RecoveryFlow extends BaseFlow {
 
   async refreshRound(sessionId: string, remoteMessageList: ComputeMessage[]) {
     this.verifySession(sessionId)
-    const round = this.keyRefresh!.lastIndex
-    console.log('start runRound', round)
     const res = await this.keyRefresh!.runRound(remoteMessageList)
-    console.log('runRound res', round, res)
     if (this.keyRefresh!.isComplete) {
       this.newSignKey = this.keyRefresh!.getSignKey()
       this.pubKey = this.keyRefresh!.getPub()

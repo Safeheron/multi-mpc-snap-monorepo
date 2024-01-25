@@ -14,10 +14,6 @@ import { SUPPORTED_METHODS } from '@/utils/configs'
 export async function syncAccountToMetaMask(
   account: KeyringAccount
 ): Promise<void> {
-  console.debug(
-    'start emit create account event to metamask',
-    JSON.stringify(account)
-  )
   await emitSnapKeyringEvent(snap, KeyringEvent.AccountCreated, { account })
 }
 

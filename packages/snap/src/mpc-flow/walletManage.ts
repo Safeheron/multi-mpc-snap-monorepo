@@ -40,7 +40,6 @@ export async function syncAccount(stateManager: StateManager) {
       snapAccount.synced = true
       await stateManager.saveOrUpdateAccount(snapAccount)
     } catch (e) {
-      console.error('sync account failed: ', e)
       snapAccount.synced = false
       await stateManager.saveOrUpdateAccount(snapAccount)
     }

@@ -54,12 +54,10 @@ let mpcKeyring: MPCKeyring
 
 export const setup = async () => {
   if (!mpcInstance) {
-    console.log('init mpc instance...')
     mpcInstance = await MPC.init()
   }
 
   if (!stateManager) {
-    console.log('init stateManager...')
     const tmpStateManager = new StateManager()
     await tmpStateManager.loadState()
     stateManager = tmpStateManager
@@ -72,7 +70,6 @@ export const setup = async () => {
  */
 export const backupHandler: OnRpcRequestHandler = async ({ request }) => {
   if (!backupFlow) {
-    console.log('init backup mpc-flow instance...')
     backupFlow = new BackupFlow(stateManager, mpcInstance)
   }
 
@@ -95,7 +92,6 @@ export const backupHandler: OnRpcRequestHandler = async ({ request }) => {
  */
 export const keygenHandler: OnRpcRequestHandler = async ({ request }) => {
   if (!keygenFlow) {
-    console.log('init keygen mpc-flow instance...')
     keygenFlow = new KeyGenFlow(stateManager, mpcInstance)
   }
   switch (request.method) {
