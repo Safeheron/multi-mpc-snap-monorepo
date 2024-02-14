@@ -9,7 +9,7 @@ export const IOS_DOWNLOAD_URL =
 export const ANDROID_DOWNLOAD_URL =
   'https://play.google.com/store/apps/details?id=com.safeheron.snap.app'
 
-export const FAQ_VIDEO_LINK = 'https://youtu.be/_vbvXwfN-Co'
+export const FAQ_VIDEO_LINK = 'https://www.youtube.com/embed/_vbvXwfN-Co'
 
 export enum RouterEnum {
   home = '/home',
